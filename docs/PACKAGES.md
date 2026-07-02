@@ -9,7 +9,8 @@ Related docs:
 - [`RELEASE.md`](./RELEASE.md) — MIT license, no npm publish without approval
 - [`INTEGRATION.md`](./INTEGRATION.md) — remote HTTP, SDK, MCP, `/tools/kb`
 - [`EMBED.md`](./EMBED.md) — in-process `createEvuKbServer` bootstrap
-- [`README.md`](../README.md) — monorepo layout and quickstart
+- [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) — monorepo layout and dev workflow
+- [`README.md`](../README.md) — short intro and quickstart
 
 ---
 

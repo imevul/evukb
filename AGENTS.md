@@ -7,11 +7,13 @@ These instructions apply to the EvuKB repository.
 1. Read [`SPEC.md`](./SPEC.md) before making product or architecture changes.
 2. Check [`docs/ROADMAP.md`](./docs/ROADMAP.md) before starting feature work or
    changing product scope.
-3. Read the package or app `package.json` and `tsconfig.json` before editing a
+3. For repository layout, env defaults, and extended dev workflow, read
+   [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md).
+4. Read the package or app `package.json` and `tsconfig.json` before editing a
    workspace.
-4. For UI work, read [`DESIGN.md`](./docs/DESIGN.md).
-5. For security-sensitive work, read [`SECURITY.md`](./SECURITY.md).
-6. For migration and porting context, read [`MIGRATION.md`](./docs/MIGRATION.md).
+5. For UI work, read [`DESIGN.md`](./docs/DESIGN.md).
+6. For security-sensitive work, read [`SECURITY.md`](./SECURITY.md).
+7. For migration and porting context, read [`MIGRATION.md`](./docs/MIGRATION.md).
 
 ## Product Boundary
 

@@ -1545,7 +1545,8 @@ Companion docs (all shipped; see `docs/` for the full set, including
 | `docs/DESIGN.md` | UI layout and component canon |
 | `SECURITY.md` | threat model and operational controls |
 | `docs/MIGRATION.md` | clean-room migration principles (detailed source maps are local-only) |
-| `README.md` | quickstart and project overview |
+| `README.md` | short intro, disclaimer, and quickstart |
+| `docs/DEVELOPMENT.md` | repository layout, status, env summary, and extended dev workflow |
 
 `AGENTS.md` should include:
 

@@ -44,4 +44,4 @@ their users and mint scoped EvuKB API keys or MCP tokens for KB access.
 3. Configure clients with `Authorization: Bearer …` and the workspace id in the URL.
 4. For MCP, send `x-evukb-workspace-id` and a token with `kb:read` or `kb:write`.
 
-See [`README.md`](../README.md) for environment variables and compose deployment notes.
+See [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) for environment variables and compose deployment notes.

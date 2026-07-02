@@ -10,7 +10,7 @@ Related docs:
 - [`docs/RELEASE.md`](./RELEASE.md) — license and distribution policy
 - [`docs/AUTH.md`](./AUTH.md) — API keys, MCP tokens, `EVUKB_REQUIRE_API_KEY`
 - [`apps/api/src/index.ts`](../apps/api/src/index.ts) — minimal reference shell
-- [`README.md`](../README.md) — Docker Compose env defaults
+- [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) — Docker Compose env defaults
 
 ## When to embed vs standalone
 
@@ -127,7 +127,7 @@ Minimum for full runtime:
 | `EVUKB_VECTOR_BACKEND` | Optional | `pgvector` (default) or `qdrant` |
 | `EVUKB_WEB_ORIGIN` | When browser clients call API | CORS allow-origin |
 
-See [`README.md`](../README.md) and [`deploy/docker-compose.dev.yml`](../deploy/docker-compose.dev.yml)
+See [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) and [`deploy/docker-compose.dev.yml`](../deploy/docker-compose.dev.yml)
 for the full list.
 
 ## MCP on the same server

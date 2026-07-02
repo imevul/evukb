@@ -7,7 +7,8 @@ Related docs:
 
 - [`LICENSE`](../LICENSE) — MIT license text
 - [`PACKAGES.md`](./PACKAGES.md) — supported `@evu/kb-*` import surfaces
-- [`README.md`](../README.md) — quickstart and repository layout
+- [`README.md`](../README.md) — short intro and quickstart
+- [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) — repository layout and dev workflow
 
 ---
 

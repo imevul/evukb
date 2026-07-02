@@ -6,7 +6,7 @@ backup policies or cloud-provider tooling.
 
 See also:
 
-- [`README.md`](../README.md) — deployment and environment variables
+- [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) — deployment and environment variables
 - [`docs/INTEGRATION.md`](./INTEGRATION.md) — remote-service integration
 - [`docs/AUTH.md`](./AUTH.md) — API keys, MCP tokens, and secret handling
 - [`SECURITY.md`](../SECURITY.md) — security invariants and release blockers
