@@ -12,6 +12,7 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "dev": "bash scripts/ensure-lockfile-sync.sh && docker compose --project-directory . -f deploy/docker-compose.dev.yml up --build",
+    "dev-local-embed": "bash scripts/ensure-lockfile-sync.sh && docker compose --project-directory . -f deploy/docker-compose.dev.yml --profile local-embed up --build",
     "down": "docker compose --project-directory . -f deploy/docker-compose.dev.yml down",
     "format": "biome format --write .",
     "generate-openapi": "pnpm --filter @evu/kb-server generate-openapi",

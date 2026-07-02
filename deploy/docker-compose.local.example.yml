@@ -31,3 +31,15 @@ services:
   qdrant:
     ports:
       - "6333:6333"
+
+  ollama:
+    ports:
+      - "11434:11434"
+
+# Optional local embeddings (requires --profile local-embed):
+# evukb-api:
+#   environment:
+#     EVUKB_EMBEDDING_API_KEY: local
+#     EVUKB_EMBEDDING_BASE_URL: http://ollama:11434/v1
+#     EVUKB_EMBEDDING_MODEL: <your-model>
+#     EVUKB_EMBEDDING_BATCH_SIZE: 1

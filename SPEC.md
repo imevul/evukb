@@ -388,6 +388,7 @@ Optional services:
 | Service | Role | Default |
 | --- | --- | --- |
 | Qdrant | optional vector backend | disabled |
+| Ollama (`local-embed` profile) | optional local OpenAI-compatible embeddings | disabled |
 | external OpenAI-compatible embedding provider | real embeddings | optional |
 | local OpenAI-compatible provider | local embeddings/LLM | optional |
 
@@ -420,6 +421,7 @@ Default services:
 | `evukb-api` | required | required | REST, MCP, pg-boss jobs in one process |
 | `evukb-web` | required for standalone | required for standalone | Vite in dev, static/nginx image in prod |
 | `qdrant` | optional profile | optional profile | only with `EVUKB_VECTOR_BACKEND=qdrant` |
+| `ollama` | optional profile | optional profile | only with `local-embed` profile; set `EVUKB_EMBEDDING_*` to sidecar URL |
 
 ```mermaid
 flowchart TB
@@ -429,6 +431,7 @@ flowchart TB
   API --> PG["postgres pgvector"]
   API --> FS["corpus-store volume"]
   API -.-> QD["qdrant optional"]
+  API -.-> OL["ollama optional local-embed"]
 ```
 
 Volumes:
@@ -438,12 +441,14 @@ Volumes:
 | `pgdata` | PostgreSQL data |
 | `corpus_store` | file bytes and exports |
 | `qdrant_data` | optional vector storage |
+| `ollama_data` | optional local embedding models |
 
 Make targets:
 
 | Target | Behavior |
 | --- | --- |
 | `make dev` | start dev compose foreground with API and web hot reload |
+| `make dev-local-embed` | start dev compose with optional Ollama embedding sidecar |
 | `make up` | detached dev stack |
 | `make down` | stop stack |
 | `make prod` | production compose using `.env` |

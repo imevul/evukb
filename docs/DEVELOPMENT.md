@@ -58,6 +58,7 @@ deploy/
   docker-compose.dev.yml
   docker-compose.yml
   docker-compose.local.example.yml
+  local-embed.env.example
 
 docs/
   AUTH.md
@@ -113,12 +114,14 @@ Default dev ports:
 - API: `http://localhost:4201`
 - Postgres: `localhost:5432`
 - Qdrant, optional profile: `localhost:6333`
+- Ollama, optional profile: `localhost:11434`
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
 | `make dev` | Start the dev Docker Compose stack in the foreground |
+| `make dev-local-embed` | Start the dev stack with the optional Ollama embedding sidecar (`local-embed` profile) |
 | `make up` | Start the dev stack in the background |
 | `make down` | Stop the dev stack |
 | `make prod` | Start the production Docker Compose stack (`deploy/docker-compose.yml`) |
@@ -153,6 +156,53 @@ make verify-qdrant
 This runs `qdrant-integration.test.ts` and `vector-backend-parity.test.ts` with
 `EVUKB_VECTOR_BACKEND=qdrant`. GitHub Actions exposes this as an optional manual
 workflow path through the `run_qdrant` dispatch input.
+
+### Optional local embeddings
+
+Default `make dev` does not start a local embedding server. To opt in, use the
+`local-embed` compose profile (Ollama sidecar with an OpenAI-compatible
+`/v1/embeddings` endpoint):
+
+```bash
+make dev-local-embed
+# or start only the sidecar alongside an existing stack:
+docker compose --project-directory . -f deploy/docker-compose.dev.yml \
+  --profile local-embed up -d ollama
+```
+
+Pull an embedding model (replace `<model>` with your choice):
+
+```bash
+docker compose --project-directory . -f deploy/docker-compose.dev.yml \
+  --profile local-embed exec ollama ollama pull <model>
+```
+
+Copy [`deploy/local-embed.env.example`](../deploy/local-embed.env.example) into
+your root `.env` (or use [`deploy/docker-compose.local.example.yml`](../deploy/docker-compose.local.example.yml)
+overrides), then restart the API container.
+
+**Dimension constraint:** pgvector stores vectors as `vector(1536)`. Verify the
+model output size before indexing — common local models (for example
+`nomic-embed-text` at 768) will fail at index time. `EVUKB_EMBEDDING_DIMENSIONS`
+is not read by server code today; see [`docs/ENV.md`](ENV.md).
+
+Verify the sidecar before reindexing:
+
+```bash
+curl -sS http://localhost:11434/v1/embeddings \
+  -H "Authorization: Bearer local" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"<model>","input":["test"]}' | jq '.data[0].embedding | length'
+# Must be 1536 for the default pgvector backend
+```
+
+Set `EVUKB_EMBEDDING_API_KEY` to any non-empty dummy value (for example `local`)
+when using self-hosted servers that do not require auth. Use
+`EVUKB_EMBEDDING_BATCH_SIZE=1` if the server rejects multi-text batches.
+
+For llama.cpp or other self-hosted servers, see
+[`docs/DEV-LEARNINGS.md`](DEV-LEARNINGS.md) and override endpoints via
+`deploy/docker-compose.local.yml` instead of the Ollama profile.
 
 ### Production Web deployment
 

@@ -79,6 +79,17 @@ corpus settings override them.
 > file but is **not read by server code today**. Embedding dimensions resolve
 > from workspace/corpus provider settings with a built-in default of 1536.
 
+### Optional local embedding sidecar (dev compose)
+
+The dev compose file includes an optional Ollama service under the
+`local-embed` profile. It is **not** started by default (`make dev`). When
+opted in, point `EVUKB_EMBEDDING_BASE_URL` at the sidecar (for example
+`http://ollama:11434/v1` from inside compose, or `http://localhost:11434/v1`
+from a host-run API). Set `EVUKB_EMBEDDING_API_KEY` to any non-empty dummy
+value for self-hosted servers that ignore auth. Use `EVUKB_EMBEDDING_BATCH_SIZE=1`
+for strict self-hosted batching. See [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md)
+and [`deploy/local-embed.env.example`](../deploy/local-embed.env.example).
+
 ## Ask / chat provider
 
 | Variable | Purpose | Default |

@@ -54,6 +54,8 @@ services:
       EVUKB_MCP_REQUIRE_TOKEN: ${EVUKB_MCP_REQUIRE_TOKEN:-false}
       # Optional Qdrant: docker compose --profile qdrant up -d qdrant
       # and set EVUKB_VECTOR_BACKEND=qdrant plus EVUKB_QDRANT_URL=http://qdrant:6333
+      # Optional local embeddings: docker compose --profile local-embed up -d ollama
+      # then set EVUKB_EMBEDDING_* to http://ollama:11434/v1 (see deploy/local-embed.env.example)
       EVUKB_WEB_ORIGIN: http://localhost:4200
     ports:
       - "4201:4201"
@@ -86,7 +88,21 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local-embed"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   corpus_store:
   pgdata:
   qdrant_data:
+  ollama_data:

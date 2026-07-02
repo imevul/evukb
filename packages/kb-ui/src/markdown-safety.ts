@@ -1,1 +1,5 @@
-export { renderObsidianMarkdown, sanitizeMarkdownPreviewHtml, shouldRenderMarkdownAsPlainText } from './markdown-preview.js';
+export {
+  renderObsidianMarkdown,
+  sanitizeMarkdownPreviewHtml,
+  shouldRenderMarkdownAsPlainText,
+} from './markdown-preview.js';

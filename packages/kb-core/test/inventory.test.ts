@@ -40,15 +40,8 @@ function sampleNode(overrides: Partial<KnowledgeNode> = {}): KnowledgeNode {
 
 describe('document inventory', () => {
   it('matches path prefixes', () => {
-    expect(
-      matchesDocumentPathPrefix(
-        'Areas/Servers/nuc.md',
-        'Areas/Servers',
-      ),
-    ).toBe(true);
-    expect(
-      matchesDocumentPathPrefix('Areas/VPS/x.md', 'Areas/Servers'),
-    ).toBe(false);
+    expect(matchesDocumentPathPrefix('Areas/Servers/nuc.md', 'Areas/Servers')).toBe(true);
+    expect(matchesDocumentPathPrefix('Areas/VPS/x.md', 'Areas/Servers')).toBe(false);
   });
 
   it('filters and projects frontmatter fields', () => {

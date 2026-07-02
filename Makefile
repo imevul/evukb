@@ -1,9 +1,12 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: dev up down prod migrate test verify-dev verify-qdrant generate-openapi lint typecheck build
+.PHONY: dev dev-local-embed up down prod migrate test verify-dev verify-qdrant generate-openapi lint typecheck build
 
 dev:
 	pnpm run dev
+
+dev-local-embed:
+	pnpm run dev-local-embed
 
 up:
 	pnpm run up
