@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    # Nightly Qdrant vector backend parity verification.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      run_qdrant:
+        description: Run optional Qdrant vector backend verification
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.33.0"
+  EVUKB_DATABASE_URL: postgres://evukb:evukb@localhost:5432/evukb
+
+jobs:
+  required:
+    name: Required checks
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'schedule' }}
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: evukb
+          POSTGRES_PASSWORD: evukb
+          POSTGRES_USER: evukb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evukb -d evukb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test with Postgres integration suites
+        run: pnpm test:ci
+
+      - name: Verify OpenAPI and SDK drift
+        run: pnpm exec tsx scripts/verify-openapi-sdk.ts
+
+      - name: Validate dev compose config
+        run: docker compose --project-directory . -f deploy/docker-compose.dev.yml config >/dev/null
+
+  qdrant:
+    name: Qdrant verification (nightly / on demand)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_qdrant) }}
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: evukb
+          POSTGRES_PASSWORD: evukb
+          POSTGRES_USER: evukb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evukb -d evukb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+
+    env:
+      EVUKB_QDRANT_URL: http://localhost:6333
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Wait for Qdrant
+        run: |
+          for attempt in {1..30}; do
+            if curl -fsS "$EVUKB_QDRANT_URL/healthz"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Qdrant did not become healthy in time" >&2
+          exit 1
+
+      - name: Verify Qdrant parity
+        run: make verify-qdrant

@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "composite": true,
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "rootDir": "src",
+    "paths": {
+      "@evu/kb-core": ["packages/kb-core/src/index.ts"],
+      "@evu/kb-core/okf/browser": ["packages/kb-core/src/okf/browser.ts"],
+      "@evu/kb-db": ["packages/kb-db/src/index.ts"],
+      "@evu/kb-sdk": ["packages/kb-sdk/src/index.ts"],
+      "@evu/kb-server": ["packages/kb-server/src/index.ts"],
+      "@evu/kb-ui": ["packages/kb-ui/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [{ "path": "../kb-core" }, { "path": "../kb-sdk" }]
+}

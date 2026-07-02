@@ -1,0 +1,38 @@
+{
+  "name": "@evu/kb-server",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "EvuKB HTTP, MCP, job, and adapter wiring package.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate-openapi": "tsx src/generate-openapi.ts",
+    "test": "pnpm -w exec vitest run packages/kb-server/test",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@evu/kb-core": "workspace:*",
+    "@evu/kb-db": "workspace:*",
+    "@fastify/multipart": "^9.2.1",
+    "@modelcontextprotocol/node": "2.0.0-alpha.3",
+    "@modelcontextprotocol/server": "2.0.0-alpha.3",
+    "@qdrant/js-client-rest": "^1.18.0",
+    "fastify": "^5.9.0",
+    "fflate": "^0.8.2",
+    "pg-boss": "^12.23.1",
+    "zod": "^4.4.3"
+  }
+}

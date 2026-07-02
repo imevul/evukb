@@ -1,0 +1,37 @@
+{
+  "name": "@evu/kb-core",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "EvuKB domain contracts and knowledge-base core utilities.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./okf/browser": {
+      "types": "./dist/okf/browser.d.ts",
+      "default": "./dist/okf/browser.js"
+    },
+    "./archive/heuristics": {
+      "types": "./dist/archive/heuristics.d.ts",
+      "default": "./dist/archive/heuristics.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "fflate": "^0.8.2"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm -w exec vitest run packages/kb-core/test",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

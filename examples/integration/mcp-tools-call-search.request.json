@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "evu.kb.search",
+    "arguments": {
+      "corpusId": "00000000-0000-4000-8000-000000000001",
+      "query": "alpha fixture",
+      "limit": 5
+    }
+  }
+}

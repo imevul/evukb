@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Stale tsc artifacts must not live beside package sources (Vite dev resolves *.js imports).
+packages/kb-core/src/**/*.js
+packages/kb-core/src/**/*.d.ts
+packages/kb-core/src/**/*.map
+packages/kb-sdk/src/**/*.js
+packages/kb-sdk/src/**/*.d.ts
+packages/kb-sdk/src/**/*.map
+!packages/kb-sdk/src/generated/**
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# EvuKB local runtime data
+.evukb/
+data/
+var/
+artifacts/
+backups/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test and browser artifacts
+test-results/
+playwright-report/
+
+# Editors and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Docker/local overrides
+deploy/docker-compose.local.yml
+
+# Maintainer-local migration/source references (never publish)
+docs/private/*
+!docs/private/README.md

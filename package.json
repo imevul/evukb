@@ -1,0 +1,49 @@
+{
+  "name": "evukb",
+  "private": true,
+  "version": "0.1.0",
+  "description": "EvuKB standalone knowledge base and RAG system.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "dev": "bash scripts/ensure-lockfile-sync.sh && docker compose --project-directory . -f deploy/docker-compose.dev.yml up --build",
+    "down": "docker compose --project-directory . -f deploy/docker-compose.dev.yml down",
+    "format": "biome format --write .",
+    "generate-openapi": "pnpm --filter @evu/kb-server generate-openapi",
+    "generate-types": "pnpm --filter @evu/kb-sdk generate-types",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "migrate": "pnpm --filter @evu/kb-db db:migrate",
+    "prod": "docker compose --project-directory . -f deploy/docker-compose.yml up --build",
+    "test": "pnpm exec tsx scripts/verify-db-test-env.ts && vitest run",
+    "test:ci": "pnpm exec tsx scripts/verify-db-test-env.ts --require && vitest run --coverage",
+    "test:coverage": "pnpm exec tsx scripts/verify-db-test-env.ts && vitest run --coverage",
+    "typecheck": "pnpm run build && pnpm -r --if-present typecheck",
+    "up": "bash scripts/ensure-lockfile-sync.sh && docker compose --project-directory . -f deploy/docker-compose.dev.yml up --build -d",
+    "verify-dev": "pnpm run build && pnpm run test && pnpm exec tsx scripts/verify-api-smoke.ts && pnpm exec tsx scripts/verify-openapi-sdk.ts && docker compose --project-directory . -f deploy/docker-compose.dev.yml config >/dev/null",
+    "verify-qdrant": "pnpm exec tsx scripts/verify-qdrant.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@types/node": "^26.0.1",
+    "@vitest/coverage-v8": "^4.1.9",
+    "autoprefixer": "^10.5.2",
+    "openapi-typescript": "^7.10.1",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.22.0",
+    "tailwind-merge": "^3.6.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "action": "list_documents",
+  "corpusId": "00000000-0000-4000-8000-000000000001",
+  "pathPrefix": "Areas/Servers",
+  "filters": {
+    "frontmatter": {
+      "type": "server"
+    }
+  },
+  "fields": ["hostname", "os", "virtual"],
+  "limit": 50
+}

@@ -1,0 +1,50 @@
+/**
+ * Shared design tokens for the EvuKB UI.
+ *
+ * shadcn-style HSL channels (space-separated, no `hsl()`) consumed by Tailwind
+ * via `hsl(var(--token))`. Palette aligned with EvuKB operator-console design
+ * tokens. Dark mode is applied with a `.dark` class on
+ * <html> (see color-scheme.ts), not a media query, so the user preference wins.
+ */
+
+:root {
+  --background: 220 20% 97%;
+  --foreground: 224 71% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 71% 4%;
+  --primary: 222 47% 31%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --border: 220 13% 91%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 222 47% 31%;
+  --radius: 0.5rem;
+
+  /* EvuKB-specific extras (link graph nodes) kept as HSL channels. */
+  --graph-node: 0 0% 100%;
+  --graph-node-center: 214 95% 93%;
+  /* Warning accent for SVG/canvas surfaces (unresolved edges, validation rings). */
+  --graph-warning: 38 92% 50%;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 210 40% 98%;
+  --card: 224 71% 7%;
+  --card-foreground: 210 40% 98%;
+  --primary: 217 71% 60%;
+  --primary-foreground: 224 71% 9%;
+  --muted: 215 27% 12%;
+  --muted-foreground: 215 20% 68%;
+  --border: 215 27% 18%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 217 71% 60%;
+  --radius: 0.5rem;
+
+  --graph-node: 224 71% 7%;
+  --graph-node-center: 214 60% 22%;
+  --graph-warning: 38 92% 50%;
+}

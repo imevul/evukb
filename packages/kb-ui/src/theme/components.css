@@ -1,0 +1,297 @@
+/* Token-driven layout rules for file manager legacy classes and CodeMirror shell.
+ * Import from apps/web/styles.css (@layer components) when using Tailwind; this
+ * file is for hosts that import kb-ui CSS without a Tailwind @apply pipeline. */
+
+.evukb-viewport-panel {
+  height: calc(100dvh - 13rem);
+  max-height: calc(100dvh - 13rem);
+  min-height: 0;
+}
+
+.evukb-graph-panel .evukb-graph-wrap {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+.evukb-graph-panel .evukb-corpus-meta {
+  flex-shrink: 0;
+}
+
+.evukb-graph-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--card));
+}
+
+.evukb-graph-canvas text {
+  fill: hsl(var(--muted-foreground));
+  font-size: 11px;
+}
+
+.evukb-graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  border: 0;
+  padding: 0;
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.evukb-graph-legend legend {
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+.evukb-graph-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.evukb-graph-legend__swatch {
+  width: 1.5rem;
+  height: 0.375rem;
+}
+
+.evukb-graph-selection {
+  margin-bottom: 0.5rem;
+}
+
+.evukb-graph-node--interactive {
+  cursor: pointer;
+}
+
+.evukb-graph-node--interactive:focus-visible {
+  outline: none;
+}
+
+.evukb-graph-node--interactive:focus-visible circle {
+  stroke: hsl(var(--ring));
+  stroke-width: 3;
+}
+
+.evukb-cm-editor .cm-editor,
+.evukb-cm-editor .cm-scroller,
+.evukb-cm-editor .cm-gutters {
+  background-color: hsl(var(--muted));
+}
+
+.dark .evukb-cm-editor .cm-editor,
+.dark .evukb-cm-editor .cm-scroller,
+.dark .evukb-cm-editor .cm-gutters {
+  background-color: hsl(var(--background));
+}
+
+.evukb-cm-editor .cm-gutters {
+  border-right: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+}
+
+.evukb-cm-editor .cm-activeLine,
+.evukb-cm-editor .cm-activeLineGutter {
+  background-color: hsl(var(--muted) / 0.45);
+}
+
+.evukb-cm-editor .cm-panel.cm-search {
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.evukb-cm-editor .cm-panel.cm-search input {
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+}
+
+.dark .evukb-cm-editor .cm-searchMatch {
+  background-color: hsl(var(--primary) / 0.35);
+}
+
+.evukb-cm-editor .cm-searchMatch-selected {
+  background-color: hsl(var(--primary) / 0.55);
+}
+
+/* Markdown preview (Obsidian-style extensions) */
+.evukb-md-preview h1,
+.evukb-md-preview h2,
+.evukb-md-preview h3,
+.evukb-md-preview h4 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 1.25em 0 0.5em;
+}
+
+.evukb-md-preview h1 {
+  font-size: 1.5rem;
+}
+
+.evukb-md-preview h2 {
+  font-size: 1.25rem;
+}
+
+.evukb-md-preview h3 {
+  font-size: 1.125rem;
+}
+
+.evukb-md-preview p,
+.evukb-md-preview ul,
+.evukb-md-preview ol,
+.evukb-md-preview pre,
+.evukb-md-preview blockquote {
+  margin: 0.75em 0;
+}
+
+.evukb-md-preview ul,
+.evukb-md-preview ol {
+  padding-left: 1.5rem;
+}
+
+.evukb-md-preview pre,
+.evukb-md-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+.evukb-md-preview pre {
+  overflow-x: auto;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted) / 0.5);
+  padding: 0.75rem 1rem;
+}
+
+.evukb-md-preview code {
+  border-radius: calc(var(--radius) - 4px);
+  background-color: hsl(var(--muted) / 0.6);
+  padding: 0.1em 0.35em;
+}
+
+.evukb-md-preview pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.evukb-md-preview a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.evukb-md-frontmatter {
+  margin-bottom: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--muted) / 0.35);
+  padding: 0.75rem 1rem;
+}
+
+.evukb-md-frontmatter dl {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.evukb-md-frontmatter__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) 1fr;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.evukb-md-frontmatter__row dt {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.evukb-wikilink {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.evukb-tag {
+  color: hsl(var(--primary));
+  font-weight: 500;
+}
+
+.evukb-md-embed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  border: 1px dashed hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--muted) / 0.35);
+  padding: 0.65rem 0.85rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+}
+
+.evukb-md-embed__label {
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+
+.evukb-md-embed::before {
+  content: "⎘";
+  opacity: 0.7;
+}
+
+.evukb-callout {
+  margin: 0.75rem 0;
+  border-left: 4px solid hsl(var(--primary));
+  border-radius: calc(var(--radius) - 2px);
+  background-color: hsl(var(--muted) / 0.45);
+  padding: 0.65rem 0.85rem;
+}
+
+.evukb-callout__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.evukb-callout__body > :first-child {
+  margin-top: 0;
+}
+
+.evukb-callout__body > :last-child {
+  margin-bottom: 0;
+}
+
+.evukb-callout--note,
+.evukb-callout--info {
+  border-left-color: hsl(var(--primary));
+}
+
+.evukb-callout--tip,
+.evukb-callout--success {
+  border-left-color: hsl(142 71% 45%);
+}
+
+.evukb-callout--warning,
+.evukb-callout--caution {
+  border-left-color: hsl(var(--graph-warning, 38 92% 50%));
+}
+
+.evukb-callout--danger,
+.evukb-callout--error {
+  border-left-color: hsl(var(--destructive));
+}
+
+.evukb-md-preview mark {
+  border-radius: 0.15em;
+  background-color: hsl(var(--graph-warning, 38 92% 50%) / 0.35);
+  padding: 0.05em 0.2em;
+}

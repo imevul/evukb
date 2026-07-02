@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@evu/kb-core": ["packages/kb-core/src/index.ts"],
+      "@evu/kb-core/okf/browser": ["packages/kb-core/src/okf/browser.ts"],
+      "@evu/kb-db": ["packages/kb-db/src/index.ts"],
+      "@evu/kb-sdk": ["packages/kb-sdk/src/index.ts"],
+      "@evu/kb-server": ["packages/kb-server/src/index.ts"],
+      "@evu/kb-ui": ["packages/kb-ui/src/index.ts"]
+    },
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "incremental": true,
+    "composite": false
+  }
+}

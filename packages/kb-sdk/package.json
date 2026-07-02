@@ -1,0 +1,32 @@
+{
+  "name": "@evu/kb-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "EvuKB TypeScript SDK with hand-written client and OpenAPI-generated types.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate-types": "openapi-typescript openapi/evukb.openapi.json -o src/generated/openapi.d.ts",
+    "test": "pnpm -w exec vitest run packages/kb-sdk/test",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@evu/kb-core": "workspace:*"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.10.1"
+  }
+}

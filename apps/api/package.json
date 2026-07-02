@@ -1,0 +1,25 @@
+{
+  "name": "@evu/kb-api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Standalone EvuKB API process.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "pnpm -w exec vitest run apps/api/test/config.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@evu/kb-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1"
+  }
+}

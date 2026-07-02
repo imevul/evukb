@@ -1,0 +1,74 @@
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, type LucideIcon, X } from 'lucide-react';
+import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
+
+import { cn } from './cn.js';
+
+export type AlertVariant = 'info' | 'warning' | 'danger' | 'success';
+
+const VARIANT_CLASS: Record<AlertVariant, string> = {
+  info: 'border-primary/30 bg-primary/10 text-foreground [&_svg]:text-primary',
+  warning: 'border-amber-500/40 bg-amber-500/10 text-foreground [&_svg]:text-amber-500',
+  danger: 'border-destructive/40 bg-destructive/10 text-foreground [&_svg]:text-destructive',
+  success: 'border-green-600/30 bg-green-500/10 text-foreground [&_svg]:text-green-500',
+};
+
+const VARIANT_ICON: Record<AlertVariant, LucideIcon> = {
+  info: Info,
+  warning: AlertTriangle,
+  danger: AlertCircle,
+  success: CheckCircle2,
+};
+
+export type AlertProps = HTMLAttributes<HTMLDivElement> & {
+  variant?: AlertVariant;
+  title?: ReactNode;
+  icon?: boolean;
+  /** When provided, renders a dismiss (X) button that calls this handler. */
+  onDismiss?: () => void;
+};
+
+/**
+ * Banner/callout with a semantic variant. Fixes ad-hoc banner spacing by owning
+ * the icon + title + body layout in one place. Pass `onDismiss` for lightweight
+ * dismissible feedback (e.g. success notices after create/save).
+ */
+export function Alert({
+  variant = 'info',
+  title,
+  icon = true,
+  onDismiss,
+  className,
+  children,
+  ...props
+}: AlertProps): ReactElement {
+  const Icon = VARIANT_ICON[variant];
+  return (
+    <div
+      role="note"
+      className={cn(
+        'flex gap-3 rounded-lg border p-4 text-sm [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0 [&_svg]:mt-0.5',
+        VARIANT_CLASS[variant],
+        className,
+      )}
+      {...props}
+    >
+      {icon ? <Icon aria-hidden /> : null}
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        {title ? <p className="font-semibold leading-none">{title}</p> : null}
+        {children ? (
+          <div className="space-y-1 leading-relaxed text-muted-foreground">{children}</div>
+        ) : null}
+      </div>
+      {onDismiss ? (
+        <button
+          aria-label="Dismiss"
+          className="-m-1 shrink-0 self-start rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={onDismiss}
+          type="button"
+        >
+          <X aria-hidden />
+        </button>
+      ) : null}
+    </div>
+  );
+}

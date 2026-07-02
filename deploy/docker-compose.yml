@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ${EVUKB_POSTGRES_DB:-evukb}
+      POSTGRES_PASSWORD: ${EVUKB_POSTGRES_PASSWORD:-evukb}
+      POSTGRES_USER: ${EVUKB_POSTGRES_USER:-evukb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  evukb-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      EVUKB_API_PORT: ${EVUKB_API_PORT:-4201}
+      EVUKB_BLOB_ROOT: ${EVUKB_BLOB_ROOT:-/data/corpus-store}
+      EVUKB_DATABASE_URL: ${EVUKB_DATABASE_URL:-postgres://evukb:evukb@postgres:5432/evukb}
+      EVUKB_HOST: ${EVUKB_HOST:-0.0.0.0}
+      EVUKB_LOG_LEVEL: ${EVUKB_LOG_LEVEL:-info}
+      EVUKB_QDRANT_URL: ${EVUKB_QDRANT_URL:-http://qdrant:6333}
+      # Required when auth is enforced (production default); startup fails if empty.
+      EVUKB_TOKEN_PEPPER: ${EVUKB_TOKEN_PEPPER:-}
+      EVUKB_VECTOR_BACKEND: ${EVUKB_VECTOR_BACKEND:-pgvector}
+      EVUKB_WEB_ORIGIN: ${EVUKB_WEB_ORIGIN:-http://localhost:4200}
+    ports:
+      - "${EVUKB_API_PORT:-4201}:4201"
+    volumes:
+      - corpus_store:/data/corpus-store
+
+  evukb-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      - evukb-api
+    environment:
+      EVUKB_API_PROXY_TARGET: http://evukb-api:4201
+    ports:
+      - "${EVUKB_WEB_PORT:-4200}:4200"
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    profiles: ["qdrant"]
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  corpus_store:
+  pgdata:
+  qdrant_data:

@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/kb-core" },
+    { "path": "./packages/kb-db" },
+    { "path": "./packages/kb-server" },
+    { "path": "./packages/kb-sdk" },
+    { "path": "./packages/kb-ui" },
+    { "path": "./apps/api" },
+    { "path": "./apps/web" }
+  ]
+}

@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: evukb
+      POSTGRES_PASSWORD: evukb
+      POSTGRES_USER: evukb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evukb -d evukb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  evukb-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: sh -c "pnpm install --no-frozen-lockfile && pnpm --filter @evu/kb-api dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      CI: "true"
+      EVUKB_API_PORT: 4201
+      EVUKB_BLOB_ROOT: /data/corpus-store
+      EVUKB_MAX_UPLOAD_BYTES: ${EVUKB_MAX_UPLOAD_BYTES:-104857600}
+      EVUKB_MAX_ARCHIVE_IMPORT_BYTES: ${EVUKB_MAX_ARCHIVE_IMPORT_BYTES:-524288000}
+      EVUKB_DATABASE_URL: postgres://evukb:evukb@postgres:5432/evukb
+      EVUKB_HOST: 0.0.0.0
+      EVUKB_LOG_LEVEL: info
+      EVUKB_VECTOR_BACKEND: pgvector
+      EVUKB_EMBEDDING_PROVIDER: ${EVUKB_EMBEDDING_PROVIDER:-openai-compatible}
+      EVUKB_EMBEDDING_API_KEY: ${EVUKB_EMBEDDING_API_KEY:-}
+      EVUKB_EMBEDDING_BASE_URL: ${EVUKB_EMBEDDING_BASE_URL:-https://api.openai.com/v1}
+      EVUKB_EMBEDDING_MODEL: ${EVUKB_EMBEDDING_MODEL:-text-embedding-3-small}
+      EVUKB_EMBEDDING_DIMENSIONS: ${EVUKB_EMBEDDING_DIMENSIONS:-1536}
+      EVUKB_EMBEDDING_BATCH_SIZE: ${EVUKB_EMBEDDING_BATCH_SIZE:-8}
+      EVUKB_EMBEDDING_MAX_RETRIES: ${EVUKB_EMBEDDING_MAX_RETRIES:-3}
+      EVUKB_CHUNKING_STRATEGY: ${EVUKB_CHUNKING_STRATEGY:-headings}
+      EVUKB_CHUNK_MAX_TOKENS: ${EVUKB_CHUNK_MAX_TOKENS:-512}
+      EVUKB_CHAT_API_KEY: ${EVUKB_CHAT_API_KEY:-}
+      EVUKB_CHAT_BASE_URL: ${EVUKB_CHAT_BASE_URL:-https://api.openai.com/v1}
+      EVUKB_CHAT_MODEL: ${EVUKB_CHAT_MODEL:-gpt-4o-mini}
+      EVUKB_SECRETS_KEY: ${EVUKB_SECRETS_KEY:-}
+      EVUKB_TOKEN_PEPPER: ${EVUKB_TOKEN_PEPPER:-}
+      # Dev compose opts in to open auth; production must never set this.
+      EVUKB_ALLOW_OPEN_AUTH: ${EVUKB_ALLOW_OPEN_AUTH:-true}
+      EVUKB_REQUIRE_API_KEY: ${EVUKB_REQUIRE_API_KEY:-false}
+      EVUKB_MCP_DEV_TOKEN: ${EVUKB_MCP_DEV_TOKEN:-}
+      EVUKB_MCP_REQUIRE_TOKEN: ${EVUKB_MCP_REQUIRE_TOKEN:-false}
+      # Optional Qdrant: docker compose --profile qdrant up -d qdrant
+      # and set EVUKB_VECTOR_BACKEND=qdrant plus EVUKB_QDRANT_URL=http://qdrant:6333
+      EVUKB_WEB_ORIGIN: http://localhost:4200
+    ports:
+      - "4201:4201"
+    volumes:
+      - .:/workspace
+      - corpus_store:/data/corpus-store
+      - /workspace/node_modules
+
+  evukb-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    command: sh -c "pnpm install --no-frozen-lockfile && pnpm --filter @evu/kb-web dev"
+    depends_on:
+      - evukb-api
+    environment:
+      CI: "true"
+      VITE_EVUKB_API_PROXY_TARGET: http://evukb-api:4201
+    ports:
+      - "4200:4200"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    profiles: ["qdrant"]
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  corpus_store:
+  pgdata:
+  qdrant_data:

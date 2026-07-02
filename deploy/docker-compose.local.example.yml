@@ -1,0 +1,33 @@
+# Copy this file to deploy/docker-compose.local.yml and include it with:
+# docker compose --project-directory . -f deploy/docker-compose.dev.yml -f deploy/docker-compose.local.yml up
+#
+# The copied local override is gitignored.
+
+services:
+  evukb-api:
+    environment:
+      EVUKB_API_PORT: 4201
+      EVUKB_BLOB_ROOT: /data/corpus-store
+      EVUKB_EMBEDDING_PROVIDER: openai-compatible
+      EVUKB_EMBEDDING_MODEL: text-embedding-3-small
+      EVUKB_LLM_PROVIDER: openai-compatible
+      EVUKB_LLM_MODEL: gpt-4o-mini
+      EVUKB_LOG_LEVEL: debug
+    ports:
+      - "4201:4201"
+    volumes:
+      - .evukb/corpus-store:/data/corpus-store
+
+  evukb-web:
+    environment:
+      VITE_EVUKB_API_BASE_URL: http://localhost:4201
+    ports:
+      - "4200:4200"
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  qdrant:
+    ports:
+      - "6333:6333"

@@ -1,0 +1,404 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+ * Base — element defaults that Tailwind's preflight strips but our raw page
+ * markup (headings, links, inline code) still relies on. All token-driven.
+ * ------------------------------------------------------------------------- */
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+
+  h1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  h2 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  h3 {
+    @apply text-base font-semibold;
+  }
+
+  h4 {
+    @apply text-sm font-semibold;
+  }
+
+  a {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-[0.85em];
+  }
+
+  .dark select option,
+  .dark select optgroup {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Components — the structural design-system classes shared across pages,
+ * reimplemented on the shadcn HSL tokens. Placed in the `components` layer so
+ * Tailwind utilities on the same element always win.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  /* Text states */
+  .evukb-muted {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .evukb-error {
+    @apply text-sm text-destructive;
+  }
+
+  .evukb-success {
+    @apply text-sm font-medium text-green-600 dark:text-green-400;
+  }
+
+  /* Surface / page panel — mirrors the Card primitive. */
+  .evukb-panel {
+    @apply flex flex-col gap-4 rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm;
+  }
+
+  .evukb-panel > h2,
+  .evukb-panel > h3 {
+    @apply m-0;
+  }
+
+  /* Forms */
+  .evukb-form {
+    @apply flex flex-col gap-4;
+  }
+
+  .evukb-form > h2,
+  .evukb-form > h3 {
+    @apply m-0;
+  }
+
+  .evukb-form > button {
+    @apply self-start;
+  }
+
+  .evukb-form label {
+    @apply flex flex-col gap-2 text-sm font-medium text-foreground;
+  }
+
+  .evukb-checkbox {
+    @apply flex w-fit items-center gap-2.5 text-sm font-medium text-foreground;
+  }
+
+  .evukb-form label.evukb-checkbox {
+    @apply flex-row;
+  }
+
+  .evukb-form input:not([type="checkbox"]):not([type="radio"]),
+  .evukb-form select,
+  .evukb-form textarea,
+  .evukb-form-grid input:not([type="checkbox"]):not([type="radio"]),
+  .evukb-form-grid select,
+  .evukb-input,
+  .evukb-audit-filter select,
+  .evukb-audit-filter input,
+  .evukb-inline-form input {
+    @apply flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm shadow-sm;
+    @apply placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .evukb-form textarea {
+    @apply h-auto min-h-20 resize-y py-2;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .evukb-form select {
+    @apply cursor-pointer;
+  }
+
+  .evukb-form-grid label {
+    @apply flex flex-col gap-2 text-sm font-medium text-foreground;
+  }
+
+  .evukb-form-grid select {
+    @apply cursor-pointer;
+  }
+
+  .evukb-form fieldset {
+    @apply m-0 flex flex-col gap-3.5 rounded-lg border border-border bg-muted/30 p-4;
+  }
+
+  .evukb-form legend {
+    @apply px-1 text-sm font-semibold text-foreground;
+  }
+
+  .evukb-form-hint {
+    @apply m-0 text-sm leading-relaxed text-muted-foreground;
+  }
+
+  .evukb-form-hint code {
+    @apply bg-background/60 dark:bg-background/30;
+  }
+
+  .evukb-search-form {
+    @apply flex flex-col gap-4;
+  }
+
+  .evukb-search-form__toolbar {
+    @apply grid items-end gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @screen md {
+    .evukb-search-form__toolbar {
+      grid-template-columns: minmax(0, 1fr) minmax(12rem, 18rem) auto;
+    }
+  }
+
+  .evukb-form-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .evukb-form-row {
+    @apply grid items-end gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  /* Definition list (workspace settings) */
+  .evukb-settings-dl {
+    @apply m-0 grid gap-3;
+  }
+
+  .evukb-settings-dl > div {
+    @apply grid gap-0.5;
+  }
+
+  .evukb-settings-dl dt {
+    @apply text-xs font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+
+  .evukb-settings-dl dd {
+    @apply m-0 text-sm;
+  }
+
+  /* Stat cards */
+  .evukb-stat-grid,
+  .evukb-stats-grid {
+    @apply m-0 grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .evukb-stat-grid-half {
+    @apply m-0 grid grid-cols-1 gap-4 md:grid-cols-2;
+  }
+
+  .evukb-stat-card {
+    @apply flex flex-col gap-1.5 rounded-lg border border-border bg-muted/30 p-4;
+  }
+
+  .evukb-stat-metrics {
+    @apply m-0 grid gap-2;
+  }
+
+  .evukb-stat-metrics > div {
+    @apply grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-0 border-t border-border/60 pt-2 first:border-t-0 first:pt-0;
+  }
+
+  .evukb-stat-metrics dt {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .evukb-stat-metrics dd {
+    @apply m-0 text-right text-sm font-medium tabular-nums text-foreground;
+  }
+
+  .evukb-stat-card strong {
+    @apply text-xs font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+
+  .evukb-stat-card > p {
+    @apply m-0 text-sm text-foreground [overflow-wrap:anywhere];
+  }
+
+  .evukb-stat-card > p:only-of-type {
+    @apply text-lg font-bold;
+  }
+
+  /* Plain / meta lists */
+  .evukb-stats-list,
+  .evukb-warnings-list {
+    @apply m-0 grid list-none gap-1.5 p-0 text-sm leading-relaxed;
+  }
+
+  .evukb-list-plain {
+    @apply m-0 list-none p-0;
+  }
+
+  .evukb-list-plain > li {
+    @apply border-t border-border py-3 first:border-t-0;
+  }
+
+  .evukb-corpus-meta {
+    @apply flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground;
+  }
+
+  /* Credential list (API keys / tokens / secrets) */
+  .evukb-credential-list {
+    @apply m-0 grid list-none gap-0 p-0;
+  }
+
+  .evukb-credential-list > li {
+    @apply grid gap-1.5 border-t border-border py-3 text-sm text-muted-foreground first:border-t-0;
+  }
+
+  .evukb-credential-list strong {
+    @apply text-foreground;
+  }
+
+  .evukb-credential-list p {
+    @apply m-0;
+  }
+
+  /* Boolean rows (labels wrapping a Switch) */
+  .evukb-checkbox-list {
+    @apply m-0 grid list-none gap-2.5 p-0;
+  }
+
+  .evukb-audit-filter {
+    @apply mt-1 grid max-w-sm gap-1.5 text-sm font-medium;
+  }
+
+  .evukb-inline-form,
+  .evukb-diagnostics-actions {
+    @apply flex flex-wrap items-end gap-2;
+  }
+
+  .evukb-inline-form input {
+    @apply w-auto min-w-[min(18rem,100%)];
+  }
+
+  /* File upload trigger, styled like an outline button. */
+  .evukb-file-input-label {
+    @apply inline-flex h-9 w-fit cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted;
+  }
+
+  .evukb-file-input-label input {
+    @apply hidden;
+  }
+
+  /* Ask response block */
+  .evukb-ask-response {
+    @apply grid gap-3 rounded-lg border border-border bg-muted/30 p-5;
+  }
+
+  .evukb-ask-response h3,
+  .evukb-ask-response p {
+    @apply m-0;
+  }
+
+  .evukb-warnings {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  /* Secret reveal banner (shown once on credential create). */
+  .evukb-secret-banner {
+    @apply grid gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm;
+  }
+
+  .evukb-secret-banner p {
+    @apply m-0;
+  }
+
+  .evukb-secret-banner > code {
+    @apply block overflow-x-auto whitespace-nowrap;
+  }
+
+  /* File manager layout (also documented in @evu/kb-ui/theme/components.css raw rules) */
+  .evukb-file-layout {
+    @apply grid gap-4;
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    min-height: 420px;
+  }
+
+  .evukb-file-tree,
+  .evukb-file-editor-pane {
+    @apply flex min-h-0 flex-col rounded-lg border border-border bg-card;
+  }
+
+  .evukb-file-editor-pane {
+    min-height: 420px;
+  }
+
+  .evukb-file-tree__toolbar {
+    @apply border-b border-border p-3;
+  }
+
+  .evukb-file-breadcrumbs {
+    @apply flex flex-wrap items-center gap-1.5 text-sm;
+  }
+
+  .evukb-file-breadcrumbs button {
+    @apply border-0 bg-transparent p-0 text-primary hover:underline;
+  }
+
+  .evukb-file-tree__list {
+    @apply flex-1 overflow-auto py-1;
+  }
+
+  .evukb-file-tree__row {
+    @apply grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1.5 border-0 bg-transparent px-3 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-muted;
+  }
+
+  .evukb-file-tree__row.is-active {
+    @apply bg-muted font-semibold;
+  }
+
+  .evukb-file-tree__row.is-folder {
+    @apply font-medium;
+  }
+
+  .evukb-file-tree__row.is-drop-target {
+    @apply outline-dashed outline-1 outline-primary;
+  }
+
+  .evukb-file-editor-pane__toolbar {
+    @apply flex flex-wrap items-center gap-2 border-b border-border p-3;
+  }
+
+  .evukb-file-editor-pane__body {
+    @apply min-h-0 flex-1;
+  }
+
+  .evukb-cm-editor,
+  .evukb-cm-editor .cm-editor {
+    @apply h-full min-h-[360px];
+  }
+
+  .evukb-cm-status {
+    @apply flex flex-wrap gap-3 border-t border-border px-3 py-1.5 text-xs text-muted-foreground;
+  }
+
+  .evukb-context-menu {
+    @apply fixed z-50 min-w-40 rounded-md border border-border bg-card py-1 shadow-md;
+  }
+
+  .evukb-context-menu button {
+    @apply block w-full border-0 bg-transparent px-3 py-2 text-left text-sm text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "action": "ask",
+  "corpusIds": ["00000000-0000-4000-8000-000000000001"],
+  "question": "What is the alpha fixture?",
+  "responseMode": "concise",
+  "stream": false
+}
