@@ -2,7 +2,7 @@
 
 import './setup.js';
 
-import { ColorSchemeProvider } from '@evu/kb-ui';
+import { ColorSchemeProvider, DisplayPreferencesProvider } from '@evu/kb-ui';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -97,7 +97,9 @@ vi.mock('../../src/api/client.js', () => ({
 function renderWithProviders(ui: ReactElement): ReturnType<typeof render> {
   return render(
     <ColorSchemeProvider>
-      <MemoryRouter>{ui}</MemoryRouter>
+      <DisplayPreferencesProvider>
+        <MemoryRouter>{ui}</MemoryRouter>
+      </DisplayPreferencesProvider>
     </ColorSchemeProvider>,
   );
 }

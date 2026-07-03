@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
   useConfirmAction,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -21,6 +22,7 @@ function formatAction(action: string): string {
 }
 
 export function MutationApprovalsPage() {
+  const formatDateTime = useFormatDateTime();
   const [items, setItems] = useState<MutationApprovalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export function MutationApprovalsPage() {
                   <code>{item.corpusId.slice(0, 8)}…</code>
                 </TableCell>
                 <TableCell>{item.preview.path ?? item.preview.nodeId ?? '—'}</TableCell>
-                <TableCell>{new Date(item.createdAt).toLocaleString()}</TableCell>
+                <TableCell>{formatDateTime(item.createdAt)}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap items-center gap-2">
                     <Button

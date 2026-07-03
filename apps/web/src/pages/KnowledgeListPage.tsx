@@ -20,6 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { FolderOpen, LayoutDashboard, Trash2 } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
@@ -40,6 +41,7 @@ const createCorpusFormId = 'create-corpus-form';
 const importCorpusFormId = 'import-corpus-form';
 
 export function KnowledgeListPage() {
+  const formatDateTime = useFormatDateTime();
   const [corpora, setCorpora] = useState<KnowledgeCorpus[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -421,7 +423,7 @@ export function KnowledgeListPage() {
                     {formatFileTreeBytes(corpus.totalBytes)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {formatCorpusUpdatedAt(corpus.updatedAt)}
+                    {formatDateTime(corpus.updatedAt)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
@@ -742,15 +744,4 @@ function formatImportKindLabel(settings: Record<string, unknown>): string {
     default:
       return 'Managed';
   }
-}
-
-function formatCorpusUpdatedAt(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 }

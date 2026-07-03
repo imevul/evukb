@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
   useConfirmAction,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { Eye, RotateCw, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -146,6 +147,7 @@ function CorpusReference({
 }
 
 export function DiagnosticsPage() {
+  const formatDateTime = useFormatDateTime();
   const [dbHealth, setDbHealth] = useState<DatabaseHealth | null>(null);
   const [blobHealth, setBlobHealth] = useState<BlobStoreHealth | null>(null);
   const [providerHealth, setProviderHealth] = useState<ProviderHealthSummary | null>(null);
@@ -448,7 +450,7 @@ export function DiagnosticsPage() {
                             corpusNameById={corpusNameById}
                           />
                         </TableCell>
-                        <TableCell>{new Date(job.failedAt).toLocaleString()}</TableCell>
+                        <TableCell>{formatDateTime(job.failedAt)}</TableCell>
                         <TableCell>{job.errorMessage ?? '—'}</TableCell>
                         <TableCell className="whitespace-nowrap align-middle">
                           <div className="flex items-center gap-2">
@@ -514,7 +516,7 @@ export function DiagnosticsPage() {
                 <TableBody>
                   {usageRecords.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell>{new Date(record.createdAt).toLocaleString()}</TableCell>
+                      <TableCell>{formatDateTime(record.createdAt)}</TableCell>
                       <TableCell>{record.operationType}</TableCell>
                       <TableCell>{record.model}</TableCell>
                       <TableCell>
@@ -559,7 +561,7 @@ export function DiagnosticsPage() {
                 </div>
                 <div>
                   <dt>Failed at</dt>
-                  <dd>{new Date(detailJob.failedAt).toLocaleString()}</dd>
+                  <dd>{formatDateTime(detailJob.failedAt)}</dd>
                 </div>
                 <div>
                   <dt>Corpus</dt>

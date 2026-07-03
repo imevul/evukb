@@ -8,6 +8,7 @@ import { type ReactElement, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AskPanel, type AskPanelProps } from '../../src/ask/AskPanel.js';
+import { DisplayPreferencesProvider } from '../../src/display/DisplayPreferencesProvider.js';
 import { emptySearchFilterDraft } from '../../src/search/search-filters.js';
 
 const strategies = [
@@ -68,9 +69,13 @@ function QuestionHarness({ onSubmit }: { onSubmit: () => void }): ReactElement {
   );
 }
 
+function renderAskPanel(ui: ReactElement): ReturnType<typeof render> {
+  return render(<DisplayPreferencesProvider>{ui}</DisplayPreferencesProvider>);
+}
+
 describe('AskPanel', () => {
   it('shows the initial empty state with a corpus-scoped hint', () => {
-    render(<AskPanel {...makeProps()} />);
+    renderAskPanel(<AskPanel {...makeProps()} />);
 
     expect(screen.getByText('Ask a question')).toBeTruthy();
     expect(screen.getByText('Answers cite retrieved chunks from this corpus.')).toBeTruthy();
@@ -78,7 +83,7 @@ describe('AskPanel', () => {
 
   it('submits after the user types a question', () => {
     const onSubmit = vi.fn();
-    render(<QuestionHarness onSubmit={onSubmit} />);
+    renderAskPanel(<QuestionHarness onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText('Question'), {
       target: { value: 'How does EvuKB store files?' },
@@ -89,7 +94,7 @@ describe('AskPanel', () => {
   });
 
   it('disables the submit button while asking', () => {
-    render(<AskPanel {...makeProps({ loading: true })} />);
+    renderAskPanel(<AskPanel {...makeProps({ loading: true })} />);
 
     const button = screen.getByRole('button', { name: 'Asking…' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
@@ -97,19 +102,21 @@ describe('AskPanel', () => {
 
   it('renders a streaming answer placeholder, then the final answer with citations', () => {
     const streaming = makeResponse({ answer: '', citations: [], warnings: [] });
-    const { rerender } = render(
+    const { rerender } = renderAskPanel(
       <AskPanel {...makeProps({ loading: true, response: streaming })} />,
     );
 
     expect(screen.getByText('Generating answer…')).toBeTruthy();
 
     rerender(
-      <AskPanel
-        {...makeProps({
-          loading: false,
-          response: makeResponse({ warnings: ['Embedding provider not configured'] }),
-        })}
-      />,
+      <DisplayPreferencesProvider>
+        <AskPanel
+          {...makeProps({
+            loading: false,
+            response: makeResponse({ warnings: ['Embedding provider not configured'] }),
+          })}
+        />
+      </DisplayPreferencesProvider>,
     );
 
     expect(screen.getByText('EvuKB stores markdown files in corpora.')).toBeTruthy();
@@ -120,7 +127,7 @@ describe('AskPanel', () => {
   });
 
   it('renders citations through a custom file link renderer', () => {
-    render(
+    renderAskPanel(
       <AskPanel
         {...makeProps({
           response: makeResponse(),
@@ -136,7 +143,7 @@ describe('AskPanel', () => {
   });
 
   it('shows an error message', () => {
-    render(<AskPanel {...makeProps({ error: 'Ask failed: provider unavailable.' })} />);
+    renderAskPanel(<AskPanel {...makeProps({ error: 'Ask failed: provider unavailable.' })} />);
 
     expect(screen.getByText('Ask failed: provider unavailable.')).toBeTruthy();
   });
@@ -144,7 +151,9 @@ describe('AskPanel', () => {
   it('propagates response mode and ranking strategy changes', () => {
     const onResponseModeChange = vi.fn();
     const onRankingStrategyIdChange = vi.fn();
-    render(<AskPanel {...makeProps({ onResponseModeChange, onRankingStrategyIdChange })} />);
+    renderAskPanel(
+      <AskPanel {...makeProps({ onResponseModeChange, onRankingStrategyIdChange })} />,
+    );
 
     fireEvent.change(screen.getByLabelText('Response mode'), { target: { value: 'detailed' } });
     expect(onResponseModeChange).toHaveBeenCalledWith('detailed');
@@ -158,7 +167,7 @@ describe('AskPanel', () => {
   it('renders the workspace corpus multi-select and toggles corpora', () => {
     const onToggle = vi.fn();
     const setCorpusIds = vi.fn();
-    render(
+    renderAskPanel(
       <AskPanel
         {...makeProps({
           layout: 'workspace',

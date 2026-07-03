@@ -1165,3 +1165,20 @@ Learning:
 
 Action: See `packages/kb-core/src/search/ranking-registry.ts`,
 `packages/kb-server/src/services/ranking-strategy-plugin-service.ts`, `docs/EMBED.md`.
+
+---
+
+Area: display preferences, timestamp formatting
+
+Context: Ported 02m8-style per-browser display prefs instead of server `EVUKB_DISPLAY_*` env vars.
+
+Learning:
+- Web UI timestamps use `DisplayPreferencesProvider` + `formatDateTime()` (`Intl`) in
+  `@evu/kb-ui`; prefs live in `localStorage` (`evukb_display_preferences`) with per-field
+  **System setting** default.
+- Docker Compose `TZ` (default `UTC`) is separate: it affects container logs and server-side
+  `Date`, not how the browser renders ISO timestamps from the API.
+- Prefer `useFormatDateTime()` over scattered `toLocaleString()` so operator prefs apply
+  consistently across pages and `CorpusMultiSelect`.
+
+Action: See `packages/kb-ui/src/display/`, Settings → Preferences route, `docs/ENV.md`.

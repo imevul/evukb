@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
   useConfirmAction,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { type FormEvent, type ReactElement, type ReactNode, useEffect, useState } from 'react';
@@ -66,6 +67,7 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
 }: {
   config: CredentialTokensPageConfig<TRecord, TCreated>;
 }) {
+  const formatDateTime = useFormatDateTime();
   const [records, setRecords] = useState<TRecord[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -261,10 +263,10 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
                   </div>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {record.expiresAt ? formatCredentialTimestamp(record.expiresAt) : 'Never'}
+                  {record.expiresAt ? formatDateTime(record.expiresAt) : 'Never'}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {formatCredentialTimestamp(record.createdAt)}
+                  {formatDateTime(record.createdAt)}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">
@@ -357,15 +359,4 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
   }
 
   return panel;
-}
-
-function formatCredentialTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 }

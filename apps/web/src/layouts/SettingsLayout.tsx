@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { appRoutes } from '../config.js';
 
 const settingsTabs = [
+  { to: appRoutes.settingsPreferences, label: 'Preferences' },
   { to: appRoutes.settingsWorkspace, label: 'Workspace' },
   { to: appRoutes.settingsAi, label: 'AI providers' },
   { to: appRoutes.settingsRanking, label: 'Ranking' },

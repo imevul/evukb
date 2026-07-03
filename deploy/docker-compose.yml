@@ -21,6 +21,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      TZ: ${TZ:-UTC}
       EVUKB_API_PORT: ${EVUKB_API_PORT:-4201}
       EVUKB_BLOB_ROOT: ${EVUKB_BLOB_ROOT:-/data/corpus-store}
       EVUKB_DATABASE_URL: ${EVUKB_DATABASE_URL:-postgres://evukb:evukb@postgres:5432/evukb}
@@ -43,6 +44,7 @@ services:
     depends_on:
       - evukb-api
     environment:
+      TZ: ${TZ:-UTC}
       EVUKB_API_PROXY_TARGET: http://evukb-api:4201
     ports:
       - "${EVUKB_WEB_PORT:-4200}:4200"

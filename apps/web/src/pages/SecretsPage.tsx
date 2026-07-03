@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
   useConfirmAction,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
@@ -26,6 +27,7 @@ const createSecretFormId = 'create-secret-form';
 const rotateSecretFormId = 'rotate-secret-form';
 
 export function SecretsPage() {
+  const formatDateTime = useFormatDateTime();
   const [secrets, setSecrets] = useState<SecretRecord[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -225,7 +227,7 @@ export function SecretsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {formatCredentialTimestamp(secret.createdAt)}
+                  {formatDateTime(secret.createdAt)}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">
@@ -354,15 +356,4 @@ export function SecretsPage() {
       {confirmModal}
     </section>
   );
-}
-
-function formatCredentialTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 }

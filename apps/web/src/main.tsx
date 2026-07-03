@@ -1,4 +1,4 @@
-import { ColorSchemeProvider } from '@evu/kb-ui';
+import { ColorSchemeProvider, DisplayPreferencesProvider } from '@evu/kb-ui';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -16,9 +16,11 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <ColorSchemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <DisplayPreferencesProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </DisplayPreferencesProvider>
     </ColorSchemeProvider>
   </StrictMode>,
 );

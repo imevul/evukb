@@ -6,6 +6,7 @@
 services:
   evukb-api:
     environment:
+      TZ: ${TZ:-UTC}
       EVUKB_API_PORT: 4201
       EVUKB_BLOB_ROOT: /data/corpus-store
       EVUKB_EMBEDDING_PROVIDER: openai-compatible
@@ -20,6 +21,7 @@ services:
 
   evukb-web:
     environment:
+      TZ: ${TZ:-UTC}
       VITE_EVUKB_API_BASE_URL: http://localhost:4201
     ports:
       - "4200:4200"

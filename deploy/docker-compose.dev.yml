@@ -25,6 +25,7 @@ services:
         condition: service_healthy
     environment:
       CI: "true"
+      TZ: ${TZ:-UTC}
       EVUKB_API_PORT: 4201
       EVUKB_BLOB_ROOT: /data/corpus-store
       EVUKB_MAX_UPLOAD_BYTES: ${EVUKB_MAX_UPLOAD_BYTES:-104857600}
@@ -77,6 +78,7 @@ services:
       - evukb-api
     environment:
       CI: "true"
+      TZ: ${TZ:-UTC}
       VITE_EVUKB_API_PROXY_TARGET: http://evukb-api:4201
     ports:
       - "4200:4200"

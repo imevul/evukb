@@ -1,4 +1,4 @@
-import { EmptyState, resolveFormatProfile } from '@evu/kb-ui';
+import { EmptyState, resolveFormatProfile, useFormatDateTime } from '@evu/kb-ui';
 import { useParams } from 'react-router-dom';
 import { CorpusOverridesSection } from './corpus-overview/CorpusOverridesSection.js';
 import { CorpusStatsCard } from './corpus-overview/CorpusStatsCard.js';
@@ -10,6 +10,7 @@ import { useCorpusOverview } from './corpus-overview/use-corpus-overview.js';
 import { WarningsCard } from './corpus-overview/WarningsCard.js';
 
 export function CorpusOverviewPage() {
+  const formatDateTime = useFormatDateTime();
   const { corpusId } = useParams<{ corpusId: string }>();
   const overview = useCorpusOverview(corpusId);
   const { stats, corpus, loading, error } = overview;
@@ -45,9 +46,9 @@ export function CorpusOverviewPage() {
       : null;
   const nextDueAt =
     syncIntervalMinutes && stats.syncStatus?.lastSyncAt
-      ? new Date(
-          Date.parse(stats.syncStatus.lastSyncAt) + syncIntervalMinutes * 60_000,
-        ).toLocaleString()
+      ? formatDateTime(
+          new Date(Date.parse(stats.syncStatus.lastSyncAt) + syncIntervalMinutes * 60_000),
+        )
       : null;
   const hasPersistedOverrides = corpus
     ? corpusOverridesEnabled(corpus, overview.workspaceRankingStrategyId)

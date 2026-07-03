@@ -24,6 +24,39 @@ export { ConfirmModal } from './confirm-modal.js';
 export { TAB_CLASS, tabClassName } from './detail-tab-class.js';
 export type { DetailTabItem, DetailTabsProps } from './detail-tabs.js';
 export { DetailTabs } from './detail-tabs.js';
+export {
+  DisplayPreferencesProvider,
+  useDisplayPreferences,
+  useFormatDateTime,
+} from './display/DisplayPreferencesProvider.js';
+export { DisplayPreferencesSettings } from './display/DisplayPreferencesSettings.js';
+export type {
+  DateFormat,
+  DateFormatPreference,
+  DisplayPreferences,
+  EffectiveDisplayPreferences,
+  LocalePreference,
+  ResolvedTimeFormat,
+  TimeFormatPreference,
+  TimeZonePreference,
+} from './display/display-preferences.js';
+export {
+  COMMON_LOCALES,
+  COMMON_TIME_ZONES,
+  DATE_FORMAT_OPTIONS,
+  DEFAULT_DISPLAY_PREFERENCES,
+  DISPLAY_PREFERENCES_STORAGE_KEY,
+  detectSystemTimeFormat,
+  EXAMPLE_CUSTOM_DISPLAY_PREFERENCES,
+  getSystemLocale,
+  getSystemTimeZone,
+  isValidTimeZone,
+  readStoredDisplayPreferences,
+  resolveDisplayPreferences,
+  SYSTEM_SETTING,
+  writeStoredDisplayPreferences,
+} from './display/display-preferences.js';
+export { formatDateTime } from './display/format-date-time.js';
 export type { EmptyStateProps } from './empty-state.js';
 export { EmptyState } from './empty-state.js';
 // Note: CodeMirrorFileEditor is intentionally not re-exported here. It is

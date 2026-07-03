@@ -17,6 +17,7 @@ import { McpTokensPage } from './pages/McpTokensPage.js';
 import { MutationApprovalsPage } from './pages/MutationApprovalsPage.js';
 import { RankingSettingsPage } from './pages/RankingSettingsPage.js';
 import { SecretsPage } from './pages/SecretsPage.js';
+import { SettingsPreferencesPage } from './pages/SettingsPreferencesPage.js';
 import { WorkspaceAskPage } from './pages/WorkspaceAskPage.js';
 import { WorkspaceSearchPage } from './pages/WorkspaceSearchPage.js';
 import { WorkspaceSettingsPage } from './pages/WorkspaceSettingsPage.js';
@@ -66,7 +67,8 @@ export function App() {
           />
           <Route element={<CorpusAskPage />} path="knowledge/:corpusId/ask" />
           <Route element={<SettingsLayout />} path="settings">
-            <Route element={<Navigate replace to="workspace" />} index />
+            <Route element={<Navigate replace to="preferences" />} index />
+            <Route element={<SettingsPreferencesPage />} path="preferences" />
             <Route element={<WorkspaceSettingsPage />} path="workspace" />
             <Route element={<AiProvidersPage />} path="ai" />
             <Route element={<RankingSettingsPage />} path="ranking" />

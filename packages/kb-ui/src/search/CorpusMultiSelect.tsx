@@ -1,3 +1,4 @@
+import { useFormatDateTime } from '../display/DisplayPreferencesProvider.js';
 import { formatFileTreeBytes } from '../file-manager-utils.js';
 import type { WorkspaceCorpusOption } from '../hooks/useWorkspaceCorpora.js';
 import { Switch } from '../switch.js';
@@ -16,6 +17,7 @@ export function CorpusMultiSelect({
   onToggle,
   setCorpusIds,
 }: CorpusMultiSelectProps) {
+  const formatDateTime = useFormatDateTime();
   const selectedCount = availableCorpora.filter((corpus) => corpusIds.includes(corpus.id)).length;
   const allSelected = availableCorpora.length > 0 && selectedCount === availableCorpora.length;
 
@@ -70,7 +72,7 @@ export function CorpusMultiSelect({
                 className="text-right text-muted-foreground"
                 title={new Date(corpus.updatedAt).toISOString()}
               >
-                {new Date(corpus.updatedAt).toLocaleString()}
+                {formatDateTime(corpus.updatedAt)}
               </TableCell>
             </TableRow>
           ))}

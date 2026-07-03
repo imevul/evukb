@@ -2,7 +2,7 @@
 
 import './setup.js';
 
-import { ColorSchemeProvider, FileEditorModal } from '@evu/kb-ui';
+import { ColorSchemeProvider, DisplayPreferencesProvider, FileEditorModal } from '@evu/kb-ui';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -88,7 +88,9 @@ vi.mock('../../src/api/client.js', () => ({
 function renderWithProviders(ui: ReactElement, initialEntry = '/'): ReturnType<typeof render> {
   return render(
     <ColorSchemeProvider>
-      <MemoryRouter initialEntries={[initialEntry]}>{ui}</MemoryRouter>
+      <DisplayPreferencesProvider>
+        <MemoryRouter initialEntries={[initialEntry]}>{ui}</MemoryRouter>
+      </DisplayPreferencesProvider>
     </ColorSchemeProvider>,
   );
 }

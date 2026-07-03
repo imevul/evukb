@@ -43,7 +43,7 @@ Primary sidebar routes:
 | Knowledge | `/knowledge` |
 | Search | `/search` |
 | Ask | `/ask` |
-| Settings | `/settings/workspace` |
+| Settings | `/settings/preferences` |
 | Diagnostics | `/diagnostics` |
 
 Corpus-scoped pages use underline **DetailTabs**: Overview, Files, Search, Links,
@@ -53,6 +53,12 @@ Implementation: `@evu/kb-ui` exports `AppShell`, `AppContent`, `DetailTabs`,
 `ThemeMenu`. Theme preference (`light` / `dark` / `system`) lives in `@evu/kb-ui`
 (`ColorSchemeProvider`, `ThemeMenu`) and toggles a `.dark` **class** on `<html>`
 (Tailwind `darkMode: ['class']`), set early by the FOUC script in `index.html`.
+
+Display preferences (date format, time format, timezone, locale) are per-browser
+`localStorage` (`evukb_display_preferences`). Each field defaults to **System
+setting** (browser/OS via `Intl`). Operators change them under **Settings →
+Preferences** (`DisplayPreferencesSettings` in `@evu/kb-ui`). Container `TZ` in
+Docker Compose affects server logs and process time only, not UI formatting.
 
 ## Theme Tokens
 
@@ -205,6 +211,7 @@ Primary routes from `SPEC.md`:
 | `/knowledge/{corpusId}/links` | Link graph |
 | `/knowledge/{corpusId}/ask` | Ask with citations |
 | `/knowledge/{corpusId}/graph` | Graph and neighborhood view |
+| `/settings/preferences` | Per-browser display prefs (date/time format, timezone, locale) |
 | `/settings/workspace` | Workspace settings |
 | `/settings/ai` | LLM and embedding providers |
 | `/settings/ranking` | Ranking strategy and weights |
@@ -217,7 +224,7 @@ Primary routes from `SPEC.md`:
 The standalone UI has three layers:
 
 - Primary KB UI: corpora, files, editor, search, ask, links, graph.
-- Operator settings: workspace, providers, embeddings, ranking, sync, keys,
+- Operator settings: preferences, workspace, providers, embeddings, ranking, sync, keys,
   tokens.
 - Diagnostics: health, index status, failed jobs, sync status, audit.
 

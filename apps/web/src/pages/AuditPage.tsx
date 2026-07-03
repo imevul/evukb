@@ -7,6 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import { useEffect, useState } from 'react';
 
@@ -39,6 +40,7 @@ function formatTarget(target: AuditLogEntry['target']): string {
 }
 
 export function AuditPage() {
+  const formatDateTime = useFormatDateTime();
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
   const [actionFilter, setActionFilter] = useState<ActionFilter>('');
   const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ export function AuditPage() {
             {entries.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell className="whitespace-nowrap">
-                  {new Date(entry.createdAt).toLocaleString()}
+                  {formatDateTime(entry.createdAt)}
                 </TableCell>
                 <TableCell>{entry.action}</TableCell>
                 <TableCell className="max-w-[26rem] [overflow-wrap:anywhere]">

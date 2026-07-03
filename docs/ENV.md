@@ -127,3 +127,13 @@ not runtime API configuration.
 | `VITE_EVUKB_WORKSPACE_ID` | Default workspace slug for the Web app | `local-dev` |
 | `VITE_EVUKB_MCP_BASE_URL` | MCP base URL shown in the in-app MCP setup guide | derived from API origin |
 | `VITE_EVUKB_API_PROXY_TARGET` | Alternative to `EVUKB_API_PROXY_TARGET` for the Vite proxy | `http://localhost:4201` |
+
+## Container timezone (Docker Compose)
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `TZ` | Linux timezone for API/web containers (logs, server-side `Date`, cron ticks) | `UTC` |
+
+Set in Compose as `TZ: ${TZ:-UTC}` on `evukb-api` and `evukb-web`. This does **not**
+control how timestamps are rendered in the Web UI — operators configure that per browser
+under **Settings → Preferences** (`localStorage` key `evukb_display_preferences`).

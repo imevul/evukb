@@ -8,6 +8,7 @@ import {
   Label,
   StatusPill,
   Switch,
+  useFormatDateTime,
 } from '@evu/kb-ui';
 import type { MountModeChoice } from './corpus-settings.js';
 
@@ -60,6 +61,8 @@ export function CorpusSummaryCard({
   saveMountMode,
   toggleOkfStrict,
 }: CorpusSummaryCardProps) {
+  const formatDateTime = useFormatDateTime();
+
   return (
     <Card>
       <h2 className="text-lg font-semibold leading-none">Corpus</h2>
@@ -70,7 +73,7 @@ export function CorpusSummaryCard({
             <>
               {' '}
               Last sync: {stats.syncStatus.lastSyncStatus ?? 'unknown'} at{' '}
-              {new Date(stats.syncStatus.lastSyncAt).toLocaleString()}
+              {formatDateTime(stats.syncStatus.lastSyncAt)}
             </>
           ) : null}
           {stats.syncStatus?.lastCommitSha ? (
