@@ -34,7 +34,10 @@ export function resolveExampleRankingStrategiesModulePath(): string {
     }
   }
 
-  return candidates[0];
+  return (
+    candidates[0] ??
+    path.join(process.cwd(), 'examples/custom-ranking-strategy/src/register-dev.ts')
+  );
 }
 
 let cachedStrategies: Map<string, RankingStrategy> | null = null;
