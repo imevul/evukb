@@ -1,8 +1,7 @@
 import { AppContent, AppShell, StatusPill, ThemeMenu, useColorScheme } from '@evu/kb-ui';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
 import { appConfig, appRoutes } from '../config.js';
-import { isWideLayoutPath } from '../routes.js';
 
 const primaryNav = [
   { to: appRoutes.knowledgeList, label: 'Knowledge', end: false },
@@ -14,8 +13,6 @@ const primaryNav = [
 
 export function AppLayout() {
   const { preference, setPreference } = useColorScheme();
-  const { pathname } = useLocation();
-  const isWideContent = isWideLayoutPath(pathname);
 
   return (
     <AppShell
@@ -25,7 +22,7 @@ export function AppLayout() {
       navItems={[...primaryNav]}
       tagline="Knowledge base and RAG operator console"
     >
-      <AppContent wide={isWideContent}>
+      <AppContent>
         <Outlet />
       </AppContent>
     </AppShell>

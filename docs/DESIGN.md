@@ -22,7 +22,7 @@ Implementations are clean-room against documented contracts.
 
 ```text
 +----------+-----------------------------------------------+
-| Sidebar  | Main content (mx-auto max-w-6xl default)      |
+| Sidebar  | Main content (full width via AppContent)      |
 | brand    |                                               |
 | primary  | Corpus detail: underline tabs when scoped     |
 | nav      |                                               |
@@ -149,9 +149,8 @@ for prior ad-hoc spacing:
   toggle is genuinely wrong (e.g. inside a native multi-select form the platform
   must own). Multi-select facet rows (corpus pickers, source-type / index-status
   filters) also use `Switch` rows.
-- Default content width is `max-w-6xl` via `AppContent`. Use `AppContent wide`
-  only for dense work surfaces: file manager/editor, graphs, diagnostics, and
-  wide link tables.
+- Content uses full main-column width via `AppContent` (`max-w-none` by default).
+  Pass `wide={false}` only when a deliberately narrow column is needed.
 - Use `Card` (or the equivalent `.evukb-panel` compatibility class) for one
   elevated content block; the two stay visually equivalent.
 - Route layouts own broad context titles (`Settings`, corpus name). Corpus tabs

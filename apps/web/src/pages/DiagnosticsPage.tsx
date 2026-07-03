@@ -20,6 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  tabClassName,
   useConfirmAction,
   useFormatDateTime,
 } from '@evu/kb-ui';
@@ -146,6 +147,14 @@ function CorpusReference({
   );
 }
 
+type DiagnosticsTab = 'overview' | 'failed-jobs' | 'usage';
+
+const diagnosticsTabs: Array<{ id: DiagnosticsTab; label: string }> = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'failed-jobs', label: 'Failed jobs' },
+  { id: 'usage', label: 'Recent usage' },
+];
+
 export function DiagnosticsPage() {
   const formatDateTime = useFormatDateTime();
   const [dbHealth, setDbHealth] = useState<DatabaseHealth | null>(null);
@@ -159,6 +168,7 @@ export function DiagnosticsPage() {
   const [retryingJobId, setRetryingJobId] = useState<string | null>(null);
   const [bulkAction, setBulkAction] = useState<'retry' | 'delete' | null>(null);
   const [detailJob, setDetailJob] = useState<FailedJobRecord | null>(null);
+  const [activeTab, setActiveTab] = useState<DiagnosticsTab>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { confirm, confirmModal } = useConfirmAction();
@@ -308,232 +318,278 @@ export function DiagnosticsPage() {
   return (
     <>
       <PageHeader
-        description="Workspace health probes, usage telemetry, and recent failed background jobs."
+        description="Workspace health probes, usage telemetry, and background job status."
         title="Diagnostics"
       />
+      <div
+        aria-label="Diagnostics sections"
+        className="flex flex-wrap gap-6 border-b border-border"
+        role="tablist"
+      >
+        {diagnosticsTabs.map((tab) => (
+          <button
+            key={tab.id}
+            aria-selected={activeTab === tab.id}
+            className={tabClassName(activeTab === tab.id)}
+            id={`diagnostics-tab-${tab.id}`}
+            onClick={() => setActiveTab(tab.id)}
+            role="tab"
+            type="button"
+          >
+            {tab.id === 'failed-jobs' && failedJobs.length > 0
+              ? `${tab.label} (${failedJobs.length})`
+              : tab.label}
+          </button>
+        ))}
+      </div>
       <section className="evukb-panel">
         {error ? <p className="evukb-error">{error}</p> : null}
         {loading ? <p className="evukb-muted">Loading diagnostics…</p> : null}
         {!loading ? (
           <>
-            <div className="evukb-stat-grid">
-              <div className="evukb-stat-card">
-                <strong>Database</strong>
-                <p>
-                  <StatusPill tone={healthTone(dbHealth?.status ?? 'not-configured')}>
-                    {dbHealth?.status ?? 'unknown'}
-                  </StatusPill>
-                </p>
-                {dbHealth?.migrationsApplied !== undefined ? (
-                  <p>Migrations applied: {dbHealth.migrationsApplied}</p>
-                ) : null}
-              </div>
-              <div className="evukb-stat-card">
-                <strong>Blob store</strong>
-                <p>
-                  <StatusPill tone={healthTone(blobHealth?.status ?? 'not-configured')}>
-                    {blobHealth?.status ?? 'unknown'}
-                  </StatusPill>
-                </p>
-                {blobHealth?.root ? <p>Root: {blobHealth.root}</p> : null}
-              </div>
-              <div className="evukb-stat-card">
-                <strong>Embedding provider</strong>
-                <p>
-                  <StatusPill
-                    tone={healthTone(providerHealth?.embedding.status ?? 'not-configured')}
-                  >
-                    {providerHealth?.embedding.status ?? 'unknown'}
-                  </StatusPill>
-                </p>
-                {providerHealth?.embedding.model ? (
-                  <p>Model: {providerHealth.embedding.model}</p>
-                ) : null}
-              </div>
-              <div className="evukb-stat-card">
-                <strong>Chat provider</strong>
-                <p>
-                  <StatusPill tone={healthTone(providerHealth?.chat.status ?? 'not-configured')}>
-                    {providerHealth?.chat.status ?? 'unknown'}
-                  </StatusPill>
-                </p>
-                {providerHealth?.chat.model ? <p>Model: {providerHealth.chat.model}</p> : null}
-              </div>
-              <div className="evukb-stat-card">
-                <strong>Vector store</strong>
-                <p>
-                  <StatusPill tone={healthTone(vectorHealth?.status ?? 'not-configured')}>
-                    {vectorHealth?.status ?? 'unknown'}
-                  </StatusPill>
-                </p>
-                {vectorHealth?.backend ? <p>Backend: {vectorHealth.backend}</p> : null}
-                {vectorHealth?.message ? <p>{vectorHealth.message}</p> : null}
-                {vectorHealth?.backend === 'qdrant' ? (
-                  <p className="evukb-form-hint">
-                    Switching vector backends requires a corpus reindex.
-                  </p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="min-w-0">
-              <h2>Usage summary (last 7 days)</h2>
-              {usageSummary.length === 0 ? (
-                <EmptyState
-                  title="No usage recorded"
-                  hint="Ask, rerank, and indexing usage appears here."
-                />
-              ) : (
-                <div className="evukb-stat-grid-half">
-                  {usageSummary.map((row) => (
-                    <UsageSummaryCard key={row.operationType} row={row} />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2>Failed jobs</h2>
-                {failedJobs.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      aria-label={
-                        bulkAction === 'retry'
-                          ? 'Retrying all failed jobs'
-                          : 'Retry all failed jobs'
-                      }
-                      disabled={bulkAction !== null || retryingJobId !== null}
-                      onClick={() => void handleRetryAll()}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                    >
-                      <RotateCw
-                        aria-hidden
-                        className={`h-4 w-4${bulkAction === 'retry' ? ' animate-spin' : ''}`}
-                      />
-                    </Button>
-                    <Button
-                      aria-label="Delete all failed jobs"
-                      disabled={bulkAction !== null || retryingJobId !== null}
-                      onClick={openDeleteAllConfirm}
-                      size="icon"
-                      type="button"
-                      variant="dangerOutline"
-                    >
-                      <Trash2 aria-hidden className="h-4 w-4" />
-                    </Button>
+            {activeTab === 'overview' ? (
+              <div
+                aria-labelledby="diagnostics-tab-overview"
+                className="flex flex-col gap-6"
+                id="diagnostics-panel-overview"
+                role="tabpanel"
+              >
+                <div className="evukb-stat-grid">
+                  <div className="evukb-stat-card">
+                    <strong>Database</strong>
+                    <p>
+                      <StatusPill tone={healthTone(dbHealth?.status ?? 'not-configured')}>
+                        {dbHealth?.status ?? 'unknown'}
+                      </StatusPill>
+                    </p>
+                    {dbHealth?.migrationsApplied !== undefined ? (
+                      <p>Migrations applied: {dbHealth.migrationsApplied}</p>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-              {failedJobs.length === 0 ? (
-                <EmptyState title="No failed jobs" hint="Background jobs are healthy." />
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Queue</TableHead>
-                      <TableHead>Corpus</TableHead>
-                      <TableHead>Failed at</TableHead>
-                      <TableHead>Error</TableHead>
-                      <TableHead className="w-[1%] whitespace-nowrap">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {failedJobs.map((job) => (
-                      <TableRow key={job.id}>
-                        <TableCell>{job.queueName}</TableCell>
-                        <TableCell>
-                          <CorpusReference
-                            corpusId={job.corpusId}
-                            corpusNameById={corpusNameById}
-                          />
-                        </TableCell>
-                        <TableCell>{formatDateTime(job.failedAt)}</TableCell>
-                        <TableCell>{job.errorMessage ?? '—'}</TableCell>
-                        <TableCell className="whitespace-nowrap align-middle">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              aria-label="View job details"
-                              onClick={() => setDetailJob(job)}
-                              size="icon"
-                              type="button"
-                              variant="outline"
-                            >
-                              <Eye aria-hidden className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              aria-label={retryingJobId === job.id ? 'Retrying job' : 'Retry job'}
-                              disabled={retryingJobId === job.id || bulkAction !== null}
-                              onClick={() => void handleRetry(job.id)}
-                              size="icon"
-                              type="button"
-                              variant="outline"
-                            >
-                              <RotateCw
-                                aria-hidden
-                                className={`h-4 w-4${retryingJobId === job.id ? ' animate-spin' : ''}`}
-                              />
-                            </Button>
-                            <Button
-                              aria-label="Delete job"
-                              disabled={retryingJobId === job.id || bulkAction !== null}
-                              onClick={() => openDeleteConfirm(job)}
-                              size="icon"
-                              type="button"
-                              variant="dangerOutline"
-                            >
-                              <Trash2 aria-hidden className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
+                  <div className="evukb-stat-card">
+                    <strong>Blob store</strong>
+                    <p>
+                      <StatusPill tone={healthTone(blobHealth?.status ?? 'not-configured')}>
+                        {blobHealth?.status ?? 'unknown'}
+                      </StatusPill>
+                    </p>
+                    {blobHealth?.root ? <p>Root: {blobHealth.root}</p> : null}
+                  </div>
+                  <div className="evukb-stat-card">
+                    <strong>Embedding provider</strong>
+                    <p>
+                      <StatusPill
+                        tone={healthTone(providerHealth?.embedding.status ?? 'not-configured')}
+                      >
+                        {providerHealth?.embedding.status ?? 'unknown'}
+                      </StatusPill>
+                    </p>
+                    {providerHealth?.embedding.model ? (
+                      <p>Model: {providerHealth.embedding.model}</p>
+                    ) : null}
+                  </div>
+                  <div className="evukb-stat-card">
+                    <strong>Chat provider</strong>
+                    <p>
+                      <StatusPill tone={healthTone(providerHealth?.chat.status ?? 'not-configured')}>
+                        {providerHealth?.chat.status ?? 'unknown'}
+                      </StatusPill>
+                    </p>
+                    {providerHealth?.chat.model ? <p>Model: {providerHealth.chat.model}</p> : null}
+                  </div>
+                  <div className="evukb-stat-card">
+                    <strong>Vector store</strong>
+                    <p>
+                      <StatusPill tone={healthTone(vectorHealth?.status ?? 'not-configured')}>
+                        {vectorHealth?.status ?? 'unknown'}
+                      </StatusPill>
+                    </p>
+                    {vectorHealth?.backend ? <p>Backend: {vectorHealth.backend}</p> : null}
+                    {vectorHealth?.message ? <p>{vectorHealth.message}</p> : null}
+                    {vectorHealth?.backend === 'qdrant' ? (
+                      <p className="evukb-form-hint">
+                        Switching vector backends requires a corpus reindex.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
 
-            <h2>Recent usage</h2>
-            {usageRecords.length === 0 ? (
-              <EmptyState
-                title="No recent usage"
-                hint="Provider-backed operations will appear here."
-              />
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>When</TableHead>
-                    <TableHead>Operation</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead>Tokens</TableHead>
-                    <TableHead>Latency</TableHead>
-                    <TableHead>Corpus</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {usageRecords.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell>{formatDateTime(record.createdAt)}</TableCell>
-                      <TableCell>{record.operationType}</TableCell>
-                      <TableCell>{record.model}</TableCell>
-                      <TableCell>
-                        {record.inputTokens ?? '—'} / {record.outputTokens ?? '—'}
-                      </TableCell>
-                      <TableCell>{record.latencyMs} ms</TableCell>
-                      <TableCell>
-                        <CorpusReference
-                          corpusId={record.corpusId ?? null}
-                          corpusNameById={corpusNameById}
+                <div className="min-w-0">
+                  <h2>Usage summary (last 7 days)</h2>
+                  {usageSummary.length === 0 ? (
+                    <EmptyState
+                      title="No usage recorded"
+                      hint="Ask, rerank, and indexing usage appears here."
+                    />
+                  ) : (
+                    <div className="evukb-stat-grid-half">
+                      {usageSummary.map((row) => (
+                        <UsageSummaryCard key={row.operationType} row={row} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            {activeTab === 'failed-jobs' ? (
+              <div
+                aria-labelledby="diagnostics-tab-failed-jobs"
+                className="min-w-0"
+                id="diagnostics-panel-failed-jobs"
+                role="tabpanel"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2>Failed jobs</h2>
+                  {failedJobs.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        aria-label={
+                          bulkAction === 'retry'
+                            ? 'Retrying all failed jobs'
+                            : 'Retry all failed jobs'
+                        }
+                        disabled={bulkAction !== null || retryingJobId !== null}
+                        onClick={() => void handleRetryAll()}
+                        size="icon"
+                        type="button"
+                        variant="outline"
+                      >
+                        <RotateCw
+                          aria-hidden
+                          className={`h-4 w-4${bulkAction === 'retry' ? ' animate-spin' : ''}`}
                         />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                      </Button>
+                      <Button
+                        aria-label="Delete all failed jobs"
+                        disabled={bulkAction !== null || retryingJobId !== null}
+                        onClick={openDeleteAllConfirm}
+                        size="icon"
+                        type="button"
+                        variant="dangerOutline"
+                      >
+                        <Trash2 aria-hidden className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+                {failedJobs.length === 0 ? (
+                  <EmptyState title="No failed jobs" hint="Background jobs are healthy." />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Queue</TableHead>
+                        <TableHead>Corpus</TableHead>
+                        <TableHead>Failed at</TableHead>
+                        <TableHead>Error</TableHead>
+                        <TableHead className="w-[1%] whitespace-nowrap">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {failedJobs.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell>{job.queueName}</TableCell>
+                          <TableCell>
+                            <CorpusReference
+                              corpusId={job.corpusId}
+                              corpusNameById={corpusNameById}
+                            />
+                          </TableCell>
+                          <TableCell>{formatDateTime(job.failedAt)}</TableCell>
+                          <TableCell>{job.errorMessage ?? '—'}</TableCell>
+                          <TableCell className="whitespace-nowrap align-middle">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                aria-label="View job details"
+                                onClick={() => setDetailJob(job)}
+                                size="icon"
+                                type="button"
+                                variant="outline"
+                              >
+                                <Eye aria-hidden className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                aria-label={retryingJobId === job.id ? 'Retrying job' : 'Retry job'}
+                                disabled={retryingJobId === job.id || bulkAction !== null}
+                                onClick={() => void handleRetry(job.id)}
+                                size="icon"
+                                type="button"
+                                variant="outline"
+                              >
+                                <RotateCw
+                                  aria-hidden
+                                  className={`h-4 w-4${retryingJobId === job.id ? ' animate-spin' : ''}`}
+                                />
+                              </Button>
+                              <Button
+                                aria-label="Delete job"
+                                disabled={retryingJobId === job.id || bulkAction !== null}
+                                onClick={() => openDeleteConfirm(job)}
+                                size="icon"
+                                type="button"
+                                variant="dangerOutline"
+                              >
+                                <Trash2 aria-hidden className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            ) : null}
+
+            {activeTab === 'usage' ? (
+              <div
+                aria-labelledby="diagnostics-tab-usage"
+                className="min-w-0"
+                id="diagnostics-panel-usage"
+                role="tabpanel"
+              >
+                <h2>Recent usage</h2>
+                {usageRecords.length === 0 ? (
+                  <EmptyState
+                    title="No recent usage"
+                    hint="Provider-backed operations will appear here."
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>When</TableHead>
+                        <TableHead>Operation</TableHead>
+                        <TableHead>Model</TableHead>
+                        <TableHead>Tokens</TableHead>
+                        <TableHead>Latency</TableHead>
+                        <TableHead>Corpus</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {usageRecords.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell>{formatDateTime(record.createdAt)}</TableCell>
+                          <TableCell>{record.operationType}</TableCell>
+                          <TableCell>{record.model}</TableCell>
+                          <TableCell>
+                            {record.inputTokens ?? '—'} / {record.outputTokens ?? '—'}
+                          </TableCell>
+                          <TableCell>{record.latencyMs} ms</TableCell>
+                          <TableCell>
+                            <CorpusReference
+                              corpusId={record.corpusId ?? null}
+                              corpusNameById={corpusNameById}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            ) : null}
           </>
         ) : null}
 

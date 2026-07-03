@@ -7,8 +7,11 @@ import {
   defaultKbReadScopes,
   type KbAuthScope,
   type McpTokenRecord,
+  parseAgentWritePathPrefixes,
+  validateCredentialWritePathPrefixes,
+  workspaceAgentWritePathPrefixes,
 } from '@evu/kb-core';
-import type { ApiKeyRepository, McpTokenRepository } from '@evu/kb-db';
+import type { ApiKeyRepository, McpTokenRepository, WorkspaceRepository } from '@evu/kb-db';
 import {
   generateApiKeySecret,
   generateMcpTokenSecret,
@@ -20,6 +23,7 @@ export type CreateTokenInput = {
   workspaceId: string;
   name: string;
   scopes?: KbAuthScope[];
+  writePathPrefixes?: string[] | null;
   expiresAt?: string | null;
 };
 
@@ -35,6 +39,14 @@ function normalizeScopes(scopes?: KbAuthScope[]): KbAuthScope[] {
   }
 
   return scopes;
+}
+
+function normalizeWritePathPrefixes(raw: string[] | null | undefined): string[] | null {
+  if (raw === undefined || raw === null) {
+    return null;
+  }
+  const parsed = parseAgentWritePathPrefixes(raw);
+  return parsed ?? null;
 }
 
 function isExpired(expiresAt: string | null): boolean {
@@ -59,10 +71,37 @@ function toAuthenticatedToken(record: McpTokenRecord | ApiKeyRecord): Authentica
 export class TokenAuthService {
   readonly #mcpTokens: McpTokenRepository;
   readonly #apiKeys: ApiKeyRepository;
+  readonly #workspaces: WorkspaceRepository;
 
-  constructor(mcpTokens: McpTokenRepository, apiKeys: ApiKeyRepository) {
+  constructor(
+    mcpTokens: McpTokenRepository,
+    apiKeys: ApiKeyRepository,
+    workspaces: WorkspaceRepository,
+  ) {
     this.#mcpTokens = mcpTokens;
     this.#apiKeys = apiKeys;
+    this.#workspaces = workspaces;
+  }
+
+  async #assertValidWritePathPrefixes(
+    workspaceId: string,
+    writePathPrefixes: string[] | null | undefined,
+  ): Promise<string[] | null> {
+    if (writePathPrefixes === undefined || writePathPrefixes === null) {
+      return null;
+    }
+    const workspace = await this.#workspaces.getById(workspaceId);
+    if (!workspace) {
+      throw ApiError.notFound(`Workspace not found: ${workspaceId}`);
+    }
+    const error = validateCredentialWritePathPrefixes(
+      writePathPrefixes,
+      workspaceAgentWritePathPrefixes(workspace.settings),
+    );
+    if (error) {
+      throw ApiError.validation(error);
+    }
+    return normalizeWritePathPrefixes(writePathPrefixes);
   }
 
   async createMcpToken(input: CreateTokenInput): Promise<CreatedMcpToken> {
@@ -71,12 +110,18 @@ export class TokenAuthService {
       throw ApiError.validation('Token name is required.');
     }
 
+    const writePathPrefixes = await this.#assertValidWritePathPrefixes(
+      input.workspaceId,
+      input.writePathPrefixes,
+    );
+
     const token = generateMcpTokenSecret();
     const record = await this.#mcpTokens.create({
       workspaceId: input.workspaceId,
       name,
       hash: hashTokenSecret(token),
       scopes: normalizeScopes(input.scopes),
+      writePathPrefixes,
       expiresAt: input.expiresAt ?? null,
     });
 
@@ -106,6 +151,7 @@ export class TokenAuthService {
       name: existing.name,
       hash: hashTokenSecret(token),
       scopes: existing.scopes,
+      writePathPrefixes: existing.writePathPrefixes,
       expiresAt: existing.expiresAt,
     });
 
@@ -124,12 +170,18 @@ export class TokenAuthService {
       throw ApiError.validation('API key name is required.');
     }
 
+    const writePathPrefixes = await this.#assertValidWritePathPrefixes(
+      input.workspaceId,
+      input.writePathPrefixes,
+    );
+
     const key = generateApiKeySecret();
     const record = await this.#apiKeys.create({
       workspaceId: input.workspaceId,
       name,
       hash: hashTokenSecret(key),
       scopes: normalizeScopes(input.scopes),
+      writePathPrefixes,
       expiresAt: input.expiresAt ?? null,
     });
 
@@ -159,6 +211,7 @@ export class TokenAuthService {
       name: existing.name,
       hash: hashTokenSecret(key),
       scopes: existing.scopes,
+      writePathPrefixes: existing.writePathPrefixes,
       expiresAt: existing.expiresAt,
     });
 

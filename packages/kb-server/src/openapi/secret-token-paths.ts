@@ -71,6 +71,7 @@ export const secretTokenPaths = {
       requestBody: jsonBody({
         name: { type: 'string' },
         scopes: { type: 'array', items: { type: 'string' } },
+        writePathPrefixes: { type: 'array', items: { type: 'string' }, nullable: true },
         expiresAt: { type: 'string', nullable: true },
       }),
       responses: {
@@ -115,6 +116,7 @@ export const secretTokenPaths = {
       requestBody: jsonBody({
         name: { type: 'string' },
         scopes: { type: 'array', items: { type: 'string' } },
+        writePathPrefixes: { type: 'array', items: { type: 'string' }, nullable: true },
         expiresAt: { type: 'string', nullable: true },
       }),
       responses: {

@@ -5,6 +5,7 @@ import { appRoutes } from '../config.js';
 
 const settingsTabs = [
   { to: appRoutes.settingsPreferences, label: 'Preferences' },
+  { to: appRoutes.settingsOverview, label: 'Overview' },
   { to: appRoutes.settingsWorkspace, label: 'Workspace' },
   { to: appRoutes.settingsAi, label: 'AI providers' },
   { to: appRoutes.settingsRanking, label: 'Ranking' },

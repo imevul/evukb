@@ -130,6 +130,7 @@ export const secretRotateBodySchema = z.object({
 export const tokenCreateBodySchema = z.object({
   name: z.string(),
   scopes: z.array(z.enum(['kb:read', 'kb:write', 'kb:admin'])).optional(),
+  writePathPrefixes: z.array(z.string()).nullable().optional(),
   expiresAt: z.string().nullable().optional(),
 });
 

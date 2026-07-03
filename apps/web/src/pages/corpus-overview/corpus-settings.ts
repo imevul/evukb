@@ -8,7 +8,8 @@ import type {
 export type ApprovalKey = 'append' | 'create' | 'update' | 'delete';
 export type ApprovalInheritMode = 'inherit' | 'always' | 'never';
 export type MountModeChoice = 'import' | 'mount_authoritative' | 'import_writeback';
-export type OverridesTab = 'ranking' | 'approval';
+export type OverridesTab = 'ranking' | 'approval' | 'agent';
+export type AgentNotesRetrievalMode = 'inherit' | 'include' | 'exclude';
 
 export const APPROVAL_KEYS: ApprovalKey[] = ['append', 'create', 'update', 'delete'];
 
@@ -64,6 +65,47 @@ export function readCorpusApprovalPolicy(
   return defaults;
 }
 
+export function readCorpusAgentNotesRetrieval(
+  settings: Record<string, unknown>,
+): AgentNotesRetrievalMode {
+  const raw = settings.includeAgentNotesInRetrieval;
+  if (raw === true) {
+    return 'include';
+  }
+  if (raw === false) {
+    return 'exclude';
+  }
+  return 'inherit';
+}
+
+export function readCorpusAgentWritePathPrefixes(settings: Record<string, unknown>): string[] {
+  const raw = settings.agentWritePathPrefixes;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+}
+
+export function formatAgentWritePathPrefixesInput(prefixes: string[]): string {
+  return prefixes.join('\n');
+}
+
+export function parseAgentWritePathPrefixesInput(raw: string): string[] {
+  return raw
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+export function readWorkspaceAgentWritePathPrefixes(settings: Record<string, unknown>): string[] {
+  const parsed = readCorpusAgentWritePathPrefixes(settings);
+  return parsed.length > 0 ? parsed : ['agent-notes'];
+}
+
+export function defaultAgentNotesRetrievalOverride(): AgentNotesRetrievalMode {
+  return 'inherit';
+}
+
 export function corpusOverridesEnabled(
   corpus: KnowledgeCorpus,
   workspaceRankingStrategyId: string,
@@ -75,9 +117,14 @@ export function corpusOverridesEnabled(
   const hasApprovalOverride = APPROVAL_KEYS.some(
     (key) => readCorpusApprovalPolicy(corpus.settings ?? {})[key] !== 'inherit',
   );
+  const hasAgentRetrievalOverride =
+    readCorpusAgentNotesRetrieval(corpus.settings ?? {}) !== 'inherit';
+  const hasAgentWritePathOverride = readCorpusAgentWritePathPrefixes(corpus.settings ?? {}).length > 0;
   return (
     hasRankingWeights ||
     hasApprovalOverride ||
+    hasAgentRetrievalOverride ||
+    hasAgentWritePathOverride ||
     corpus.rankingStrategyId !== workspaceRankingStrategyId
   );
 }

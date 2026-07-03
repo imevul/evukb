@@ -74,7 +74,7 @@ export type AppContentProps = {
   wide?: boolean;
 };
 
-export function AppContent({ children, wide = false }: AppContentProps) {
+export function AppContent({ children, wide = true }: AppContentProps) {
   return (
     <div className={cn('mx-auto flex w-full flex-col gap-6', wide ? 'max-w-none' : 'max-w-6xl')}>
       {children}

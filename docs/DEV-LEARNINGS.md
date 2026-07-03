@@ -1182,3 +1182,31 @@ Learning:
   consistently across pages and `CorpusMultiSelect`.
 
 Action: See `packages/kb-ui/src/display/`, Settings → Preferences route, `docs/ENV.md`.
+
+---
+
+## 2026-07-04: AGENT-1 + AGENT-2 — Retrieval Toggle And Write Path ACLs
+
+Area: agent writes, search, credentials, settings
+
+Context: ROADMAP AGENT-1/2 shipped in one sprint after P3-15 API reference.
+
+Decision:
+- **AGENT-1:** `includeAgentNotesInRetrieval` on workspace (default true) and optional
+  corpus override; `SearchService` filters chunk hits via `shouldIncludePathInRetrieval`
+  after existing knowledge filters.
+- **AGENT-2:** `agentWritePathPrefixes` on workspace (default `['agent-notes']`), optional
+  corpus narrowing, optional `write_path_prefixes` on API keys and MCP tokens; effective
+  prefixes use restrictive intersection in `resolveAgentWritePathPrefixes`.
+- `AgentWriteService` loads workspace + corpus settings and credential record per write.
+
+Learning:
+- Keep ACL resolution in `AgentWriteService` rather than duplicating checks in MCP and HTTP
+  routes — both call the same service.
+- Corpus prefix validation needs workspace settings at PATCH time; `corpus-routes` loads
+  workspace before `validateCorpusSettings`.
+- Credential `writePathPrefixes` stored as jsonb; omit/null means inherit all workspace
+  prefixes for that token.
+
+Action: See `packages/kb-core/src/agent-retrieval/`, `packages/kb-core/src/agent-write/path-policy.ts`,
+  migration `0004_credential_write_path_prefixes.sql`, workspace/corpus/credential UI settings.

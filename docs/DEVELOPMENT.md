@@ -27,7 +27,7 @@ agent mutation approval, graph neighborhood, portable export/import, and mount s
 (`import`, `import_writeback`, `mount_authoritative`).
 
 Remaining P3+ items are optional npm publishing (see [`docs/RELEASE.md`](RELEASE.md)),
-public docs site (P3-15), git writeback implementation (SYNC-6), and agent write/retrieval
+git writeback implementation (SYNC-6), and agent write/retrieval
 backlog (AGENT-1, AGENT-2). Memory banks are out of scope for EvuKB (see SPEC §16).
 Host-specific adapter code belongs in consuming projects, not in EvuKB.
 
@@ -131,6 +131,7 @@ Default dev ports:
 | `make verify-qdrant` | Optional: run Qdrant integration and vector-backend parity tests (requires Postgres + Qdrant) |
 | `make migrate` | Apply Drizzle migrations to the configured Postgres database |
 | `make generate-openapi` | Write OpenAPI spec to `packages/kb-sdk/openapi/evukb.openapi.json` |
+| `make api-docs` | Regenerate Redoc HTML at `docs/api/index.html` (served at `GET /api-reference`) |
 | `pnpm generate-types` | Regenerate TypeScript types from the OpenAPI spec |
 | `pnpm test:ci` | Fail fast unless `EVUKB_DATABASE_URL` is set, then run all Vitest suites |
 

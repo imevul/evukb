@@ -1,15 +1,25 @@
 import {
   AgentWritePathError,
-  assertAgentNotesPath,
   joinAgentWritePath,
   type KbWriteActor,
   type KbWriteToolRequest,
   type KbWriteToolResponse,
   type KnowledgeNode,
+  parseAgentWritePathPrefixes,
+  prefixCovers,
+  resolveAgentWritePathPrefixes,
   splitAgentWritePath,
+  workspaceAgentWritePathPrefixes,
 } from '@evu/kb-core';
 
-import type { AuditLogRepository, NodeRepository } from '@evu/kb-db';
+import type {
+  ApiKeyRepository,
+  AuditLogRepository,
+  CorpusRepository,
+  McpTokenRepository,
+  NodeRepository,
+  WorkspaceRepository,
+} from '@evu/kb-db';
 
 import { ApiError } from '../errors.js';
 import type { FileManagerService, FileMutationContext } from './file-manager.js';
@@ -20,6 +30,10 @@ export type AgentWriteServiceDeps = {
   auditLog: AuditLogRepository;
   fileManager: FileManagerService;
   nodes: NodeRepository;
+  workspaces: WorkspaceRepository;
+  corpora: CorpusRepository;
+  apiKeys: ApiKeyRepository;
+  mcpTokens: McpTokenRepository;
   mutationApproval?: MutationApprovalService | null;
 };
 
@@ -42,12 +56,20 @@ export class AgentWriteService {
   readonly #auditLog: AuditLogRepository;
   readonly #fileManager: FileManagerService;
   readonly #nodes: NodeRepository;
+  readonly #workspaces: WorkspaceRepository;
+  readonly #corpora: CorpusRepository;
+  readonly #apiKeys: ApiKeyRepository;
+  readonly #mcpTokens: McpTokenRepository;
   #mutationApproval: MutationApprovalService | null;
 
   constructor(deps: AgentWriteServiceDeps) {
     this.#auditLog = deps.auditLog;
     this.#fileManager = deps.fileManager;
     this.#nodes = deps.nodes;
+    this.#workspaces = deps.workspaces;
+    this.#corpora = deps.corpora;
+    this.#apiKeys = deps.apiKeys;
+    this.#mcpTokens = deps.mcpTokens;
     this.#mutationApproval = deps.mutationApproval ?? null;
   }
 
@@ -93,10 +115,11 @@ export class AgentWriteService {
     actor: KbWriteActor,
     input: Extract<KbWriteToolRequest, { action: 'append_document' }>,
   ): Promise<KbWriteToolResponse> {
+    const allowedPrefixes = await this.#resolveAllowedPrefixes(workspaceId, input.corpusId, actor);
     let folderPath: string;
     let name: string;
     try {
-      ({ folderPath, name } = splitAgentWritePath(input.path));
+      ({ folderPath, name } = splitAgentWritePath(input.path, allowedPrefixes));
     } catch (error) {
       mapPathError(error);
     }
@@ -153,12 +176,12 @@ export class AgentWriteService {
     actor: KbWriteActor,
     input: Extract<KbWriteToolRequest, { action: 'create_document' }>,
   ): Promise<KbWriteToolResponse> {
+    const allowedPrefixes = await this.#resolveAllowedPrefixes(workspaceId, input.corpusId, actor);
     let folderPath: string;
     let fullPath: string;
     try {
-      folderPath = assertAgentNotesPath(input.path);
-      fullPath = joinAgentWritePath(folderPath, input.name);
-      ({ folderPath } = splitAgentWritePath(fullPath));
+      fullPath = joinAgentWritePath(input.path, input.name, allowedPrefixes);
+      ({ folderPath } = splitAgentWritePath(fullPath, allowedPrefixes));
     } catch (error) {
       mapPathError(error);
     }
@@ -192,6 +215,23 @@ export class AgentWriteService {
     actor: KbWriteActor,
     input: Extract<KbWriteToolRequest, { action: 'update_document' }>,
   ): Promise<KbWriteToolResponse> {
+    const allowedPrefixes = await this.#resolveAllowedPrefixes(workspaceId, input.corpusId, actor);
+    const existing = await this.#nodes.getById(workspaceId, input.corpusId, input.nodeId);
+    if (!existing) {
+      throw ApiError.nodeNotFound(input.nodeId);
+    }
+    const existingPath = nodeDisplayPath(existing.path, existing.name);
+    try {
+      const allowed = allowedPrefixes.some((prefix) => prefixCovers(prefix, existingPath));
+      if (!allowed) {
+        throw new AgentWritePathError(
+          `Agent write path must be under one of: ${allowedPrefixes.join(', ')}`,
+        );
+      }
+    } catch (error) {
+      mapPathError(error);
+    }
+
     const node = await this.#fileManager.saveContent(
       workspaceId,
       input.corpusId,
@@ -217,12 +257,24 @@ export class AgentWriteService {
     actor: KbWriteActor,
     input: Extract<KbWriteToolRequest, { action: 'delete_document' }>,
   ): Promise<KbWriteToolResponse> {
+    const allowedPrefixes = await this.#resolveAllowedPrefixes(workspaceId, input.corpusId, actor);
     const node = await this.#nodes.getById(workspaceId, input.corpusId, input.nodeId);
     if (!node) {
       throw ApiError.nodeNotFound(input.nodeId);
     }
 
     const path = nodeDisplayPath(node.path, node.name);
+    try {
+      const allowed = allowedPrefixes.some((prefix) => prefixCovers(prefix, path));
+      if (!allowed) {
+        throw new AgentWritePathError(
+          `Agent write path must be under one of: ${allowedPrefixes.join(', ')}`,
+        );
+      }
+    } catch (error) {
+      mapPathError(error);
+    }
+
     const { deleted } = await this.#fileManager.deleteNodes(
       workspaceId,
       input.corpusId,
@@ -238,6 +290,46 @@ export class AgentWriteService {
     });
 
     return { ok: true, action: 'delete_document', nodeId: input.nodeId, path, deleted };
+  }
+
+  async #resolveAllowedPrefixes(
+    workspaceId: string,
+    corpusId: string,
+    actor: KbWriteActor,
+  ): Promise<string[]> {
+    const workspace = await this.#workspaces.getById(workspaceId);
+    if (!workspace) {
+      throw ApiError.notFound(`Workspace not found: ${workspaceId}`);
+    }
+
+    const corpus = await this.#corpora.getById(workspaceId, corpusId);
+    if (!corpus) {
+      throw ApiError.corpusNotFound(corpusId);
+    }
+
+    const workspacePrefixes = workspaceAgentWritePathPrefixes(workspace.settings);
+    const corpusPrefixes = parseAgentWritePathPrefixes(corpus.settings.agentWritePathPrefixes);
+
+    let tokenPrefixes: string[] | undefined;
+    if (actor.kind === 'api_key') {
+      const key = await this.#apiKeys.getById(workspaceId, actor.tokenId);
+      tokenPrefixes = key?.writePathPrefixes ?? undefined;
+    } else if (actor.kind === 'mcp_token') {
+      const token = await this.#mcpTokens.getById(workspaceId, actor.tokenId);
+      tokenPrefixes = token?.writePathPrefixes ?? undefined;
+    }
+
+    const resolved = resolveAgentWritePathPrefixes({
+      workspacePrefixes,
+      ...(corpusPrefixes ? { corpusPrefixes } : {}),
+      ...(tokenPrefixes ? { tokenPrefixes } : {}),
+    });
+
+    if (resolved.length === 0) {
+      throw ApiError.forbidden('No agent write path prefixes are configured for this actor.');
+    }
+
+    return resolved;
   }
 
   async #ensureFolderChain(

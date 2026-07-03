@@ -69,6 +69,7 @@ export async function registerWorkspaceRoutes(
 
       await workspaceRoutes.register(corpusRoutesPlugin, {
         corpora: runtime.corpora,
+        workspaces: runtime.workspaces,
         fileManager: runtime.fileManager,
         rankingRegistry: runtime.rankingRegistry,
       });

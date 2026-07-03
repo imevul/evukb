@@ -2,6 +2,7 @@ import type { CreatedMcpToken, McpTokenRecord } from '@evu/kb-sdk';
 
 import { kbClient } from '../api/client.js';
 import { McpSetupGuide } from '../components/McpSetupGuide.js';
+import { KB_AUTH_SCOPE_AREAS_MCP } from '../components/KbAuthScopePicker.js';
 import { appConfig } from '../config.js';
 import {
   CredentialTokensPage,
@@ -19,6 +20,7 @@ const mcpTokensPageConfig: CredentialTokensPageConfig<McpTokenRecord, CreatedMcp
   modalTitle: 'Create MCP token',
   scopeHint:
     'Capable agents like Cursor usually need kb:read. Add kb:write when the client should create or edit agent-notes.',
+  scopeAreas: KB_AUTH_SCOPE_AREAS_MCP,
   secretBannerLabel: 'Copy this token now:',
   loadingText: 'Loading tokens…',
   emptyTitle: 'No MCP tokens yet',

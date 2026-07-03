@@ -27,6 +27,8 @@ import {
   resolveEffectiveRankingSettings,
   resolveNodeTitleFromMetadata,
   resolveRankingStrategyIdSetting,
+  resolveIncludeAgentNotesInRetrieval,
+  shouldIncludePathInRetrieval,
   type SearchRequest,
   type SearchResult,
   semanticOnlyStrategyId,
@@ -189,6 +191,10 @@ export class SearchService {
     }
 
     const limit = request.limit ?? 20;
+    const includeAgentNotesInRetrieval = resolveIncludeAgentNotesInRetrieval(
+      workspace?.settings ?? {},
+      corpus.settings,
+    );
     const query = normalizeSearchQuery(request.query);
     if (!query && !allowsMetadataOnlySearch(request)) {
       throw ApiError.validation(
@@ -197,7 +203,13 @@ export class SearchService {
     }
 
     if (!query && allowsMetadataOnlySearch(request)) {
-      return this.#searchMetadataOnly(workspaceId, corpusId, request, limit);
+      return this.#searchMetadataOnly(
+        workspaceId,
+        corpusId,
+        request,
+        limit,
+        includeAgentNotesInRetrieval,
+      );
     }
 
     const pathPrefix = request.pathPrefix;
@@ -267,7 +279,13 @@ export class SearchService {
 
     const filteredHits = mergedHits.filter((hit) => {
       const node = nodeById.get(asNodeId(hit.nodeId));
-      return node ? nodeMatchesKnowledgeFilters(node, filters, hit.filePath) : false;
+      if (!node) {
+        return false;
+      }
+      if (!shouldIncludePathInRetrieval(hit.filePath, includeAgentNotesInRetrieval)) {
+        return false;
+      }
+      return nodeMatchesKnowledgeFilters(node, filters, hit.filePath);
     });
 
     const candidates = filteredHits.map((hit) => {
@@ -435,6 +453,7 @@ export class SearchService {
     corpusId: string,
     request: SearchRequest,
     limit: number,
+    includeAgentNotesInRetrieval = true,
   ): Promise<SearchResult[]> {
     const filters = request.filters;
     const pathPrefix = request.pathPrefix;
@@ -443,6 +462,9 @@ export class SearchService {
       .filter((node) => node.nodeType === 'file')
       .filter((node) => {
         const filePath = nodeRelativeFilePath(node);
+        if (!shouldIncludePathInRetrieval(filePath, includeAgentNotesInRetrieval)) {
+          return false;
+        }
         return (
           matchesDocumentPathPrefix(filePath, pathPrefix) &&
           nodeMatchesKnowledgeFilters(node, filters, filePath)

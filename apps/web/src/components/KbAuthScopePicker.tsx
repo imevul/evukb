@@ -26,6 +26,9 @@ export const KB_AUTH_SCOPE_AREAS: KbAuthScopeArea[] = [
   },
 ];
 
+/** Scopes offered when creating MCP tokens (agents); excludes kb:admin. */
+export const KB_AUTH_SCOPE_AREAS_MCP = KB_AUTH_SCOPE_AREAS.filter((area) => area.id !== 'kb:admin');
+
 export type KbAuthScopePickerProps = {
   areas?: KbAuthScopeArea[];
   idPrefix: string;

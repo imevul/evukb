@@ -97,6 +97,10 @@ export function CorpusOverviewPage() {
           updateRankingOverride={overview.updateRankingOverride}
           approvalOverrides={overview.approvalOverrides}
           setApprovalOverrides={overview.setApprovalOverrides}
+          agentNotesRetrieval={overview.agentNotesRetrieval}
+          setAgentNotesRetrieval={overview.setAgentNotesRetrieval}
+          agentWritePathPrefixesInput={overview.agentWritePathPrefixesInput}
+          setAgentWritePathPrefixesInput={overview.setAgentWritePathPrefixesInput}
           saveCorpusAdvancedSettings={overview.saveCorpusAdvancedSettings}
         />
       ) : null}

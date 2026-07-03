@@ -17,9 +17,13 @@ import {
 } from '@evu/kb-ui';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { type FormEvent, type ReactElement, type ReactNode, useEffect, useState } from 'react';
-
-import { KbAuthScopeField, kbAuthScopesFromSelection } from '../../components/KbAuthScopePicker.js';
+import {
+  type KbAuthScopeArea,
+  KbAuthScopeField,
+  kbAuthScopesFromSelection,
+} from '../../components/KbAuthScopePicker.js';
 import { SecretRevealBanner } from '../../components/SecretRevealBanner.js';
+import { parseAgentWritePathPrefixesInput } from '../corpus-overview/corpus-settings.js';
 
 const defaultCredentialScopes = (): Set<KbAuthScope> => new Set(['kb:read']);
 
@@ -27,6 +31,7 @@ export interface CredentialRecord {
   id: string;
   name: string;
   scopes: KbAuthScope[];
+  writePathPrefixes: string[] | null;
   expiresAt: string | null;
   createdAt: string;
 }
@@ -43,6 +48,7 @@ export interface CredentialTokensPageConfig<
   submitLabel: string;
   modalTitle: string;
   scopeHint: string;
+  scopeAreas?: KbAuthScopeArea[];
   secretBannerLabel: string;
   loadingText: string;
   emptyTitle: string;
@@ -55,7 +61,11 @@ export interface CredentialTokensPageConfig<
   rotateBody: string;
   rotateConfirmLabel: string;
   list: () => Promise<TRecord[]>;
-  create: (input: { name: string; scopes: KbAuthScope[] }) => Promise<TCreated>;
+  create: (input: {
+    name: string;
+    scopes: KbAuthScope[];
+    writePathPrefixes?: string[] | null;
+  }) => Promise<TCreated>;
   revoke: (id: string) => Promise<void>;
   rotate: (id: string) => Promise<TCreated>;
   secretOf: (created: TCreated) => string;
@@ -72,6 +82,7 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
   const [selectedScopes, setSelectedScopes] = useState<Set<KbAuthScope>>(defaultCredentialScopes);
+  const [writePathPrefixesInput, setWritePathPrefixesInput] = useState('');
   const [scopeError, setScopeError] = useState<string | null>(null);
   const [createdSecret, setCreatedSecret] = useState<TCreated | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +95,7 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
   function resetCreateForm(): void {
     setName('');
     setSelectedScopes(defaultCredentialScopes());
+    setWritePathPrefixesInput('');
     setScopeError(null);
     setCreateError(null);
   }
@@ -146,9 +158,11 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
     setCreateError(null);
     setScopeError(null);
     try {
+      const writePathPrefixes = parseAgentWritePathPrefixesInput(writePathPrefixesInput);
       const created = await config.create({
         name: name.trim(),
         scopes,
+        ...(writePathPrefixes.length > 0 ? { writePathPrefixes } : {}),
       });
       setCreatedSecret(created);
       await refreshRecords();
@@ -336,6 +350,7 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
             />
           </div>
           <KbAuthScopeField
+            {...(config.scopeAreas ? { areas: config.scopeAreas } : {})}
             error={scopeError}
             hint={config.scopeHint}
             idPrefix={config.idPrefix}
@@ -348,6 +363,24 @@ export function CredentialTokensPage<TRecord extends CredentialRecord, TCreated 
             }}
             selected={selectedScopes}
           />
+          {selectedScopes.has('kb:write') || selectedScopes.has('kb:admin') ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor={`${config.idPrefix}-write-path-prefixes`}>
+                Write path prefixes (optional)
+              </Label>
+              <textarea
+                className="min-h-[6rem] rounded-md border border-border bg-background px-3 py-2 text-sm"
+                id={`${config.idPrefix}-write-path-prefixes`}
+                onChange={(event) => setWritePathPrefixesInput(event.target.value)}
+                placeholder="One prefix per line; leave blank to inherit workspace prefixes"
+                value={writePathPrefixesInput}
+              />
+              <p className="evukb-form-hint">
+                Narrows agent write access for this credential. Prefixes must stay within the
+                workspace allowlist.
+              </p>
+            </div>
+          ) : null}
         </form>
       </AppModal>
       {confirmModal}

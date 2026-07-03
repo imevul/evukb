@@ -123,7 +123,7 @@ integration, and optional npm/package consumption.
 | P3-13d | Remaining UI polish: frontmatter panel, search ranking trace, Ask retrieval trace, richer graph, a11y tests (note: the axe a11y baseline covers ~5 screens — app shell/knowledge list, corpus search, corpus graph, file editor modal, API keys settings — not the full UI) | [X] |
 | P3-13e | Tailwind + shadcn design migration: HSL token layer, `.dark` class theme, rebuilt kb-ui primitives, `Switch`-by-default, `Alert` banners, spacing rhythm | [X] |
 | P3-14 | Add generic backup/restore guidance for Postgres, blobs, config, secret inventory, and optional Qdrant snapshots | [X] |
-| P3-15 | Public docs site or generated API reference, if/when the project is released publicly | [ ] |
+| P3-15 | Public docs site or generated API reference, if/when the project is released publicly | [X] |
 
 ---
 
@@ -178,13 +178,13 @@ budget systems.
 
 | ID | Task | Status |
 | --- | --- | --- |
-| AGENT-1 | Workspace setting to include `agent-notes/` in Ask/search context (default **true**), with per-corpus override | [ ] |
-| AGENT-2 | Configurable agent write path ACLs beyond `agent-notes/` (path prefixes, token/corpus grants) so agents can CRUD approved corpus paths | [ ] |
+| AGENT-1 | Workspace setting to include `agent-notes/` in Ask/search context (default **true**), with per-corpus override | [X] |
+| AGENT-2 | Configurable agent write path ACLs beyond `agent-notes/` (path prefixes, token/corpus grants) so agents can CRUD approved corpus paths | [X] |
 
 Notes:
 
-- Today all agent write tools are restricted to `agent-notes/`; writes outside that prefix are rejected.
-- Operators who want full isolation today can dedicate a corpus to agent writes (e.g. mount/git Obsidian vault used by humans elsewhere).
+- Workspace `agentWritePathPrefixes` defaults to `['agent-notes']`; corpus and credential layers may narrow further.
+- Operators who want full isolation today can dedicate a corpus to agent writes (e.g. mount/git Obsidian vault used by humans elsewhere) and exclude `agent-notes/` from retrieval on other corpora.
 - Per-agent isolation within a workspace needs further operational testing before scoping design.
 
 ---

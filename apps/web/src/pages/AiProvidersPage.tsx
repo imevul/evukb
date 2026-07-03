@@ -127,7 +127,7 @@ export function AiProvidersPage() {
         Effective embedding and chat configuration. Model and base URL can be overridden per
         workspace. Chunking controls how markdown is split before embedding.
       </p>
-      <Alert title="API keys are configured on the API server." variant="info">
+      <Alert collapsible title="API keys are configured on the API server." variant="info">
         <p>
           Set <code>EVUKB_EMBEDDING_API_KEY</code> for semantic indexing/search and{' '}
           <code>EVUKB_CHAT_API_KEY</code> for Ask/chat in the repository root <code>.env</code>{' '}

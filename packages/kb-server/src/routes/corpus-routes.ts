@@ -5,7 +5,7 @@ import {
   type RankingStrategyRegistry,
   validateCorpusSettings,
 } from '@evu/kb-core';
-import type { CorpusRepository } from '@evu/kb-db';
+import type { CorpusRepository, WorkspaceRepository } from '@evu/kb-db';
 import type { FastifyPluginAsync } from 'fastify';
 
 import { ApiError } from '../errors.js';
@@ -15,17 +15,24 @@ import { corpusCreateBodySchema, corpusPatchBodySchema, parseBody } from './body
 
 export type CorpusRoutesOptions = {
   corpora: CorpusRepository;
+  workspaces: WorkspaceRepository;
   fileManager: FileManagerService;
   rankingRegistry: RankingStrategyRegistry;
 };
 
-function assertValidCorpusSettings(settings: Record<string, unknown> | undefined): void {
+async function assertValidCorpusSettings(
+  workspaceId: string,
+  workspaces: WorkspaceRepository,
+  settings: Record<string, unknown> | undefined,
+): Promise<void> {
   if (settings === undefined) {
     return;
   }
+  const workspace = await workspaces.getById(workspaceId);
   const error = validateCorpusSettings(settings, {
     allowMountAuthoritative: isMountAuthoritativeEnabled(process.env),
     allowImportWriteback: isImportWritebackEnabled(process.env),
+    workspaceSettings: workspace?.settings ?? {},
   });
   if (error) {
     throw ApiError.validation(error);
@@ -47,7 +54,7 @@ export const corpusRoutesPlugin: FastifyPluginAsync<CorpusRoutesOptions> = async
       if (!name.trim()) {
         throw ApiError.validation('Corpus name is required.');
       }
-      assertValidCorpusSettings(settings);
+      await assertValidCorpusSettings(request.evuKbWorkspace.id, options.workspaces, settings);
 
       const corpus = await options.corpora.create({
         workspaceId: asWorkspaceId(request.evuKbWorkspace.id),
@@ -81,7 +88,7 @@ export const corpusRoutesPlugin: FastifyPluginAsync<CorpusRoutesOptions> = async
     };
   }>('/knowledge-corpora/:corpusId', async (request) => {
     const body = parseBody(corpusPatchBodySchema, request.body);
-    assertValidCorpusSettings(body.settings);
+    await assertValidCorpusSettings(request.evuKbWorkspace.id, options.workspaces, body.settings);
     assertValidRankingStrategyId(options.rankingRegistry, body.rankingStrategyId);
 
     const updated = await options.corpora.update(

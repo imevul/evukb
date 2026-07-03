@@ -1,4 +1,10 @@
+import { validateIncludeAgentNotesInRetrieval } from '../agent-retrieval/settings.js';
 import { validateCorpusAgentMutationApprovalPolicy } from '../agent-write/approval-policy.js';
+import {
+  validateAgentWritePathPrefixes,
+  validateCorpusAgentWritePathPrefixes,
+  workspaceAgentWritePathPrefixes,
+} from '../agent-write/path-policy.js';
 import type { KnowledgeFormatProfile } from '../runtime.js';
 import { validateRankingSettings } from '../settings/ranking.js';
 import { validateSyncSettings } from '../sync/settings.js';
@@ -44,7 +50,11 @@ export function isOkfCorpus(settings: Record<string, unknown>): boolean {
 
 export function validateCorpusSettings(
   settings: Record<string, unknown>,
-  options: { allowMountAuthoritative?: boolean; allowImportWriteback?: boolean } = {},
+  options: {
+    allowMountAuthoritative?: boolean;
+    allowImportWriteback?: boolean;
+    workspaceSettings?: Record<string, unknown>;
+  } = {},
 ): string | null {
   const formatProfile = settings.formatProfile;
   if (
@@ -68,6 +78,14 @@ export function validateCorpusSettings(
   return (
     validateSyncSettings(settings, options) ??
     validateRankingSettings(settings) ??
+    validateIncludeAgentNotesInRetrieval(settings.includeAgentNotesInRetrieval) ??
+    validateAgentWritePathPrefixes(settings.agentWritePathPrefixes) ??
+    (settings.agentWritePathPrefixes !== undefined
+      ? validateCorpusAgentWritePathPrefixes(
+          settings.agentWritePathPrefixes,
+          workspaceAgentWritePathPrefixes(options.workspaceSettings ?? {}),
+        )
+      : null) ??
     validateCorpusAgentMutationApprovalPolicy(settings.agentMutationApprovalPolicy)
   );
 }

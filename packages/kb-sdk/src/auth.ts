@@ -5,6 +5,7 @@ export type McpTokenRecord = {
   workspaceId: string;
   name: string;
   scopes: KbAuthScope[];
+  writePathPrefixes: string[] | null;
   expiresAt: string | null;
   createdAt: string;
 };
@@ -14,6 +15,7 @@ export type ApiKeyRecord = {
   workspaceId: string;
   name: string;
   scopes: KbAuthScope[];
+  writePathPrefixes: string[] | null;
   expiresAt: string | null;
   createdAt: string;
 };
@@ -35,5 +37,6 @@ export type AuthenticatedToken = {
 export type CreateAuthCredentialRequest = {
   name: string;
   scopes?: KbAuthScope[];
+  writePathPrefixes?: string[] | null;
   expiresAt?: string | null;
 };

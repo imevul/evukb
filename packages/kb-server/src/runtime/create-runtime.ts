@@ -98,7 +98,7 @@ export async function createEvuKbRuntime(
   const auditLog = new AuditLogRepository(db);
   const secrets = new SecretRepository(db);
   const usageRecords = new UsageRecordRepository(db);
-  const tokenAuth = new TokenAuthService(mcpTokens, apiKeys);
+  const tokenAuth = new TokenAuthService(mcpTokens, apiKeys, workspaces);
   const embeddingProvider = resolveEmbeddingProvider();
   const resolvedVector = resolveVectorStore({ chunks, embeddingProvider });
   const chatProvider =
@@ -288,6 +288,10 @@ export async function createEvuKbRuntime(
     auditLog,
     fileManager,
     nodes,
+    workspaces,
+    corpora,
+    apiKeys,
+    mcpTokens,
   });
   const mutationApprovalService = new MutationApprovalService({
     agentWrite: agentWriteService,

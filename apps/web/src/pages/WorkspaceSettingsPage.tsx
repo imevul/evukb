@@ -1,57 +1,14 @@
-import type { MutationApprovalPolicy, SettingsResponse, WorkspaceBootHints } from '@evu/kb-sdk';
-import { Alert, Button, EmptyState, StatusPill } from '@evu/kb-ui';
+import type { MutationApprovalPolicy, SettingsResponse } from '@evu/kb-sdk';
+import { Alert, Button, EmptyState, Switch } from '@evu/kb-ui';
 import { type FormEvent, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
 import { appConfig } from '../config.js';
-
-type BootHintCard = {
-  label: string;
-  status: string;
-  tone: 'success' | 'warning' | 'danger' | 'neutral';
-  hint: string;
-};
-
-function buildBootHintCards(hints: WorkspaceBootHints): BootHintCard[] {
-  return [
-    {
-      label: 'Database',
-      status: hints.databaseConfigured ? 'Configured' : 'Not configured',
-      tone: hints.databaseConfigured ? 'success' : 'danger',
-      hint: 'Set EVUKB_DATABASE_URL on the API server.',
-    },
-    {
-      label: 'Blob store',
-      status: hints.blobStoreConfigured ? 'Configured' : 'Not configured',
-      tone: hints.blobStoreConfigured ? 'success' : 'danger',
-      hint: 'Set EVUKB_BLOB_ROOT on the API server.',
-    },
-    {
-      label: 'Mount allowlist',
-      status: hints.mountAllowlistConfigured ? 'Configured' : 'Not configured',
-      tone: hints.mountAllowlistConfigured ? 'success' : 'neutral',
-      hint: 'Optional unless using shared mount import (EVUKB_MOUNT_ALLOWLIST).',
-    },
-    {
-      label: 'Secrets key',
-      status: hints.secretsKeyConfigured ? 'Configured' : 'Not configured',
-      tone: hints.secretsKeyConfigured ? 'success' : 'warning',
-      hint: 'Required for git corpus credentials (EVUKB_SECRETS_KEY).',
-    },
-    {
-      label: 'Mount authoritative mode',
-      status: hints.mountAuthoritativeEnabled ? 'Enabled' : 'Disabled',
-      tone: hints.mountAuthoritativeEnabled ? 'success' : 'neutral',
-      hint: 'EVUKB_ENABLE_MOUNT_AUTHORITATIVE=true on the API server.',
-    },
-    {
-      label: 'Import writeback mode',
-      status: hints.importWritebackEnabled ? 'Enabled' : 'Disabled',
-      tone: hints.importWritebackEnabled ? 'success' : 'neutral',
-      hint: 'EVUKB_ENABLE_IMPORT_WRITEBACK=true on the API server.',
-    },
-  ];
-}
+import {
+  formatAgentWritePathPrefixesInput,
+  parseAgentWritePathPrefixesInput,
+  readWorkspaceAgentWritePathPrefixes,
+} from './corpus-overview/corpus-settings.js';
 
 type ApprovalKey = keyof Required<MutationApprovalPolicy>;
 
@@ -75,9 +32,15 @@ function readApprovalPolicy(settings: Record<string, unknown>): Required<Mutatio
   };
 }
 
+function readIncludeAgentNotesInRetrieval(settings: Record<string, unknown>): boolean {
+  return settings.includeAgentNotesInRetrieval !== false;
+}
+
 export function WorkspaceSettingsPage() {
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
   const [name, setName] = useState('');
+  const [includeAgentNotesInRetrieval, setIncludeAgentNotesInRetrieval] = useState(true);
+  const [agentWritePathPrefixesInput, setAgentWritePathPrefixesInput] = useState('agent-notes');
   const [approvalPolicy, setApprovalPolicy] = useState<Required<MutationApprovalPolicy>>({
     ...defaultApprovalPolicy,
   });
@@ -96,6 +59,10 @@ export function WorkspaceSettingsPage() {
           setSettings(loaded);
           setName(loaded.name);
           setApprovalPolicy(readApprovalPolicy(loaded.settings));
+          setIncludeAgentNotesInRetrieval(readIncludeAgentNotesInRetrieval(loaded.settings));
+          setAgentWritePathPrefixesInput(
+            formatAgentWritePathPrefixesInput(readWorkspaceAgentWritePathPrefixes(loaded.settings)),
+          );
           setError(null);
         }
       })
@@ -126,11 +93,19 @@ export function WorkspaceSettingsPage() {
     try {
       const updated = await kbClient.updateSettings(appConfig.workspaceId, {
         name: name.trim(),
-        settings: { mutationApprovalPolicy: approvalPolicy },
+        settings: {
+          mutationApprovalPolicy: approvalPolicy,
+          includeAgentNotesInRetrieval,
+          agentWritePathPrefixes: parseAgentWritePathPrefixesInput(agentWritePathPrefixesInput),
+        },
       });
       setSettings(updated);
       setName(updated.name);
       setApprovalPolicy(readApprovalPolicy(updated.settings));
+      setIncludeAgentNotesInRetrieval(readIncludeAgentNotesInRetrieval(updated.settings));
+      setAgentWritePathPrefixesInput(
+        formatAgentWritePathPrefixesInput(readWorkspaceAgentWritePathPrefixes(updated.settings)),
+      );
       setMessage('Workspace settings saved.');
       setError(null);
     } catch (saveError: unknown) {
@@ -142,7 +117,7 @@ export function WorkspaceSettingsPage() {
 
   return (
     <section aria-label="Workspace settings" className="evukb-panel">
-      <p>Workspace identity and environment-sourced boot configuration.</p>
+      <p>Editable workspace policies for agent writes and retrieval.</p>
       {error ? <p className="evukb-error">{error}</p> : null}
       {message ? (
         <Alert onDismiss={() => setMessage(null)} title={message} variant="success" />
@@ -152,26 +127,11 @@ export function WorkspaceSettingsPage() {
         <EmptyState title="Settings unavailable" hint="Check API connectivity and try again." />
       ) : null}
       {!loading && settings ? (
-        <>
-          <dl className="evukb-settings-dl">
-            <div>
-              <dt>Slug</dt>
-              <dd>
-                <code>{settings.slug}</code>
-              </dd>
-            </div>
-            <div>
-              <dt>Workspace ID</dt>
-              <dd>
-                <code>{settings.id}</code>
-              </dd>
-            </div>
-          </dl>
-          <form className="evukb-form" onSubmit={(event) => void handleSave(event)}>
-            <label>
-              Display name
-              <input value={name} onChange={(event) => setName(event.target.value)} required />
-            </label>
+        <form className="evukb-form" onSubmit={(event) => void handleSave(event)}>
+          <label>
+            Display name
+            <input value={name} onChange={(event) => setName(event.target.value)} required />
+          </label>
             <fieldset>
               <legend>Agent mutation approval</legend>
               <p className="evukb-form-hint">
@@ -196,27 +156,42 @@ export function WorkspaceSettingsPage() {
                 </label>
               ))}
             </fieldset>
-            <Button disabled={submitting} type="submit" variant="primary">
-              {submitting ? 'Saving…' : 'Save settings'}
-            </Button>
-          </form>
-          <h2 className="text-base font-semibold">Boot hints</h2>
-          <p className="evukb-form-hint">
-            Environment-sourced API boot configuration. These values are read from the server
-            process, not from workspace settings.
-          </p>
-          <div className="evukb-stat-grid md:grid-cols-2 xl:grid-cols-3">
-            {buildBootHintCards(settings.bootHints).map((item) => (
-              <div className="evukb-stat-card" key={item.label}>
-                <strong>{item.label}</strong>
-                <p>
-                  <StatusPill tone={item.tone}>{item.status}</StatusPill>
-                </p>
-                <p className="text-muted-foreground">{item.hint}</p>
-              </div>
-            ))}
-          </div>
-        </>
+            <fieldset>
+              <legend>Agent notes in search and Ask</legend>
+              <p className="evukb-form-hint">
+                When enabled, files under <code>agent-notes/</code> can appear in hybrid search and
+                Ask citations. Disable to keep agent-authored notes out of retrieval for this
+                workspace (corpora can override).
+              </p>
+              <label className="evukb-checkbox">
+                <Switch
+                  aria-label="Include agent-notes in search and Ask"
+                  checked={includeAgentNotesInRetrieval}
+                  onCheckedChange={setIncludeAgentNotesInRetrieval}
+                />
+                <span>Include agent-notes/ in search and Ask</span>
+              </label>
+            </fieldset>
+            <fieldset>
+              <legend>Agent write path prefixes</legend>
+              <p className="evukb-form-hint">
+                Relative path prefixes where agent write tools may create or update files. One
+                prefix per line; default is <code>agent-notes</code>. Corpus and credential settings
+                can narrow this list further.
+              </p>
+              <label>
+                Allowed prefixes
+                <textarea
+                  onChange={(event) => setAgentWritePathPrefixesInput(event.target.value)}
+                  rows={4}
+                  value={agentWritePathPrefixesInput}
+                />
+              </label>
+            </fieldset>
+          <Button disabled={submitting} type="submit" variant="primary">
+            {submitting ? 'Saving…' : 'Save settings'}
+          </Button>
+        </form>
       ) : null}
     </section>
   );

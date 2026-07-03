@@ -50,7 +50,7 @@ and KB mutation policy.
 | Search, Ask, corpus graph | no | yes |
 | Audit of host workflow decisions | yes | audit of KB mutations |
 | Second KB index inside the host | **forbidden** | single source of truth |
-| Durable agent-authored corpus files (`agent-notes/`) | no | yes (today: `agent-notes/` only; see AGENT-2) |
+| Durable agent-authored corpus files (`agent-notes/`) | no | yes (configurable write path prefixes; default `agent-notes/`) |
 
 ### Topology
 
@@ -203,16 +203,18 @@ A common combined setup:
 - **Standalone EvuKB** indexes an Obsidian vault via mount or git import.
 - **Humans** edit the vault in Obsidian (or the EvuKB file manager).
 - **Agents** in a separate orchestration host call EvuKB over MCP or
-  `POST /tools/kb` for retrieval and `agent-notes/` writes.
+  `POST /tools/kb` for retrieval and agent writes under configured path prefixes
+  (workspace default `agent-notes/`).
 
 Knowledge stays in EvuKB; session memory, TTL, and run injection stay in the host.
 If a dedicated memory product is needed later, it should be a separate project (for
 example EvuMemory), not an expansion of EvuKB core. See [`SPEC.md`](../SPEC.md) §16.
 
 Operators who want agent-authored content isolated from human knowledge can dedicate
-a corpus to agent writes. Planned settings (AGENT-1) will control whether
-`agent-notes/` paths appear in Ask/search context (workspace default true, corpus
-override).
+a corpus to agent writes. Workspace `includeAgentNotesInRetrieval` (default true)
+controls whether `agent-notes/` paths appear in Ask/search; corpora may override.
+Workspace `agentWritePathPrefixes` and optional corpus or credential narrowing
+control where agents may write.
 
 ---
 

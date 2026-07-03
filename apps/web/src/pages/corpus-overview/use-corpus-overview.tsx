@@ -25,13 +25,19 @@ import { kbClient } from '../../api/client.js';
 import { appConfig } from '../../config.js';
 import { normalizeArchiveUploadFile } from '../../lib/archive-import-normalize.js';
 import {
+  type AgentNotesRetrievalMode,
   APPROVAL_KEYS,
   type ApprovalInheritMode,
   type ApprovalKey,
   corpusOverridesEnabled,
+  defaultAgentNotesRetrievalOverride,
   defaultApprovalOverrides,
+  formatAgentWritePathPrefixesInput,
   type MountModeChoice,
   type OverridesTab,
+  parseAgentWritePathPrefixesInput,
+  readCorpusAgentNotesRetrieval,
+  readCorpusAgentWritePathPrefixes,
   readCorpusApprovalPolicy,
   readCorpusRanking,
   summarizeConvertResult,
@@ -70,6 +76,10 @@ export interface CorpusOverviewState {
   updateRankingOverride: (key: keyof RankingSettings, raw: string) => void;
   approvalOverrides: Record<ApprovalKey, ApprovalInheritMode>;
   setApprovalOverrides: Dispatch<SetStateAction<Record<ApprovalKey, ApprovalInheritMode>>>;
+  agentNotesRetrieval: AgentNotesRetrievalMode;
+  setAgentNotesRetrieval: (value: AgentNotesRetrievalMode) => void;
+  agentWritePathPrefixesInput: string;
+  setAgentWritePathPrefixesInput: (value: string) => void;
   confirmModal: ReactNode;
   runReindexAll: () => Promise<void>;
   runReindexNeedingAttention: () => Promise<void>;
@@ -111,12 +121,11 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
   const [rankingOverrides, setRankingOverrides] = useState<RankingSettings>({});
   const [approvalOverrides, setApprovalOverrides] = useState<
     Record<ApprovalKey, ApprovalInheritMode>
-  >({
-    append: 'inherit',
-    create: 'inherit',
-    update: 'inherit',
-    delete: 'inherit',
-  });
+  >(defaultApprovalOverrides());
+  const [agentNotesRetrieval, setAgentNotesRetrieval] = useState<AgentNotesRetrievalMode>(
+    defaultAgentNotesRetrievalOverride(),
+  );
+  const [agentWritePathPrefixesInput, setAgentWritePathPrefixesInput] = useState('');
 
   const { confirm, confirmModal } = useConfirmAction();
 
@@ -139,6 +148,12 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       setCorpus(loadedCorpus);
       setRankingOverrides(readCorpusRanking(loadedCorpus.settings ?? {}));
       setApprovalOverrides(readCorpusApprovalPolicy(loadedCorpus.settings ?? {}));
+      setAgentNotesRetrieval(readCorpusAgentNotesRetrieval(loadedCorpus.settings ?? {}));
+      setAgentWritePathPrefixesInput(
+        formatAgentWritePathPrefixesInput(
+          readCorpusAgentWritePathPrefixes(loadedCorpus.settings ?? {}),
+        ),
+      );
       setRankingStrategyId(loadedCorpus.rankingStrategyId);
       setWorkspaceRankingStrategyId(loadedSettings.ranking.strategyId);
       setOverridesEnabled(corpusOverridesEnabled(loadedCorpus, loadedSettings.ranking.strategyId));
@@ -492,6 +507,8 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       if (!overridesEnabled) {
         delete nextSettings.rankingSettings;
         delete nextSettings.agentMutationApprovalPolicy;
+        delete nextSettings.includeAgentNotesInRetrieval;
+        delete nextSettings.agentWritePathPrefixes;
         const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
           settings: nextSettings,
           rankingStrategyId: workspaceRankingStrategyId,
@@ -500,6 +517,8 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
         setRankingStrategyId(updated.rankingStrategyId);
         setRankingOverrides({});
         setApprovalOverrides(defaultApprovalOverrides());
+        setAgentNotesRetrieval(defaultAgentNotesRetrievalOverride());
+        setAgentWritePathPrefixesInput('');
         setActionMessage('Corpus overrides cleared.');
         return;
       }
@@ -520,6 +539,21 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
         delete nextSettings.agentMutationApprovalPolicy;
       }
 
+      if (agentNotesRetrieval === 'include') {
+        nextSettings.includeAgentNotesInRetrieval = true;
+      } else if (agentNotesRetrieval === 'exclude') {
+        nextSettings.includeAgentNotesInRetrieval = false;
+      } else {
+        delete nextSettings.includeAgentNotesInRetrieval;
+      }
+
+      const parsedWritePrefixes = parseAgentWritePathPrefixesInput(agentWritePathPrefixesInput);
+      if (parsedWritePrefixes.length > 0) {
+        nextSettings.agentWritePathPrefixes = parsedWritePrefixes;
+      } else {
+        delete nextSettings.agentWritePathPrefixes;
+      }
+
       const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
         settings: nextSettings,
         rankingStrategyId,
@@ -528,6 +562,10 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       setRankingStrategyId(updated.rankingStrategyId);
       setRankingOverrides(readCorpusRanking(updated.settings ?? {}));
       setApprovalOverrides(readCorpusApprovalPolicy(updated.settings ?? {}));
+      setAgentNotesRetrieval(readCorpusAgentNotesRetrieval(updated.settings ?? {}));
+      setAgentWritePathPrefixesInput(
+        formatAgentWritePathPrefixesInput(readCorpusAgentWritePathPrefixes(updated.settings ?? {})),
+      );
       setActionMessage('Corpus settings updated.');
     } catch (settingsError: unknown) {
       setActionError(
@@ -605,6 +643,10 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     updateRankingOverride,
     approvalOverrides,
     setApprovalOverrides,
+    agentNotesRetrieval,
+    setAgentNotesRetrieval,
+    agentWritePathPrefixesInput,
+    setAgentWritePathPrefixesInput,
     confirmModal,
     runReindexAll,
     runReindexNeedingAttention,

@@ -18,7 +18,9 @@ import {
   resolveMaxChunkTokensFromSettings,
   resolveRankingStrategyIdSetting,
   toRankingStrategySummary,
+  validateAgentWritePathPrefixes,
   validateAiProviderSettings,
+  validateIncludeAgentNotesInRetrieval,
   validateMutationApprovalPolicy,
   validateRankingSettings,
   type WorkspaceSettingsView,
@@ -128,7 +130,9 @@ export class SettingsService {
 
       const validationError =
         validateRankingSettings(nextSettings) ??
-        validateMutationApprovalPolicy(nextSettings.mutationApprovalPolicy);
+        validateMutationApprovalPolicy(nextSettings.mutationApprovalPolicy) ??
+        validateIncludeAgentNotesInRetrieval(nextSettings.includeAgentNotesInRetrieval) ??
+        validateAgentWritePathPrefixes(nextSettings.agentWritePathPrefixes);
       if (validationError) {
         throw ApiError.validation(validationError);
       }

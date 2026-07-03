@@ -4562,6 +4562,13 @@
                       "type": "string"
                     }
                   },
+                  "writePathPrefixes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "nullable": true
+                  },
                   "expiresAt": {
                     "type": "string",
                     "nullable": true
@@ -4787,6 +4794,13 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "writePathPrefixes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "nullable": true
                   },
                   "expiresAt": {
                     "type": "string",

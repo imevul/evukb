@@ -30,6 +30,7 @@ export const appRoutes = {
   audit: '/settings/audit',
   mutationApprovals: '/settings/approvals',
   settingsWorkspace: '/settings/workspace',
+  settingsOverview: '/settings/overview',
   settingsPreferences: '/settings/preferences',
   settingsAi: '/settings/ai',
   settingsRanking: '/settings/ranking',

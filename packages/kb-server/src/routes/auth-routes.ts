@@ -11,6 +11,7 @@ export type AuthRoutesOptions = {
 type CreateTokenBody = {
   name: string;
   scopes?: KbAuthScope[];
+  writePathPrefixes?: string[] | null;
   expiresAt?: string | null;
 };
 
@@ -25,6 +26,9 @@ export const authRoutesPlugin: FastifyPluginAsync<AuthRoutesOptions> = async (se
       workspaceId: request.evuKbWorkspace.id,
       name: request.body.name,
       ...(request.body.scopes !== undefined ? { scopes: request.body.scopes } : {}),
+      ...(request.body.writePathPrefixes !== undefined
+        ? { writePathPrefixes: request.body.writePathPrefixes }
+        : {}),
       ...(request.body.expiresAt !== undefined ? { expiresAt: request.body.expiresAt } : {}),
     });
     reply.code(201);
@@ -59,6 +63,9 @@ export const authRoutesPlugin: FastifyPluginAsync<AuthRoutesOptions> = async (se
       workspaceId: request.evuKbWorkspace.id,
       name: request.body.name,
       ...(request.body.scopes !== undefined ? { scopes: request.body.scopes } : {}),
+      ...(request.body.writePathPrefixes !== undefined
+        ? { writePathPrefixes: request.body.writePathPrefixes }
+        : {}),
       ...(request.body.expiresAt !== undefined ? { expiresAt: request.body.expiresAt } : {}),
     });
     reply.code(201);

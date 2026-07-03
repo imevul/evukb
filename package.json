@@ -16,6 +16,7 @@
     "down": "docker compose --project-directory . -f deploy/docker-compose.dev.yml down",
     "format": "biome format --write .",
     "generate-openapi": "pnpm --filter @evu/kb-server generate-openapi",
+    "generate-api-docs": "pnpm exec tsx scripts/generate-api-docs.ts",
     "generate-types": "pnpm --filter @evu/kb-sdk generate-types",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",
+    "@redocly/cli": "^1.34.17",
     "@types/node": "^26.0.1",
     "@vitest/coverage-v8": "^4.1.9",
     "autoprefixer": "^10.5.2",

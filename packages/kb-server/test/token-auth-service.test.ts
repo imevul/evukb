@@ -8,11 +8,15 @@ function buildService() {
     workspaceId: input.workspaceId,
     name: input.name,
     scopes: input.scopes,
+    writePathPrefixes: input.writePathPrefixes ?? null,
     expiresAt: input.expiresAt ?? null,
     createdAt: new Date().toISOString(),
   }));
   const repo = { create } as never;
-  return { create, service: new TokenAuthService(repo, repo) };
+  const workspaces = {
+    getById: vi.fn().mockResolvedValue({ id: 'ws-1', settings: {} }),
+  };
+  return { create, service: new TokenAuthService(repo, repo, workspaces as never) };
 }
 
 describe('TokenAuthService scope defaults', () => {
@@ -52,5 +56,17 @@ describe('TokenAuthService scope defaults', () => {
     await expect(
       service.createApiKey({ name: 'ci', scopes: ['kb:superuser' as never], workspaceId: 'ws-1' }),
     ).rejects.toThrow(/Invalid scope/);
+  });
+
+  it('rejects write path prefixes outside workspace allowlist', async () => {
+    const { service } = buildService();
+    await expect(
+      service.createApiKey({
+        name: 'narrow',
+        scopes: ['kb:write'],
+        workspaceId: 'ws-1',
+        writePathPrefixes: ['drafts'],
+      }),
+    ).rejects.toThrow(/workspace write path prefixes/);
   });
 });

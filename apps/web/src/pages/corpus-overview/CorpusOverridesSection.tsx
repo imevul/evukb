@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { appRoutes } from '../../config.js';
 import {
   APPROVAL_KEYS,
+  type AgentNotesRetrievalMode,
   type ApprovalInheritMode,
   type ApprovalKey,
   corpusRankingFields,
@@ -26,6 +27,10 @@ interface CorpusOverridesSectionProps {
   updateRankingOverride: (key: keyof RankingSettings, raw: string) => void;
   approvalOverrides: Record<ApprovalKey, ApprovalInheritMode>;
   setApprovalOverrides: Dispatch<SetStateAction<Record<ApprovalKey, ApprovalInheritMode>>>;
+  agentNotesRetrieval: AgentNotesRetrievalMode;
+  setAgentNotesRetrieval: (value: AgentNotesRetrievalMode) => void;
+  agentWritePathPrefixesInput: string;
+  setAgentWritePathPrefixesInput: (value: string) => void;
   saveCorpusAdvancedSettings: () => Promise<void>;
 }
 
@@ -44,6 +49,10 @@ export function CorpusOverridesSection({
   updateRankingOverride,
   approvalOverrides,
   setApprovalOverrides,
+  agentNotesRetrieval,
+  setAgentNotesRetrieval,
+  agentWritePathPrefixesInput,
+  setAgentWritePathPrefixesInput,
   saveCorpusAdvancedSettings,
 }: CorpusOverridesSectionProps) {
   return (
@@ -91,6 +100,16 @@ export function CorpusOverridesSection({
                 role="tab"
               >
                 Mutation approval
+              </button>
+              <button
+                aria-selected={overridesTab === 'agent'}
+                className={tabClassName(overridesTab === 'agent')}
+                id="corpus-overrides-tab-agent"
+                onClick={() => setOverridesTab('agent')}
+                type="button"
+                role="tab"
+              >
+                Agent
               </button>
             </div>
             {overridesTab === 'ranking' ? (
@@ -171,6 +190,47 @@ export function CorpusOverridesSection({
                     </label>
                   ))}
                 </div>
+              </div>
+            ) : null}
+            {overridesTab === 'agent' ? (
+              <div
+                aria-labelledby="corpus-overrides-tab-agent"
+                className="flex flex-col gap-4"
+                id="corpus-overrides-panel-agent"
+                role="tabpanel"
+              >
+                <p className="evukb-form-hint">
+                  Control whether <code>agent-notes/</code> files appear in search and Ask for this
+                  corpus. Inherit uses the workspace default.
+                </p>
+                <label>
+                  Agent-notes in retrieval
+                  <select
+                    disabled={settingsSaving}
+                    onChange={(event) =>
+                      setAgentNotesRetrieval(event.target.value as AgentNotesRetrievalMode)
+                    }
+                    value={agentNotesRetrieval}
+                  >
+                    <option value="inherit">inherit workspace default</option>
+                    <option value="include">include agent-notes/</option>
+                    <option value="exclude">exclude agent-notes/</option>
+                  </select>
+                </label>
+                <label>
+                  Agent write path prefixes
+                  <textarea
+                    disabled={settingsSaving}
+                    onChange={(event) => setAgentWritePathPrefixesInput(event.target.value)}
+                    placeholder="Leave blank to inherit workspace prefixes (one per line)"
+                    rows={4}
+                    value={agentWritePathPrefixesInput}
+                  />
+                  <span className="evukb-form-hint">
+                    Optional narrower list for agent writes in this corpus. Each line is a path
+                    prefix such as <code>agent-notes</code> or <code>agent-notes/sub</code>.
+                  </span>
+                </label>
               </div>
             ) : null}
             <Button

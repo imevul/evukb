@@ -6,6 +6,7 @@ import { resolveEmbeddingProvider } from '../adapters/openai-embedding.js';
 import { resolveVectorBackend } from '../adapters/resolve-vector-store.js';
 import { probeBlobStore, probeDatabase, probeProviders } from '../health-probes.js';
 import type { EvuKbRuntime } from '../runtime/types.js';
+import { readApiReferenceHtml } from './api-reference.js';
 
 export type EvuKbHealth = {
   service: 'evukb-api';
@@ -69,4 +70,17 @@ export function registerHealthRoutes(server: FastifyInstance, options: HealthRou
     name: 'EvuKB',
     version: '0.1.0',
   }));
+
+  server.get('/api-reference', async (_request, reply) => {
+    const html = readApiReferenceHtml();
+    if (!html) {
+      await reply.code(404).send({
+        error: 'API reference is not bundled. Run pnpm generate-api-docs.',
+        code: 'not_found',
+      });
+      return;
+    }
+    reply.header('content-type', 'text/html; charset=utf-8');
+    await reply.send(html);
+  });
 }

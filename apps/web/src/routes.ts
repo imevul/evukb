@@ -14,6 +14,7 @@ export const appRouteTable: AppRoute[] = [
   { path: '/ask', purpose: 'workspace ask across corpora' },
   { path: '/search', purpose: 'workspace search across corpora' },
   { path: '/diagnostics', purpose: 'health and failed jobs' },
+  { path: '/settings/overview', purpose: 'workspace overview and boot hints' },
   { path: '/settings/workspace', purpose: 'workspace settings' },
   { path: '/settings/ai', purpose: 'AI provider settings' },
   { path: '/settings/ranking', purpose: 'ranking preferences' },
@@ -26,13 +27,4 @@ export const appRouteTable: AppRoute[] = [
 /** True for any corpus detail tab (overview, files, search, links, graph, ask). */
 export function isCorpusDetailPath(pathname: string): boolean {
   return /^\/knowledge\/[^/]+\//.test(pathname);
-}
-
-/**
- * True for dense work surfaces that use the wide `AppContent` variant:
- * diagnostics, the corpus file manager, and the corpus graph view. Everything
- * else stays at the default `max-w-6xl` content width.
- */
-export function isWideLayoutPath(pathname: string): boolean {
-  return pathname === '/diagnostics' || /^\/knowledge\/[^/]+\/(files|graph)$/.test(pathname);
 }

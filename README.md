@@ -71,9 +71,12 @@ keys, MCP tokens, and workspace scoping.
 | `pnpm test` | Run tests (DB-backed suites skip without `EVUKB_DATABASE_URL`) |
 | `pnpm build` | Build all workspace packages |
 | `make verify-dev` | Build, test, and validate dev compose config |
+| `make api-docs` | Regenerate Redoc API reference (`docs/api/index.html`) |
 
 Extended commands, operator routes, Qdrant verification, and deployment notes:
 [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md).
+
+**API reference:** with the API running, open `http://localhost:4201/api-reference`. Offline: run `make api-docs` and open [`docs/api/index.html`](./docs/api/index.html).
 
 ## Documentation
 
@@ -86,6 +89,7 @@ Extended commands, operator routes, Qdrant verification, and deployment notes:
 | [`docs/AUTH.md`](./docs/AUTH.md) | Authentication and tokens |
 | [`SECURITY.md`](./SECURITY.md) | Security model and invariants |
 | [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) | Repository layout, status, and dev workflow |
+| [`docs/api/index.html`](./docs/api/index.html) | Generated OpenAPI reference (also at `/api-reference` on the API) |
 | [`AGENTS.md`](./AGENTS.md) | Instructions for coding agents |
 
 ## License

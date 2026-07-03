@@ -3233,6 +3233,7 @@ export interface paths {
                     "application/json": {
                         name?: string;
                         scopes?: string[];
+                        writePathPrefixes?: string[] | null;
                         expiresAt?: string | null;
                     };
                 };
@@ -3426,6 +3427,7 @@ export interface paths {
                     "application/json": {
                         name?: string;
                         scopes?: string[];
+                        writePathPrefixes?: string[] | null;
                         expiresAt?: string | null;
                     };
                 };

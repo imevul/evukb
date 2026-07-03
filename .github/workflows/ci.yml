@@ -80,6 +80,9 @@ jobs:
       - name: Verify OpenAPI and SDK drift
         run: pnpm exec tsx scripts/verify-openapi-sdk.ts
 
+      - name: Verify API reference HTML drift
+        run: pnpm exec tsx scripts/verify-api-docs.ts
+
       - name: Validate dev compose config
         run: docker compose --project-directory . -f deploy/docker-compose.dev.yml config >/dev/null
 

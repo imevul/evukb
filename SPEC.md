@@ -910,23 +910,30 @@ Why keep memory out of EvuKB:
 ### agent-notes/ and retrieval
 
 - `agent-notes/` files are indexed like other corpus markdown and **may** appear
-  in search and Ask citations today.
+  in search and Ask citations by default.
+- Workspace setting `includeAgentNotesInRetrieval` (default **true**) controls
+  whether `agent-notes/` paths are eligible in hybrid search and Ask. Corpus
+  settings may override with `includeAgentNotesInRetrieval: true | false`; omit
+  the key to inherit the workspace default.
 - Operators who want isolation can use a **dedicated corpus** for agent writes
   (for example a vault corpus mounted or git-synced alongside human-authored
-  notes elsewhere).
-- **Planned (AGENT-1):** workspace default to include `agent-notes/` in
-  Ask/search context (**default true**), with a per-corpus override.
+  notes elsewhere) and set `includeAgentNotesInRetrieval: false` on other corpora.
 
-### Agent writes beyond agent-notes/
+### Agent write path ACLs
 
-Today agent write tools reject paths outside `agent-notes/` (`assertAgentNotesPath`
-in `@evu/kb-core`). Agents cannot CRUD arbitrary managed corpus paths through MCP
-or `POST /tools/kb`.
+Agent write tools (`POST /tools/kb`, MCP write tools) enforce configurable path
+prefix ACLs resolved from workspace, corpus, and credential layers (restrictive
+intersection):
 
-- **Planned (AGENT-2):** configurable write path ACLs (path prefixes, token or
-  corpus grants) so agents can mutate approved paths with finer-grained scopes.
-- Per-agent isolation within a workspace needs further operational testing before
-  scoping design.
+| Layer | Key | Default |
+| --- | --- | --- |
+| Workspace | `agentWritePathPrefixes: string[]` | `['agent-notes']` |
+| Corpus | `agentWritePathPrefixes?: string[]` | inherit workspace |
+| API key / MCP token | `writePathPrefixes?: string[]` | inherit workspace (omit = all workspace prefixes) |
+
+`@evu/kb-core` resolves effective prefixes with `resolveAgentWritePathPrefixes`
+and validates paths with `assertAgentWritePath`. Token and corpus prefix lists
+cannot expand beyond the workspace allowlist.
 
 ### Deployment shapes
 
@@ -1579,8 +1586,8 @@ P3: hardening and ecosystem
   same-origin Web proxy)
 - [x] backup/restore guidance (`docs/BACKUP.md`)
 - [x] ranking strategy plugins (see F-4, `examples/custom-ranking-strategy/`)
+- [x] generated API reference (`docs/api/index.html`, served at `GET /api-reference`)
 - [ ] larger-scale vector tuning
-- [ ] public docs site if desired
 
 ---
 
@@ -1600,6 +1607,7 @@ Companion docs (all shipped; see `docs/` for the full set, including
 | `docs/MIGRATION.md` | clean-room migration principles (detailed source maps are local-only) |
 | `README.md` | short intro, disclaimer, and quickstart |
 | `docs/DEVELOPMENT.md` | repository layout, status, env summary, and extended dev workflow |
+| `docs/api/index.html` | generated Redoc OpenAPI reference (also `GET /api-reference` on the API) |
 
 `AGENTS.md` should include:
 
@@ -1644,8 +1652,6 @@ Deferred features:
 - host run-time context injection bridges
 - git sync writeback implementation (SYNC-6)
 - ranking strategy plugins (shipped F-4)
-- agent write path ACLs beyond `agent-notes/` (see AGENT-2)
-- `agent-notes/` Ask/search inclusion settings (see AGENT-1)
 
 ---
 

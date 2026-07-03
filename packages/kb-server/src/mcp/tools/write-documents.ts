@@ -30,9 +30,10 @@ export function registerWriteDocumentTools(server: McpServer, runtime: EvuKbRunt
     'evu.kb.append_document',
     {
       title: 'Append document',
-      description: 'Append UTF-8 content to an agent-notes file, creating it when missing.',
+      description:
+        'Append UTF-8 content to a managed agent write path, creating the file when missing.',
       inputSchema: corpusScopedSchema.extend({
-        path: z.string().describe('Full path under agent-notes/, including file name.'),
+        path: z.string().describe('Full path under an allowed write prefix, including file name.'),
         body: z.string().describe('UTF-8 content to append.'),
       }),
     },
@@ -51,9 +52,9 @@ export function registerWriteDocumentTools(server: McpServer, runtime: EvuKbRunt
     'evu.kb.create_document',
     {
       title: 'Create document',
-      description: 'Create a managed file under agent-notes/.',
+      description: 'Create a managed file under an allowed agent write path prefix.',
       inputSchema: corpusScopedSchema.extend({
-        path: z.string().describe('Folder path under agent-notes/.'),
+        path: z.string().describe('Folder path under an allowed write prefix.'),
         name: z.string().describe('File name.'),
         body: z.string().describe('Initial UTF-8 file content.'),
       }),

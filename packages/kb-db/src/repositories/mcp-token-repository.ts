@@ -4,12 +4,24 @@ import { and, eq } from 'drizzle-orm';
 import type { DbHandle } from '../client.js';
 import { mcpTokens } from '../schema/auth.js';
 
+function mapWritePathPrefixes(raw: unknown): string[] | null {
+  if (raw === null || raw === undefined) {
+    return null;
+  }
+  if (!Array.isArray(raw)) {
+    return null;
+  }
+  const prefixes = raw.filter((item): item is string => typeof item === 'string');
+  return prefixes.length > 0 ? prefixes : null;
+}
+
 function mapMcpTokenRow(row: typeof mcpTokens.$inferSelect): McpTokenRecord {
   return {
     id: row.id,
     workspaceId: asWorkspaceId(row.workspaceId),
     name: row.name,
     scopes: (row.scopes ?? []) as KbAuthScope[],
+    writePathPrefixes: mapWritePathPrefixes(row.writePathPrefixes),
     expiresAt: row.expiresAt,
     createdAt: row.createdAt,
   };
@@ -20,6 +32,7 @@ export type CreateMcpTokenInput = {
   name: string;
   hash: string;
   scopes: KbAuthScope[];
+  writePathPrefixes?: string[] | null;
   expiresAt?: string | null;
 };
 
@@ -38,6 +51,7 @@ export class McpTokenRepository {
         name: input.name,
         hash: input.hash,
         scopes: input.scopes,
+        writePathPrefixes: input.writePathPrefixes ?? null,
         expiresAt: input.expiresAt ?? null,
       })
       .returning();
