@@ -14,6 +14,7 @@ import {
   CardTitle,
   ConfirmModal,
   EmptyState,
+  Input,
   Table,
   TableBody,
   TableCell,
@@ -21,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@evu/kb-ui';
+import { Trash2 } from 'lucide-react';
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
@@ -620,35 +622,63 @@ export function RankingSettingsPage() {
               <p className="evukb-muted">
                 Multiply search scores for documents under a path prefix (e.g. /docs → 2).
               </p>
-              {pathBoostRowsState.map((row) => (
-                <div key={row.id} className="evukb-form-row">
-                  <label>
-                    Path prefix
-                    <input
-                      type="text"
-                      value={row.prefix}
-                      onChange={(event) => updatePathBoostRow(row.id, 'prefix', event.target.value)}
-                      placeholder="/docs"
-                    />
-                  </label>
-                  <label>
-                    Multiplier
-                    <input
-                      inputMode="decimal"
-                      type="text"
-                      value={row.multiplier}
-                      onChange={(event) =>
-                        updatePathBoostRow(row.id, 'multiplier', event.target.value)
-                      }
-                      placeholder="2"
-                    />
-                  </label>
-                  <Button onClick={() => removePathBoostRow(row.id)} type="button" variant="danger">
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <Button onClick={addPathBoostRow} type="button" variant="quiet">
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Path prefix</TableHead>
+                      <TableHead className="w-32">Multiplier</TableHead>
+                      <TableHead className="w-[1%] whitespace-nowrap">
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pathBoostRowsState.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          <Input
+                            aria-label="Path prefix"
+                            onChange={(event) =>
+                              updatePathBoostRow(row.id, 'prefix', event.target.value)
+                            }
+                            placeholder="/docs"
+                            type="text"
+                            value={row.prefix}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            aria-label="Multiplier"
+                            className="w-24"
+                            inputMode="decimal"
+                            onChange={(event) =>
+                              updatePathBoostRow(row.id, 'multiplier', event.target.value)
+                            }
+                            placeholder="2"
+                            type="text"
+                            value={row.multiplier}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end">
+                            <Button
+                              aria-label="Remove path boost"
+                              onClick={() => removePathBoostRow(row.id)}
+                              size="icon"
+                              type="button"
+                              variant="dangerOutline"
+                            >
+                              <Trash2 aria-hidden className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <Button className="mt-2" onClick={addPathBoostRow} type="button" variant="quiet">
                 Add path boost
               </Button>
             </fieldset>
