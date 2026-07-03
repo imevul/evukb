@@ -1,4 +1,4 @@
-export type KbAuthScope = 'kb:read' | 'kb:write';
+export type KbAuthScope = 'kb:read' | 'kb:write' | 'kb:admin';
 
 export type McpTokenRecord = {
   id: string;

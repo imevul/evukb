@@ -26,10 +26,10 @@ multi-corpus ask, all six ranking strategies (including `reranker_llm`), workspa
 agent mutation approval, graph neighborhood, portable export/import, and mount sync modes
 (`import`, `import_writeback`, `mount_authoritative`).
 
-Remaining P3+ items are generic consumer integration docs/contracts, release
-hardening, optional npm publishing (see [`docs/RELEASE.md`](RELEASE.md)), and
-the optional memory-bank decision. Host-specific adapter code belongs in consuming
-projects, not in EvuKB.
+Remaining P3+ items are optional npm publishing (see [`docs/RELEASE.md`](RELEASE.md)),
+public docs site (P3-15), git writeback implementation (SYNC-6), and agent write/retrieval
+backlog (AGENT-1, AGENT-2). Memory banks are out of scope for EvuKB (see SPEC §16).
+Host-specific adapter code belongs in consuming projects, not in EvuKB.
 
 Consumer integration guide: [`docs/INTEGRATION.md`](INTEGRATION.md). Host shapes
 (agent orchestration vs platform operator): [`docs/INTEGRATION-HOST-SHAPES.md`](INTEGRATION-HOST-SHAPES.md). Auth details:

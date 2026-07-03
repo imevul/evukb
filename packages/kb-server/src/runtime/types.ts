@@ -1,4 +1,4 @@
-import type { BlobStore, VectorStore } from '@evu/kb-core';
+import type { BlobStore, RankingStrategyRegistry, VectorStore } from '@evu/kb-core';
 import type {
   AuditLogRepository,
   ChunkRepository,
@@ -12,6 +12,7 @@ import type {
 
 import type { VectorBackend } from '../adapters/resolve-vector-store.js';
 import type { JobQueueService } from '../jobs/job-queue-service.js';
+import type { PostRankHandlerRegistry } from '../search/post-rank-registry.js';
 import type { AgentWriteService } from '../services/agent-write-service.js';
 import type { AskService } from '../services/ask-service.js';
 import type { CitationValidateService } from '../services/citation-validate-service.js';
@@ -28,6 +29,7 @@ import type { MutationApprovalService } from '../services/mutation-approval-serv
 import type { OkfMaintenanceService } from '../services/okf-maintenance-service.js';
 import type { OkfService } from '../services/okf-service.js';
 import type { PortableService } from '../services/portable-service.js';
+import type { RankingStrategyPluginService } from '../services/ranking-strategy-plugin-service.js';
 import type { SearchService } from '../services/search-service.js';
 import type { SecretService } from '../services/secret-service.js';
 import type { SettingsService } from '../services/settings-service.js';
@@ -69,6 +71,9 @@ export type EvuKbRuntime = {
   tokenAuth: TokenAuthService;
   auditLog: AuditLogRepository;
   settingsService: SettingsService;
+  rankingStrategyPluginService: RankingStrategyPluginService;
+  rankingRegistry: RankingStrategyRegistry;
+  postRankHandlers: PostRankHandlerRegistry;
   secretService: SecretService;
   syncScheduleService: SyncScheduleService;
   usageRecords: UsageRecordRepository;

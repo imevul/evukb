@@ -42,7 +42,10 @@ import type {
 
 import { resolveChatProviderForWorkspace } from '../adapters/workspace-providers.js';
 import { ApiError } from '../errors.js';
-import { rerankWithLlm } from './llm-reranker.js';
+import {
+  defaultPostRankHandlerRegistry,
+  type PostRankHandlerRegistry,
+} from '../search/post-rank-registry.js';
 
 export type SearchServiceDeps = {
   chunks: ChunkRepository;
@@ -54,6 +57,7 @@ export type SearchServiceDeps = {
   usageRecords?: UsageRecordRepository;
   vectorStore: VectorStore;
   rankingRegistry?: RankingStrategyRegistry;
+  postRankHandlers?: PostRankHandlerRegistry;
 };
 
 type ChunkSearchHit = {
@@ -79,6 +83,7 @@ export class SearchService {
   readonly #usageRecords: UsageRecordRepository | undefined;
   readonly #vectorStore: VectorStore;
   readonly #rankingRegistry: RankingStrategyRegistry;
+  readonly #postRankHandlers: PostRankHandlerRegistry;
 
   constructor(deps: SearchServiceDeps) {
     this.#chunks = deps.chunks;
@@ -90,6 +95,7 @@ export class SearchService {
     this.#usageRecords = deps.usageRecords;
     this.#vectorStore = deps.vectorStore;
     this.#rankingRegistry = deps.rankingRegistry ?? defaultRankingStrategyRegistry;
+    this.#postRankHandlers = deps.postRankHandlers ?? defaultPostRankHandlerRegistry;
   }
 
   async #resolveChatProvider(workspaceId: string): Promise<ChatProvider | null> {
@@ -175,9 +181,9 @@ export class SearchService {
       }
     }
 
-    if (rankingStrategy.postRank === 'llm') {
+    if (rankingStrategy.postRank) {
       const chatProvider = await this.#resolveChatProvider(workspaceId);
-      if (!chatProvider) {
+      if (rankingStrategy.postRank === 'llm' && !chatProvider) {
         throw ApiError.validation(`${rerankerLlmStrategyId} requires a configured chat provider.`);
       }
     }
@@ -299,27 +305,35 @@ export class SearchService {
 
     let ranked = hybridRanked;
     let rerankOperationUsage: OperationUsage | undefined;
-    if (rankingStrategy.postRank === 'llm') {
+    if (rankingStrategy.postRank) {
       const chatProvider = await this.#resolveChatProvider(workspaceId);
-      if (!chatProvider) {
-        throw ApiError.validation(`${rerankerLlmStrategyId} requires a configured chat provider.`);
-      }
       const previewByChunkId = new Map(filteredHits.map((hit) => [hit.id, hit.body.slice(0, 400)]));
       const filePathByChunkId = new Map(filteredHits.map((hit) => [hit.id, hit.filePath]));
-      const rerankResult = await rerankWithLlm({
-        query,
-        hits: hybridRanked.slice(0, defaultLlmRerankCandidateLimit),
-        previews: previewByChunkId,
-        filePaths: filePathByChunkId,
-        chatProvider,
-      });
-      ranked = rerankResult.hits;
-      rerankOperationUsage = await this.#recordRerankUsage(
-        workspaceId,
-        corpusId,
-        chatProvider,
-        rerankResult.usage,
-      );
+      try {
+        const handler = this.#postRankHandlers.resolve(rankingStrategy.postRank);
+        const postRankResult = await handler({
+          workspaceId,
+          corpusId,
+          query,
+          hits: hybridRanked.slice(0, defaultLlmRerankCandidateLimit),
+          previews: previewByChunkId,
+          filePaths: filePathByChunkId,
+          chatProvider,
+        });
+        ranked = postRankResult.hits;
+        if (postRankResult.usage && chatProvider) {
+          rerankOperationUsage = await this.#recordRerankUsage(
+            workspaceId,
+            corpusId,
+            chatProvider,
+            postRankResult.usage,
+          );
+        }
+      } catch (error) {
+        throw ApiError.validation(
+          error instanceof Error ? error.message : 'Post-rank handler failed.',
+        );
+      }
     }
 
     ranked = ranked.slice(0, limit);

@@ -53,7 +53,11 @@ export default defineConfig({
       ['packages/kb-ui/test/components/**', 'jsdom'],
     ],
     fileParallelism: false,
-    include: ['apps/**/test/**/*.test.{ts,tsx}', 'packages/**/test/**/*.test.{ts,tsx}'],
+    include: [
+      'apps/**/test/**/*.test.{ts,tsx}',
+      'packages/**/test/**/*.test.{ts,tsx}',
+      'examples/**/test/**/*.test.{ts,tsx}',
+    ],
     onUnhandledError(error) {
       const message = error instanceof Error ? error.message : String(error);
       if (message.includes('socket.destroySoon is not a function')) {

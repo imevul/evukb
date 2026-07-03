@@ -74,6 +74,11 @@ export type RankingSettings = {
 export type RankingStrategySummary = {
   id: string;
   version: string;
+  label?: string;
+  description?: string;
+  requiresEmbedding?: boolean;
+  requiresChatProvider?: boolean;
+  builtin?: boolean;
 };
 
 export type RankingSettingsView = {

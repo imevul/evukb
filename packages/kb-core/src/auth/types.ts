@@ -1,8 +1,10 @@
 import type { WorkspaceId } from '../ids.js';
 
-export type KbAuthScope = 'kb:read' | 'kb:write';
+export type KbAuthScope = 'kb:read' | 'kb:write' | 'kb:admin';
 
 export const defaultKbReadScopes: KbAuthScope[] = ['kb:read'];
+
+export const allKbAuthScopes: KbAuthScope[] = ['kb:read', 'kb:write', 'kb:admin'];
 
 export type McpTokenRecord = {
   id: string;

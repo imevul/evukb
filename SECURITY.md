@@ -36,6 +36,9 @@ scope.
 - Citation URL validation has SSRF protections, timeouts, and allow/deny policy.
 - Agent write tools require explicit capability grants.
 - Agent write tools can require human approval before applying changes.
+- Ranking plugin register/uninstall requires `kb:admin` (not `kb:write`) and
+  `EVUKB_ENABLE_RANKING_PLUGIN_RELOAD=true`. Allowlisted `importPath` only;
+  never grant `kb:admin` to agent MCP tokens.
 - Markdown rendering is sanitized.
 - Upload size limits are enforced.
 - Zip imports protect against zip bombs and path traversal.

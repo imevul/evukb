@@ -1,8 +1,10 @@
 import {
   type ChatProvider,
+  createRankingStrategyRegistry,
   folderPathsForMaintenanceEvent,
   LocalFilesystemBlobStore,
   parseMountAllowlist,
+  type RankingStrategyRegistry,
 } from '@evu/kb-core';
 import {
   ApiKeyRepository,
@@ -25,6 +27,10 @@ import { resolveChatProvider } from '../adapters/openai-chat.js';
 import { resolveEmbeddingProvider } from '../adapters/openai-embedding.js';
 import { resolveVectorStore } from '../adapters/resolve-vector-store.js';
 import { JobQueueService } from '../jobs/job-queue-service.js';
+import {
+  createDefaultPostRankHandlerRegistry,
+  type PostRankHandlerRegistry,
+} from '../search/post-rank-registry.js';
 import { AgentWriteService } from '../services/agent-write-service.js';
 import { ArchiveImportService } from '../services/archive-import-service.js';
 import { AskService } from '../services/ask-service.js';
@@ -43,6 +49,7 @@ import { MutationApprovalService } from '../services/mutation-approval-service.j
 import { OkfMaintenanceService } from '../services/okf-maintenance-service.js';
 import { OkfService } from '../services/okf-service.js';
 import { PortableService } from '../services/portable-service.js';
+import { RankingStrategyPluginService } from '../services/ranking-strategy-plugin-service.js';
 import { SearchService } from '../services/search-service.js';
 import { SecretService } from '../services/secret-service.js';
 import { SettingsService } from '../services/settings-service.js';
@@ -56,6 +63,8 @@ export type CreateEvuKbRuntimeOptions = {
   connectionString?: string;
   blobRoot?: string;
   bootstrapDevWorkspace?: boolean;
+  rankingRegistry?: RankingStrategyRegistry;
+  postRankHandlers?: PostRankHandlerRegistry;
 };
 
 /**
@@ -94,6 +103,8 @@ export async function createEvuKbRuntime(
   const resolvedVector = resolveVectorStore({ chunks, embeddingProvider });
   const chatProvider =
     options.chatProvider !== undefined ? options.chatProvider : resolveChatProvider();
+  const rankingRegistry = options.rankingRegistry ?? createRankingStrategyRegistry();
+  const postRankHandlers = options.postRankHandlers ?? createDefaultPostRankHandlerRegistry();
   const indexEventHub = new CorpusIndexEventHub();
   const indexService = new IndexService({
     blobStore,
@@ -250,6 +261,8 @@ export async function createEvuKbRuntime(
     chatProvider,
     usageRecords,
     vectorStore: resolvedVector.store,
+    rankingRegistry,
+    postRankHandlers,
   });
   const askService = new AskService({
     chatProvider,
@@ -318,6 +331,13 @@ export async function createEvuKbRuntime(
     chatProvider,
     connectionString: options.connectionString,
     blobRoot: options.blobRoot,
+    rankingRegistry,
+  });
+  const rankingStrategyPluginService = new RankingStrategyPluginService({
+    rankingRegistry,
+    workspaces,
+    corpora,
+    auditLog,
   });
   const secretService = new SecretService({ secrets });
 
@@ -350,6 +370,9 @@ export async function createEvuKbRuntime(
     tokenAuth,
     auditLog,
     settingsService,
+    rankingStrategyPluginService,
+    rankingRegistry,
+    postRankHandlers,
     secretService,
     syncScheduleService,
     usageRecords,

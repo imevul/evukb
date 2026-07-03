@@ -30,6 +30,11 @@ export type RankingSettings = {
 export type RankingStrategySummary = {
   id: string;
   version: string;
+  label?: string;
+  description?: string;
+  requiresEmbedding?: boolean;
+  requiresChatProvider?: boolean;
+  builtin?: boolean;
 };
 
 export type RankingSettingsView = {
@@ -38,6 +43,16 @@ export type RankingSettingsView = {
   source: SettingSource;
   note: string;
   availableStrategies: RankingStrategySummary[];
+};
+
+export type RankingStrategyUsageView = {
+  strategyId: string;
+  workspaceDefaultUsesStrategy: boolean;
+  corpora: Array<{ id: string; name: string }>;
+};
+
+export type RankingStrategiesListResponse = {
+  strategies: RankingStrategySummary[];
 };
 
 export type SettingsResponse = WorkspaceSettingsView & {

@@ -22,8 +22,8 @@
 - **P3 - Hardening and ecosystem**: release readiness, CI, security hardening,
   package publishing, generic consumer integration guidance, usage/cost
   telemetry, and production deploy polish.
-- **Future**: optional memory-bank decision, larger scale tuning, backup/restore,
-  richer embeddable UI, and features that intentionally remain outside v1.
+- **Future**: larger scale tuning, backup/restore, richer embeddable UI, agent write
+  ACL expansion, and features that intentionally remain outside v1.
 
 ---
 
@@ -174,14 +174,29 @@ budget systems.
 
 ---
 
+## Agent Write And Retrieval Backlog
+
+| ID | Task | Status |
+| --- | --- | --- |
+| AGENT-1 | Workspace setting to include `agent-notes/` in Ask/search context (default **true**), with per-corpus override | [ ] |
+| AGENT-2 | Configurable agent write path ACLs beyond `agent-notes/` (path prefixes, token/corpus grants) so agents can CRUD approved corpus paths | [ ] |
+
+Notes:
+
+- Today all agent write tools are restricted to `agent-notes/`; writes outside that prefix are rejected.
+- Operators who want full isolation today can dedicate a corpus to agent writes (e.g. mount/git Obsidian vault used by humans elsewhere).
+- Per-agent isolation within a workspace needs further operational testing before scoping design.
+
+---
+
 ## Future And Open Decisions
 
 | ID | Task | Status |
 | --- | --- | --- |
-| F-1 | Decide whether full memory banks belong in EvuKB or remain owned by host agent platforms | [ ] |
+| F-1 | Decide whether full memory banks belong in EvuKB or remain owned by host agent platforms (decision: **not in EvuKB**; host platforms or a separate EvuMemory project if needed; see SPEC §16) | [X] |
 | F-2 | Decide whether `@evu/kb-ui` ships as a package or remains app-local until proven reusable | [X] |
 | F-3 | Stabilize embeddable `@evu/kb-server` for host applications that bring their own auth/process lifecycle | [X] |
-| F-4 | Add ranking strategy plugin API after core ranking contracts settle | [ ] |
+| F-4 | Add ranking strategy plugin API after core ranking contracts settle (mutable registry, kb:admin plugin API, post-rank handlers, example package) | [X] |
 | F-5 | Larger-scale vector tuning and benchmark guidance for pgvector and Qdrant | [ ] |
 | F-6 | External HTTP import and Obsidian vault sync, if they stay within the KB boundary | [ ] |
 | F-7 | OKF v0.2 adapter if the upstream OKF spec changes | [ ] |

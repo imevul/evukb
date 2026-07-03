@@ -56,6 +56,31 @@ rows exist in Postgres (or run bootstrap once in staging).
 | `scope` | `KnowledgeWorkspaceScope` | Default scope metadata (not a multi-tenant bypass) |
 | `logger` | `boolean` | Fastify logger (default `true`) |
 | `maxUploadBytes` | `number` | Upload limit override |
+| `rankingRegistry` | `RankingStrategyRegistry` | Optional custom ranking strategies at boot |
+| `postRankHandlers` | `PostRankHandlerRegistry` | Optional custom post-rank handlers at boot |
+
+Example boot-time strategy registration:
+
+```typescript
+import { createEvuKbServer } from '@evu/kb-server';
+import { createRankingStrategyRegistry } from '@evu/kb-core';
+import boostAgentNotesV1Strategy, {
+  preferDocsPrefixV1Strategy,
+} from '../examples/custom-ranking-strategy/src/index.ts';
+
+const rankingRegistry = createRankingStrategyRegistry({
+  extensions: [boostAgentNotesV1Strategy, preferDocsPrefixV1Strategy],
+});
+
+const server = await createEvuKbServer({ rankingRegistry });
+```
+
+See [`examples/custom-ranking-strategy/README.md`](../examples/custom-ranking-strategy/README.md)
+for preset vs custom `rank()` patterns, golden tests, and operator API fixtures.
+
+Standalone operators can also install preset strategies via
+`POST .../settings/ranking/strategies` with a **`kb:admin`** API key when
+`EVUKB_ENABLE_RANKING_PLUGIN_RELOAD=true`.
 
 If `connectionString` or `blobRoot` is missing, the server starts in **degraded**
 mode: health routes work; workspace KB routes are not registered.

@@ -134,6 +134,43 @@ export class CorpusRepository {
     return row ? mapCorpusRow(row) : null;
   }
 
+  async listByWorkspaceAndRankingStrategy(
+    workspaceId: string,
+    rankingStrategyId: string,
+  ): Promise<KnowledgeCorpus[]> {
+    const rows = await this.#db
+      .select()
+      .from(knowledgeCorpora)
+      .where(
+        and(
+          eq(knowledgeCorpora.workspaceId, workspaceId),
+          eq(knowledgeCorpora.rankingStrategyId, rankingStrategyId),
+        ),
+      )
+      .orderBy(asc(knowledgeCorpora.createdAt));
+
+    return rows.map(mapCorpusRow);
+  }
+
+  async clearRankingStrategyForWorkspace(
+    workspaceId: string,
+    fromStrategyId: string,
+    toStrategyId: string,
+  ): Promise<number> {
+    const updated = await this.#db
+      .update(knowledgeCorpora)
+      .set({ rankingStrategyId: toStrategyId, updatedAt: sql`now()` })
+      .where(
+        and(
+          eq(knowledgeCorpora.workspaceId, workspaceId),
+          eq(knowledgeCorpora.rankingStrategyId, fromStrategyId),
+        ),
+      )
+      .returning({ id: knowledgeCorpora.id });
+
+    return updated.length;
+  }
+
   async listSyncEnabled(): Promise<KnowledgeCorpus[]> {
     const rows = await this.#db.select().from(knowledgeCorpora);
     return rows.map(mapCorpusRow).filter((corpus) => {

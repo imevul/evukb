@@ -1,0 +1,12 @@
+{
+  "name": "@evu/example-custom-ranking-strategy",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@evu/kb-core": "workspace:*"
+  }
+}

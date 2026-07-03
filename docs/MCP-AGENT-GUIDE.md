@@ -17,7 +17,11 @@ Related: [`INTEGRATION.md`](./INTEGRATION.md), [`INTEGRATION-HOST-SHAPES.md`](./
 | Prose / architecture / “what does doc X say?” | `evu.kb.search` → `evu.kb.read_chunk` or `evu.kb.get_document` | `evu.kb.ask` when you already have an LLM |
 | Inventory / rollups (`os`, `virtual`, tags, path) | `evu.kb.list_documents` with filters/fields, or `evu.kb.search` with filters and no query | `evu.kb.ask` |
 | OKF corpora only | `evu.kb.list_concepts`, `evu.kb.read_index` | `evu.kb.list_concepts` on non-OKF corpora |
-| Writes | `evu.kb.create_document`, `append_document`, etc. under `agent-notes/` | — |
+| Writes | `evu.kb.create_document`, `append_document`, etc. under `agent-notes/` | Writes outside `agent-notes/` (not supported today; see ROADMAP AGENT-2) |
+
+Agent write tools are restricted to `agent-notes/` today. Session memory and run
+injection belong to the outer agent host, not EvuKB (see [`SPEC.md`](../SPEC.md) §16).
+Use a dedicated corpus for agent writes when operators want isolation from human knowledge.
 
 ### `evu.kb.search`
 

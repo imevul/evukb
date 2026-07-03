@@ -1,20 +1,22 @@
 import {
   asWorkspaceId,
-  defaultRankingStrategyRegistry,
   isImportWritebackEnabled,
   isMountAuthoritativeEnabled,
+  type RankingStrategyRegistry,
   validateCorpusSettings,
 } from '@evu/kb-core';
 import type { CorpusRepository } from '@evu/kb-db';
 import type { FastifyPluginAsync } from 'fastify';
 
 import { ApiError } from '../errors.js';
+import { assertValidRankingStrategyId } from '../search/validate-ranking-strategy.js';
 import type { FileManagerService } from '../services/file-manager.js';
 import { corpusCreateBodySchema, corpusPatchBodySchema, parseBody } from './body-schemas.js';
 
 export type CorpusRoutesOptions = {
   corpora: CorpusRepository;
   fileManager: FileManagerService;
+  rankingRegistry: RankingStrategyRegistry;
 };
 
 function assertValidCorpusSettings(settings: Record<string, unknown> | undefined): void {
@@ -27,17 +29,6 @@ function assertValidCorpusSettings(settings: Record<string, unknown> | undefined
   });
   if (error) {
     throw ApiError.validation(error);
-  }
-}
-
-function assertValidRankingStrategyId(rankingStrategyId: string | undefined): void {
-  if (rankingStrategyId === undefined) {
-    return;
-  }
-  try {
-    defaultRankingStrategyRegistry.resolve(rankingStrategyId);
-  } catch {
-    throw ApiError.validation(`Unknown ranking strategy: ${rankingStrategyId}`);
   }
 }
 
@@ -91,7 +82,7 @@ export const corpusRoutesPlugin: FastifyPluginAsync<CorpusRoutesOptions> = async
   }>('/knowledge-corpora/:corpusId', async (request) => {
     const body = parseBody(corpusPatchBodySchema, request.body);
     assertValidCorpusSettings(body.settings);
-    assertValidRankingStrategyId(body.rankingStrategyId);
+    assertValidRankingStrategyId(options.rankingRegistry, body.rankingStrategyId);
 
     const updated = await options.corpora.update(
       request.evuKbWorkspace.id,

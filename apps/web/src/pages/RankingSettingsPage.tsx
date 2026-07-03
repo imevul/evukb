@@ -1,6 +1,27 @@
-import type { AiProvidersView, RankingSettings, SettingsResponse } from '@evu/kb-sdk';
-import { Alert, Button, EmptyState } from '@evu/kb-ui';
-import { type FormEvent, useEffect, useState } from 'react';
+import type {
+  AiProvidersView,
+  RankingSettings,
+  RankingStrategySummary,
+  RankingStrategyUsageView,
+  SettingsResponse,
+} from '@evu/kb-sdk';
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  ConfirmModal,
+  EmptyState,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@evu/kb-ui';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
 import { appConfig } from '../config.js';
@@ -89,12 +110,303 @@ function buildPathBoosts(rows: PathBoostRow[]): Record<string, number> | undefin
   return Object.keys(boosts).length > 0 ? boosts : undefined;
 }
 
-function strategyRequiresEmbedding(strategyId: string): boolean {
-  return strategyId === 'semantic_only';
+function strategyRequiresEmbedding(strategy: RankingStrategySummary): boolean {
+  return strategy.requiresEmbedding === true;
 }
 
-function strategyRequiresChat(strategyId: string): boolean {
-  return strategyId === 'reranker_llm';
+function strategyRequiresChat(strategy: RankingStrategySummary): boolean {
+  return strategy.requiresChatProvider === true;
+}
+
+function strategyLabel(strategy: RankingStrategySummary): string {
+  return strategy.label ?? strategy.id;
+}
+
+const referenceExampleRankingStrategies = [
+  {
+    id: 'boost_agent_notes_v1',
+    label: 'Agent notes boost',
+    description: 'Hybrid RRF with a default path boost for agent-notes/.',
+  },
+  {
+    id: 'prefer_docs_prefix_v1',
+    label: 'Docs prefix preference',
+    description: 'Hybrid RRF with a custom rank() that boosts docs/ paths.',
+  },
+] as const;
+
+function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => Promise<void> }) {
+  const [strategies, setStrategies] = useState<RankingStrategySummary[]>([]);
+  const [usagePreview, setUsagePreview] = useState<RankingStrategyUsageView | null>(null);
+  const [pendingUninstallId, setPendingUninstallId] = useState<string | null>(null);
+  const [uninstalling, setUninstalling] = useState(false);
+  const [uninstallError, setUninstallError] = useState<string | null>(null);
+  const [installingExampleId, setInstallingExampleId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const loadStrategies = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await kbClient.listRankingStrategies(appConfig.workspaceId);
+      setStrategies(response.strategies);
+      setError(null);
+    } catch (loadError: unknown) {
+      setError(loadError instanceof Error ? loadError.message : 'Failed to load ranking plugins.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadStrategies();
+  }, [loadStrategies]);
+
+  async function beginUninstall(strategyId: string): Promise<void> {
+    setMessage(null);
+    setError(null);
+    setUninstallError(null);
+    try {
+      const usage = await kbClient.getRankingStrategyUsage(appConfig.workspaceId, strategyId);
+      setUsagePreview(usage);
+      setPendingUninstallId(strategyId);
+    } catch (previewError: unknown) {
+      setError(
+        previewError instanceof Error ? previewError.message : 'Failed to load plugin usage.',
+      );
+    }
+  }
+
+  function closeUninstallModal(): void {
+    if (uninstalling) {
+      return;
+    }
+    setPendingUninstallId(null);
+    setUsagePreview(null);
+    setUninstallError(null);
+  }
+
+  async function confirmUninstall(): Promise<void> {
+    if (!pendingUninstallId) {
+      return;
+    }
+    setUninstalling(true);
+    setUninstallError(null);
+    try {
+      const result = await kbClient.unregisterRankingStrategy(
+        appConfig.workspaceId,
+        pendingUninstallId,
+      );
+      setMessage(
+        `Uninstalled ${result.strategyId}. Updated ${result.remediatedCorpusCount} corpus override(s).`,
+      );
+      setPendingUninstallId(null);
+      setUsagePreview(null);
+      await loadStrategies();
+      await onRefreshSettings();
+    } catch (uninstallFailure: unknown) {
+      setUninstallError(
+        uninstallFailure instanceof Error
+          ? uninstallFailure.message
+          : 'Failed to uninstall plugin.',
+      );
+    } finally {
+      setUninstalling(false);
+    }
+  }
+
+  async function installExample(exampleId: string): Promise<void> {
+    setMessage(null);
+    setError(null);
+    setInstallingExampleId(exampleId);
+    try {
+      const result = await kbClient.registerRankingStrategyExample(
+        appConfig.workspaceId,
+        exampleId,
+      );
+      setMessage(`Installed ${result.strategy.label ?? result.strategy.id}.`);
+      await loadStrategies();
+      await onRefreshSettings();
+    } catch (installError: unknown) {
+      setError(
+        installError instanceof Error
+          ? installError.message
+          : 'Failed to install example strategy.',
+      );
+    } finally {
+      setInstallingExampleId(null);
+    }
+  }
+
+  const customStrategies = strategies.filter((strategy) => !strategy.builtin);
+  const installedCustomIds = new Set(customStrategies.map((strategy) => strategy.id));
+  const installableExamples = referenceExampleRankingStrategies.filter(
+    (example) => !installedCustomIds.has(example.id),
+  );
+  const pendingUninstallStrategy = customStrategies.find(
+    (strategy) => strategy.id === pendingUninstallId,
+  );
+
+  return (
+    <section aria-label="Ranking plugins" className="evukb-panel mt-6">
+      <h2 className="text-lg font-semibold">Ranking plugins</h2>
+      <p className="evukb-muted">
+        Custom strategies extend the built-in registry. Install reference examples below or register
+        your own with <code>kb:admin</code> via API or boot-time registration.
+      </p>
+      {error ? <p className="evukb-error">{error}</p> : null}
+      {message ? (
+        <Alert onDismiss={() => setMessage(null)} title={message} variant="success" />
+      ) : null}
+      {loading ? <p className="evukb-muted">Loading installed strategies…</p> : null}
+      {!loading && customStrategies.length === 0 ? (
+        <div className="mt-4">
+          <EmptyState
+            hint="Install a reference example below or register a strategy via the operator API."
+            title="No custom ranking strategies installed"
+          />
+        </div>
+      ) : null}
+      {!loading && customStrategies.length > 0 ? (
+        <div className="mt-4 overflow-x-auto rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Strategy</TableHead>
+                <TableHead>Version</TableHead>
+                <TableHead className="w-[1%] whitespace-nowrap">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customStrategies.map((strategy) => (
+                <TableRow key={strategy.id}>
+                  <TableCell className="min-w-[12rem]">
+                    <div className="min-w-0">
+                      <p className="m-0 font-medium">{strategyLabel(strategy)}</p>
+                      <p
+                        className="m-0 truncate font-mono text-[11px] text-muted-foreground/80"
+                        title={strategy.id}
+                      >
+                        {strategy.id}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
+                    v{strategy.version}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => void beginUninstall(strategy.id)}
+                        size="sm"
+                        type="button"
+                        variant="dangerOutline"
+                      >
+                        Uninstall
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : null}
+      {!loading && installableExamples.length > 0 ? (
+        <Card className="mt-6 gap-0 border-dashed bg-muted/15 p-0 shadow-none">
+          <CardHeader className="gap-2 border-b border-border px-5 py-4">
+            <CardTitle className="text-base">Reference examples</CardTitle>
+            <p className="m-0 text-sm text-muted-foreground">
+              Shipped with EvuKB in <code>examples/custom-ranking-strategy/</code>. Requires plugin
+              reload and <code>kb:admin</code>.
+            </p>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Strategy</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="w-[1%] whitespace-nowrap">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {installableExamples.map((example) => (
+                  <TableRow key={example.id}>
+                    <TableCell className="min-w-[12rem] align-top">
+                      <div className="min-w-0">
+                        <p className="m-0 font-medium">{example.label}</p>
+                        <p
+                          className="m-0 truncate font-mono text-[11px] text-muted-foreground/80"
+                          title={example.id}
+                        >
+                          {example.id}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {example.description}
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <div className="flex justify-end">
+                        <Button
+                          disabled={installingExampleId !== null}
+                          onClick={() => void installExample(example.id)}
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {installingExampleId === example.id ? 'Installing…' : 'Install'}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : null}
+      <ConfirmModal
+        confirmLabel="Uninstall"
+        confirming={uninstalling}
+        confirmingLabel="Uninstalling…"
+        description="Affected corpora fall back to the workspace default. The workspace default resets to hybrid_default_v1 when it used this strategy."
+        error={uninstallError}
+        onClose={closeUninstallModal}
+        onConfirm={() => void confirmUninstall()}
+        open={pendingUninstallId !== null && usagePreview !== null}
+        title={
+          pendingUninstallStrategy
+            ? `Uninstall “${strategyLabel(pendingUninstallStrategy)}”?`
+            : 'Uninstall ranking strategy?'
+        }
+      >
+        {usagePreview && usagePreview.corpora.length > 0 ? (
+          <div className="space-y-2">
+            <p className="m-0 text-sm">These corpora currently override this strategy:</p>
+            <ul className="m-0 list-disc space-y-1 pl-5 text-sm">
+              {usagePreview.corpora.map((corpus) => (
+                <li key={corpus.id}>
+                  <span className="font-medium">{corpus.name}</span>{' '}
+                  <span className="font-mono text-xs text-muted-foreground">{corpus.id}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="m-0 text-sm text-muted-foreground">
+            No corpora currently override this strategy.
+          </p>
+        )}
+      </ConfirmModal>
+    </section>
+  );
 }
 
 export function RankingSettingsPage() {
@@ -109,6 +421,18 @@ export function RankingSettingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  async function reloadSettings(): Promise<void> {
+    const [loaded, providers] = await Promise.all([
+      kbClient.getSettings(appConfig.workspaceId),
+      kbClient.getAiProviders(appConfig.workspaceId),
+    ]);
+    setSettings(loaded);
+    setAiProviders(providers);
+    setWorkspaceStrategyId(loaded.ranking.strategyId);
+    setRanking(loaded.ranking.settings);
+    setPathBoostRowsState(pathBoostRows(loaded.ranking.settings));
+  }
 
   const embeddingConfigured =
     aiProviders?.embedding.configured && aiProviders.embedding.healthStatus === 'ok';
@@ -209,124 +533,132 @@ export function RankingSettingsPage() {
   const futureStrategyIds: string[] = [];
 
   return (
-    <section aria-label="Ranking settings" className="evukb-panel">
-      {settings ? (
-        <>
-          <p className="evukb-muted">
-            Workspace default strategy: {settings.ranking.strategyId} · Source:{' '}
-            {settings.ranking.source}. {settings.ranking.note}
-          </p>
-          <p className="evukb-muted">
-            Active strategies:{' '}
-            {settings.ranking.availableStrategies.map((strategy) => strategy.id).join(', ')}.
-            {futureStrategyIds.length > 0 ? ` Planned: ${futureStrategyIds.join(', ')}.` : ''}
-          </p>
-        </>
-      ) : null}
-      {error ? <p className="evukb-error">{error}</p> : null}
-      {message ? (
-        <Alert onDismiss={() => setMessage(null)} title={message} variant="success" />
-      ) : null}
-      {loading ? <p className="evukb-muted">Loading ranking settings…</p> : null}
-      {!loading && !settings ? (
-        <EmptyState
-          title="Ranking settings unavailable"
-          hint="Check API connectivity and try again."
-        />
-      ) : null}
-      {!loading && settings ? (
-        <form className="evukb-form" onSubmit={(event) => void handleSave(event)}>
-          <label>
-            Workspace default ranking strategy
-            <select
-              onChange={(event) => setWorkspaceStrategyId(event.target.value)}
-              value={workspaceStrategyId}
-            >
-              {settings.ranking.availableStrategies.map((strategy) => (
-                <option
-                  disabled={
-                    (strategyRequiresEmbedding(strategy.id) && embeddingConfigured === false) ||
-                    (strategyRequiresChat(strategy.id) && chatConfigured === false)
-                  }
-                  key={strategy.id}
-                  value={strategy.id}
-                >
-                  {strategy.id} (v{strategy.version})
-                </option>
-              ))}
-            </select>
-          </label>
-          {strategyRequiresEmbedding(workspaceStrategyId) && !embeddingConfigured ? (
+    <>
+      <section aria-label="Ranking settings" className="evukb-panel">
+        {settings ? (
+          <>
             <p className="evukb-muted">
-              semantic_only requires a configured embedding provider with healthy status.
+              Workspace default strategy: {settings.ranking.strategyId} · Source:{' '}
+              {settings.ranking.source}. {settings.ranking.note}
             </p>
-          ) : null}
-          <fieldset>
-            <legend>Hybrid score weights</legend>
-            <p className="evukb-form-hint">
-              Optional numeric multipliers and boosts for <code>hybrid_default_v1</code>. Leave a
-              field blank to use the default shown in its placeholder. Only values you change are
-              saved to the workspace.
-            </p>
-            <div className="evukb-form-grid">
-              {rankingFields.map((field) => (
-                <label key={field.key}>
-                  {field.label}
-                  <input
-                    min={0}
-                    placeholder={String(defaultRankingValues[field.key])}
-                    step="any"
-                    type="number"
-                    value={typeof ranking[field.key] === 'number' ? ranking[field.key] : ''}
-                    onChange={(event) => updateField(field.key, event.target.value)}
-                  />
-                  <span className="evukb-form-hint">{field.hint}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset>
-            <legend>Path boosts</legend>
             <p className="evukb-muted">
-              Multiply search scores for documents under a path prefix (e.g. /docs → 2).
+              Active strategies:{' '}
+              {settings.ranking.availableStrategies.map((strategy) => strategy.id).join(', ')}.
+              {futureStrategyIds.length > 0 ? ` Planned: ${futureStrategyIds.join(', ')}.` : ''}
             </p>
-            {pathBoostRowsState.map((row) => (
-              <div key={row.id} className="evukb-form-row">
-                <label>
-                  Path prefix
-                  <input
-                    type="text"
-                    value={row.prefix}
-                    onChange={(event) => updatePathBoostRow(row.id, 'prefix', event.target.value)}
-                    placeholder="/docs"
-                  />
-                </label>
-                <label>
-                  Multiplier
-                  <input
-                    inputMode="decimal"
-                    type="text"
-                    value={row.multiplier}
-                    onChange={(event) =>
-                      updatePathBoostRow(row.id, 'multiplier', event.target.value)
+          </>
+        ) : null}
+        {error ? <p className="evukb-error">{error}</p> : null}
+        {message ? (
+          <Alert onDismiss={() => setMessage(null)} title={message} variant="success" />
+        ) : null}
+        {loading ? <p className="evukb-muted">Loading ranking settings…</p> : null}
+        {!loading && !settings ? (
+          <EmptyState
+            title="Ranking settings unavailable"
+            hint="Check API connectivity and try again."
+          />
+        ) : null}
+        {!loading && settings ? (
+          <form className="evukb-form" onSubmit={(event) => void handleSave(event)}>
+            <label>
+              Workspace default ranking strategy
+              <select
+                onChange={(event) => setWorkspaceStrategyId(event.target.value)}
+                value={workspaceStrategyId}
+              >
+                {settings.ranking.availableStrategies.map((strategy) => (
+                  <option
+                    disabled={
+                      (strategyRequiresEmbedding(strategy) && embeddingConfigured === false) ||
+                      (strategyRequiresChat(strategy) && chatConfigured === false)
                     }
-                    placeholder="2"
-                  />
-                </label>
-                <Button onClick={() => removePathBoostRow(row.id)} type="button" variant="danger">
-                  Remove
-                </Button>
+                    key={strategy.id}
+                    value={strategy.id}
+                  >
+                    {strategyLabel(strategy)} (v{strategy.version})
+                  </option>
+                ))}
+              </select>
+            </label>
+            {(() => {
+              const selected = settings.ranking.availableStrategies.find(
+                (strategy) => strategy.id === workspaceStrategyId,
+              );
+              return selected && strategyRequiresEmbedding(selected) && !embeddingConfigured ? (
+                <p className="evukb-muted">
+                  semantic_only requires a configured embedding provider with healthy status.
+                </p>
+              ) : null;
+            })()}
+            <fieldset>
+              <legend>Hybrid score weights</legend>
+              <p className="evukb-form-hint">
+                Optional numeric multipliers and boosts for <code>hybrid_default_v1</code>. Leave a
+                field blank to use the default shown in its placeholder. Only values you change are
+                saved to the workspace.
+              </p>
+              <div className="evukb-form-grid">
+                {rankingFields.map((field) => (
+                  <label key={field.key}>
+                    {field.label}
+                    <input
+                      min={0}
+                      placeholder={String(defaultRankingValues[field.key])}
+                      step="any"
+                      type="number"
+                      value={typeof ranking[field.key] === 'number' ? ranking[field.key] : ''}
+                      onChange={(event) => updateField(field.key, event.target.value)}
+                    />
+                    <span className="evukb-form-hint">{field.hint}</span>
+                  </label>
+                ))}
               </div>
-            ))}
-            <Button onClick={addPathBoostRow} type="button" variant="quiet">
-              Add path boost
+            </fieldset>
+            <fieldset>
+              <legend>Path boosts</legend>
+              <p className="evukb-muted">
+                Multiply search scores for documents under a path prefix (e.g. /docs → 2).
+              </p>
+              {pathBoostRowsState.map((row) => (
+                <div key={row.id} className="evukb-form-row">
+                  <label>
+                    Path prefix
+                    <input
+                      type="text"
+                      value={row.prefix}
+                      onChange={(event) => updatePathBoostRow(row.id, 'prefix', event.target.value)}
+                      placeholder="/docs"
+                    />
+                  </label>
+                  <label>
+                    Multiplier
+                    <input
+                      inputMode="decimal"
+                      type="text"
+                      value={row.multiplier}
+                      onChange={(event) =>
+                        updatePathBoostRow(row.id, 'multiplier', event.target.value)
+                      }
+                      placeholder="2"
+                    />
+                  </label>
+                  <Button onClick={() => removePathBoostRow(row.id)} type="button" variant="danger">
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button onClick={addPathBoostRow} type="button" variant="quiet">
+                Add path boost
+              </Button>
+            </fieldset>
+            <Button disabled={submitting} type="submit" variant="primary">
+              {submitting ? 'Saving…' : 'Save ranking preferences'}
             </Button>
-          </fieldset>
-          <Button disabled={submitting} type="submit" variant="primary">
-            {submitting ? 'Saving…' : 'Save ranking preferences'}
-          </Button>
-        </form>
-      ) : null}
-    </section>
+          </form>
+        ) : null}
+      </section>
+      <RankingPluginsPanel onRefreshSettings={reloadSettings} />
+    </>
   );
 }

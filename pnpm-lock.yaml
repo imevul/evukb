@@ -54,6 +54,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@evu/kb-core':
+        specifier: workspace:*
+        version: link:../../packages/kb-core
       '@evu/kb-server':
         specifier: workspace:*
         version: link:../../packages/kb-server
@@ -131,6 +134,12 @@ importers:
       vitest-axe:
         specifier: ^0.1.0
         version: 0.1.0(vitest@4.1.9)
+
+  examples/custom-ranking-strategy:
+    dependencies:
+      '@evu/kb-core':
+        specifier: workspace:*
+        version: link:../../packages/kb-core
 
   packages/kb-core:
     devDependencies:

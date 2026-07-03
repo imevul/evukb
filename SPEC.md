@@ -605,12 +605,25 @@ Qdrant adapter rules:
 Ranking must be decoupled from vector storage.
 
 ```ts
-interface RankingStrategy {
+type RankingStrategy = {
   id: string;
   version: string;
-  defaultSettings: Record<string, unknown>;
-  rank(input: RankingInput): RankedSearchHit[];
-}
+  label?: string;
+  description?: string;
+  retrieval: { keyword: boolean; semantic: boolean };
+  rank: (candidates: RankingCandidate[], weights?: HybridRankingWeights) => RankedSearchHit[];
+  postRank?: string; // handler key, e.g. "llm"
+  builtin?: boolean;
+};
+
+type RankingStrategyRegistry = {
+  register(strategy: RankingStrategy, options?: { force?: boolean }): void;
+  unregister(strategyId: string): void;
+  get(strategyId: string): RankingStrategy | undefined;
+  resolve(strategyId: string): RankingStrategy;
+  list(): RankingStrategy[];
+  isBuiltin(strategyId: string): boolean;
+};
 ```
 
 Default v1 strategy:
@@ -621,7 +634,7 @@ hybrid_default_v1
 
 Reference implementation: EvuKB `packages/kb-server` search service.
 
-Strategy registry:
+Strategy registry (built-in):
 
 | Strategy | Status | Purpose |
 | --- | --- | --- |
@@ -631,6 +644,19 @@ Strategy registry:
 | `recency_boosted` | v1 | favor recent files |
 | `citation_boosted` | v1 | favor OKF citation sections |
 | `reranker_llm` | v1 | hybrid retrieval + LLM post-rank |
+
+### Plugin API (F-4)
+
+- Hosts and operators may register additional strategies via
+  `createRankingStrategyRegistry({ extensions: [...] })` at boot or via
+  `POST /api/workspaces/{id}/settings/ranking/strategies` when
+  `EVUKB_ENABLE_RANKING_PLUGIN_RELOAD=true`.
+- Plugin administration requires **`kb:admin`** scope (not `kb:write`).
+- Uninstall previews affected corpora; confirm remediation resets corpus overrides
+  to the workspace default and workspace default to `hybrid_default_v1` when needed.
+- Custom `rank()` functions require boot-time registration or allowlisted `importPath`;
+  JSON `preset` descriptors support hybrid weight templates only.
+- Example package: `examples/custom-ranking-strategy/`.
 
 Settings:
 
@@ -855,42 +881,64 @@ Memory is adjacent to knowledge, but not identical.
 | Concept | Prior automation platform | Prior platform runtime | EvuKB decision |
 | --- | --- | --- | --- |
 | knowledge corpus | P10 corpora | `evu.documents`, `evu.search.qdrant`, `evu.ask` | core |
-| agent memory bank | P4 memory banks | `evu.memory` | defer |
+| agent memory bank | P4 memory banks | `evu.memory` | **out of scope** |
 | agent notes in corpus | `agent-notes/` prefix | partial overlap | core write path |
 
-Recommended default:
+### Decision (F-1)
 
-- EvuKB v1 is knowledge only.
-- Corpus-scoped `agent-notes/` append/create/update/delete is in scope as a KB
-  mutation path.
-- Full memory banks are deferred to optional `@evu/kb-memory` or a later phase.
-- Memory tables, if added later, are separate from `knowledge_chunks`.
-- Memory MCP namespace is `evu.memory.*`, not `evu.kb.*`.
+EvuKB is **knowledge only**. Full memory banks are **not** in scope for this
+repository.
 
-Why defer memory:
+- Corpus-scoped `agent-notes/` append/create/update/delete remains the agent write
+  path.
+- Session/run memory, TTL, consolidation, and pre-run context injection belong
+  to **host agent platforms**, not EvuKB.
+- Standalone EvuKB does not need a first-class cross-session agent memory
+  product; memory is primarily relevant when an orchestration host is in the loop.
+- If a dedicated memory product is needed later, it should live in a **separate
+  project** (for example EvuMemory), not as `@evu/kb-memory` inside EvuKB.
+- Memory tables and `evu.memory.*` tools are **not planned** here.
 
-- Knowledge is sourced and citeable.
-- Memory is curated, mutable, and often uncited.
-- Host automation platforms often own memory-bank lifecycle and run injection.
-- Platform memory extensions are separate from corpus knowledge.
+Why keep memory out of EvuKB:
 
-Open decision:
+- Knowledge is sourced and citeable; memory is curated, mutable, and often
+  uncited.
+- EvuKB's mission is narrow: corpora, search, ask, links, and citations.
+- Host platforms already own run lifecycle and memory injection; duplicating that
+  widens scope without helping the core KB product.
 
-```text
-[ ] Include memory banks in EvuKB P2+?
-```
+### agent-notes/ and retrieval
 
-Pros:
+- `agent-notes/` files are indexed like other corpus markdown and **may** appear
+  in search and Ask citations today.
+- Operators who want isolation can use a **dedicated corpus** for agent writes
+  (for example a vault corpus mounted or git-synced alongside human-authored
+  notes elsewhere).
+- **Planned (AGENT-1):** workspace default to include `agent-notes/` in
+  Ask/search context (**default true**), with a per-corpus override.
 
-- shared embedding infrastructure
-- common UI patterns
-- easier standalone "agent knowledge + memory" product
+### Agent writes beyond agent-notes/
 
-Cons:
+Today agent write tools reject paths outside `agent-notes/` (`assertAgentNotesPath`
+in `@evu/kb-core`). Agents cannot CRUD arbitrary managed corpus paths through MCP
+or `POST /tools/kb`.
 
-- widens product scope
-- risks duplicating host memory products too early
-- blurs citation-oriented knowledge with uncited facts
+- **Planned (AGENT-2):** configurable write path ACLs (path prefixes, token or
+  corpus grants) so agents can mutate approved paths with finer-grained scopes.
+- Per-agent isolation within a workspace needs further operational testing before
+  scoping design.
+
+### Deployment shapes
+
+Standalone and embedded EvuKB are equally valid and may be used interchangeably.
+A realistic pattern: standalone EvuKB synced to an Obsidian vault (mount or git
+import), used by humans in Obsidian and by agents via MCP/API from a separate
+orchestration host. Knowledge stays in EvuKB; memory stays with the host.
+
+### Audience
+
+Memory-like KB operations are almost entirely agent-mediated. A small fraction of
+human operators may query agent-authored notes through normal search or Ask.
 
 ---
 
@@ -1515,7 +1563,7 @@ P2: advanced standalone features and integration contracts
 - [x] multi-corpus ask
 - [x] mount `import_writeback`
 - [x] mount `mount_authoritative`
-- [ ] optional memory-bank decision
+- [x] memory-bank decision (out of scope; see §16)
 
 P3: hardening and ecosystem
 
@@ -1530,7 +1578,7 @@ P3: hardening and ecosystem
 - [x] production auth and deploy hardening (fail-closed auth, token pepper,
   same-origin Web proxy)
 - [x] backup/restore guidance (`docs/BACKUP.md`)
-- [ ] ranking strategy plugins
+- [x] ranking strategy plugins (see F-4, `examples/custom-ranking-strategy/`)
 - [ ] larger-scale vector tuning
 - [ ] public docs site if desired
 
@@ -1572,31 +1620,32 @@ Companion docs (all shipped; see `docs/` for the full set, including
 
 Open decisions:
 
-- Should full memory banks move into EvuKB P2+?
-- Should `@evu/kb-ui` ship as a package or remain app-local?
 - Should standalone v1 support OIDC or only local auth/API keys?
-- Should git sync ever support write-back?
-- Should usage/cost telemetry store durable per-operation records or only expose
-  request-level usage in v1?
+- Per-agent isolation within a workspace (needs operational testing before ACL design).
 
 Decisions:
 
 - Qdrant remains officially supported as an optional vector backend alongside pgvector (default).
 - Host-specific adapter code belongs in consuming projects. EvuKB owns generic HTTP, SDK, MCP, tool, and package contracts.
 - Mount `import_writeback` and `mount_authoritative` are supported sync modes.
-  Git sync remains import-only until a dedicated git writeback design is accepted.
+- Git sync writeback design is accepted ([`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md)); implementation is SYNC-6.
+- Full memory banks are **out of scope** for EvuKB; host platforms or a separate EvuMemory project if needed (see §16).
+- `@evu/kb-ui` ships as a workspace package with reusable primitives.
+- Standalone v1 auth is API-key/MCP-token only (see [`docs/AUTH.md`](docs/AUTH.md)).
+- Usage/cost telemetry exposes request-level and aggregate usage in v1 (see COST backlog).
 
 Deferred features:
 
-- Obsidian vault server sync integrations
-- memory banks
-- external HTTP import
+- Obsidian vault server sync integrations (see F-6)
+- external HTTP import (see F-6)
 - SaaS billing
 - public marketplace
 - generic resource-map platform replacement
 - host run-time context injection bridges
-- git sync writeback
-- provider usage and cost telemetry
+- git sync writeback implementation (SYNC-6)
+- ranking strategy plugins (shipped F-4)
+- agent write path ACLs beyond `agent-notes/` (see AGENT-2)
+- `agent-notes/` Ask/search inclusion settings (see AGENT-1)
 
 ---
 

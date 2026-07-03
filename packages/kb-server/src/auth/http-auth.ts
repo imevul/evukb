@@ -6,7 +6,9 @@ import { isApiKeySecret } from './token-hash.js';
 
 const READ_POST_SUFFIXES = ['/search', '/ask', '/tools/kb'] as const;
 
-export type HttpAuthActor = { kind: 'dev' } | { kind: 'api_key'; tokenId: string };
+export type HttpAuthActor =
+  | { kind: 'dev' }
+  | { kind: 'api_key'; tokenId: string; scopes: import('@evu/kb-core').KbAuthScope[] };
 
 /**
  * Auth is fail-closed by default. Unauthenticated access is allowed only when
@@ -96,7 +98,11 @@ export async function enforceHttpAuth(
     throw ApiError.forbidden('API key workspace does not match request workspace.');
   }
 
-  request.evuKbActor = { kind: 'api_key', tokenId: authenticated.tokenId };
+  request.evuKbActor = {
+    kind: 'api_key',
+    tokenId: authenticated.tokenId,
+    scopes: authenticated.scopes,
+  };
 
   if (authenticated.scopes.includes('kb:write')) {
     return;

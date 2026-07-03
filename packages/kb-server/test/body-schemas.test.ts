@@ -61,8 +61,11 @@ describe('HTTP body schemas', () => {
     expect(() =>
       parseBody(tokenCreateBodySchema, { name: 'ci', scopes: ['kb:read'] }),
     ).not.toThrow();
-    expect(() => parseBody(tokenCreateBodySchema, { name: 'ci', scopes: ['kb:admin'] })).toThrow(
-      ApiError,
-    );
+    expect(() =>
+      parseBody(tokenCreateBodySchema, { name: 'ci', scopes: ['kb:admin'] }),
+    ).not.toThrow();
+    expect(() =>
+      parseBody(tokenCreateBodySchema, { name: 'ci', scopes: ['kb:superuser'] }),
+    ).toThrow(ApiError);
   });
 });

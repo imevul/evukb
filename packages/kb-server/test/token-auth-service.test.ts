@@ -37,10 +37,20 @@ describe('TokenAuthService scope defaults', () => {
     expect(mcpToken.scopes).toEqual(['kb:read']);
   });
 
+  it('accepts kb:admin scope', async () => {
+    const { service } = buildService();
+    const apiKey = await service.createApiKey({
+      name: 'admin',
+      scopes: ['kb:admin'],
+      workspaceId: 'ws-1',
+    });
+    expect(apiKey.scopes).toEqual(['kb:admin']);
+  });
+
   it('rejects unknown scopes', async () => {
     const { service } = buildService();
     await expect(
-      service.createApiKey({ name: 'ci', scopes: ['kb:admin' as never], workspaceId: 'ws-1' }),
+      service.createApiKey({ name: 'ci', scopes: ['kb:superuser' as never], workspaceId: 'ws-1' }),
     ).rejects.toThrow(/Invalid scope/);
   });
 });

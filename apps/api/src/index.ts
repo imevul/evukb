@@ -3,12 +3,15 @@ import { pathToFileURL } from 'node:url';
 import { createEvuKbServer } from '@evu/kb-server';
 
 import { loadApiConfig } from './config.js';
+import { resolveRankingRegistryForApi } from './example-ranking-strategies.js';
 
 export async function main(): Promise<void> {
   const config = loadApiConfig();
+  const rankingRegistry = await resolveRankingRegistryForApi();
   const server = await createEvuKbServer({
     blobRoot: config.blobRoot,
     ...(config.databaseUrl ? { connectionString: config.databaseUrl } : {}),
+    ...(rankingRegistry ? { rankingRegistry } : {}),
   });
 
   await server.listen({

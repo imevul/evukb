@@ -1,7 +1,11 @@
 import type { RankingStrategySummary } from '@evu/kb-sdk';
 
-function strategyRequiresEmbedding(strategyId: string): boolean {
-  return strategyId === 'semantic_only';
+function strategyRequiresEmbedding(strategy: RankingStrategySummary): boolean {
+  return strategy.requiresEmbedding === true;
+}
+
+function strategyLabel(strategy: RankingStrategySummary): string {
+  return strategy.label ?? strategy.id;
 }
 
 export type RankingStrategySelectProps = {
@@ -26,11 +30,11 @@ export function RankingStrategySelect({
         <option value="">Inherit (corpus / workspace default)</option>
         {strategies.map((strategy) => (
           <option
-            disabled={strategyRequiresEmbedding(strategy.id) && !embeddingConfigured}
+            disabled={strategyRequiresEmbedding(strategy) && !embeddingConfigured}
             key={strategy.id}
             value={strategy.id}
           >
-            {strategy.id} (v{strategy.version})
+            {strategyLabel(strategy)} (v{strategy.version})
           </option>
         ))}
       </select>

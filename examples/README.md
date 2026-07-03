@@ -60,3 +60,18 @@ Most MCP clients (IDE harnesses, agent frameworks) only need the server URL
 and headers; the JSON-RPC fixture documents the wire shape for hand-rolled
 clients. See [`docs/MCP-AGENT-GUIDE.md`](../docs/MCP-AGENT-GUIDE.md) for tool
 routing guidance.
+
+## `custom-ranking-strategy/`
+
+Reference ranking strategy plugin package (SPEC §13, F-4). Shows preset and
+custom `rank()` patterns with golden tests and operator API fixtures.
+
+| Path | Shows |
+| --- | --- |
+| [`custom-ranking-strategy/README.md`](./custom-ranking-strategy/README.md) | Boot-time, preset, and importPath registration |
+| `custom-ranking-strategy/integration/register-boost-agent-notes-preset.request.json` | `POST .../settings/ranking/strategies` preset body |
+| `custom-ranking-strategy/integration/register-prefer-docs-import-path.request.json` | importPath body (substitute absolute path under allowlist) |
+| `custom-ranking-strategy/test/` | Golden tests run via root `pnpm test` |
+
+Requires `EVUKB_ENABLE_RANKING_PLUGIN_RELOAD=true` and a **`kb:admin`** API key
+for register/unregister routes.

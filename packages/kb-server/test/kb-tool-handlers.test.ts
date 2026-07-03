@@ -1,3 +1,4 @@
+import { createRankingStrategyRegistry } from '@evu/kb-core';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { EvuKbRuntime } from '../src/index.js';
@@ -8,6 +9,7 @@ function createRuntime(overrides: {
   askCorpora?: ReturnType<typeof vi.fn>;
 }): EvuKbRuntime {
   return {
+    rankingRegistry: createRankingStrategyRegistry(),
     searchService: {
       search: overrides.search ?? vi.fn().mockResolvedValue([]),
       searchAcrossCorpora: overrides.search ?? vi.fn().mockResolvedValue([]),

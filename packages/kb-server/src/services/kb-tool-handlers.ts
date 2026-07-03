@@ -13,7 +13,6 @@ import type {
 } from '@evu/kb-core';
 import {
   buildDocumentInventoryRows,
-  defaultRankingStrategyRegistry,
   hasListDocumentsInventoryOptions,
   parseFrontmatter,
   readNodeFrontmatter,
@@ -21,6 +20,7 @@ import {
 
 import { ApiError } from '../errors.js';
 import type { EvuKbRuntime } from '../runtime/types.js';
+import { assertValidRankingStrategyId } from '../search/validate-ranking-strategy.js';
 
 function readSuccess<T>(
   action: KbReadToolSuccessResponse['action'],
@@ -29,15 +29,11 @@ function readSuccess<T>(
   return { ok: true, action, result };
 }
 
-function assertValidRankingStrategyId(rankingStrategyId: string | undefined): void {
-  if (rankingStrategyId === undefined) {
-    return;
-  }
-  try {
-    defaultRankingStrategyRegistry.resolve(rankingStrategyId);
-  } catch {
-    throw ApiError.validation(`Unknown ranking strategy: ${rankingStrategyId}`);
-  }
+function assertRankingStrategyForRuntime(
+  runtime: EvuKbRuntime,
+  rankingStrategyId: string | undefined,
+): void {
+  assertValidRankingStrategyId(runtime.rankingRegistry, rankingStrategyId);
 }
 
 export async function handleListCorpora(
@@ -59,7 +55,7 @@ export async function handleSearch(
     throw ApiError.validation('corpusId or corpusIds is required for search.');
   }
 
-  assertValidRankingStrategyId(request.rankingStrategyId);
+  assertRankingStrategyForRuntime(runtime, request.rankingStrategyId);
 
   const searchRequest = {
     ...(request.query !== undefined ? { query: request.query } : {}),
@@ -198,7 +194,7 @@ export async function handleAskTool(
     throw ApiError.validation('corpusId or corpusIds is required for ask.');
   }
 
-  assertValidRankingStrategyId(request.rankingStrategyId);
+  assertRankingStrategyForRuntime(runtime, request.rankingStrategyId);
 
   const response = await runtime.askService.askCorpora(workspaceId, {
     question: request.question,

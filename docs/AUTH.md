@@ -8,7 +8,7 @@ API keys and MCP tokens for production use.
 
 | Actor | Mechanism | Scope |
 | --- | --- | --- |
-| HTTP clients | `Authorization: Bearer <api-key>` | Workspace-scoped `kb:read` / `kb:write` |
+| HTTP clients | `Authorization: Bearer <api-key>` | Workspace-scoped `kb:read` / `kb:write` / `kb:admin` |
 | MCP clients | MCP bearer token or configured dev token | Workspace header + token scopes |
 | Agent tools | `POST /api/workspaces/:id/tools/kb` with API key | Read/write classified per action |
 
@@ -25,6 +25,12 @@ token hashes, and changing it invalidates all existing credentials.
 API keys and MCP tokens are created with `kb:read` scope by default; an empty
 scope list is never stored. The plaintext credential is returned exactly once
 from the create/rotate response and is not retrievable afterwards.
+
+### `kb:admin` (operators only)
+
+- Workspace administration such as ranking plugin register/uninstall.
+- **Do not** mint `kb:admin` for agent MCP tokens (Cursor, orchestration hosts).
+- `kb:admin` does not imply `kb:write`; operator keys stay separate from agent keys.
 
 ## Explicitly deferred
 

@@ -18,6 +18,12 @@ export const KB_AUTH_SCOPE_AREAS: KbAuthScopeArea[] = [
     label: 'Write',
     description: 'Create, append, update, and delete agent-notes via tools/kb and MCP.',
   },
+  {
+    id: 'kb:admin',
+    label: 'Admin',
+    description:
+      'Workspace administration such as ranking plugin install/uninstall. Not for agent MCP tokens.',
+  },
 ];
 
 export type KbAuthScopePickerProps = {
@@ -75,6 +81,9 @@ export function kbAuthScopesFromSelection(selected: Set<KbAuthScope>): KbAuthSco
   }
   if (selected.has('kb:write')) {
     scopes.push('kb:write');
+  }
+  if (selected.has('kb:admin')) {
+    scopes.push('kb:admin');
   }
   return scopes;
 }

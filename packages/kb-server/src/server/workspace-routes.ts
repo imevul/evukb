@@ -18,6 +18,7 @@ import { kbToolRoutesPlugin } from '../routes/kb-tool-routes.js';
 import { linkRoutesPlugin } from '../routes/link-routes.js';
 import { okfRoutesPlugin } from '../routes/okf-routes.js';
 import { portableRoutesPlugin } from '../routes/portable-routes.js';
+import { rankingStrategyRoutesPlugin } from '../routes/ranking-strategy-routes.js';
 import { searchRoutesPlugin } from '../routes/search-routes.js';
 import { secretRoutesPlugin } from '../routes/secret-routes.js';
 import { settingsRoutesPlugin } from '../routes/settings-routes.js';
@@ -69,6 +70,7 @@ export async function registerWorkspaceRoutes(
       await workspaceRoutes.register(corpusRoutesPlugin, {
         corpora: runtime.corpora,
         fileManager: runtime.fileManager,
+        rankingRegistry: runtime.rankingRegistry,
       });
       await workspaceRoutes.register(fileRoutesPlugin, {
         fileManager: runtime.fileManager,
@@ -113,6 +115,9 @@ export async function registerWorkspaceRoutes(
       });
       await workspaceRoutes.register(settingsRoutesPlugin, {
         settings: runtime.settingsService,
+      });
+      await workspaceRoutes.register(rankingStrategyRoutesPlugin, {
+        rankingPlugins: runtime.rankingStrategyPluginService,
       });
       await workspaceRoutes.register(diagnosticsRoutesPlugin, {
         jobQueue: runtime.jobQueue,

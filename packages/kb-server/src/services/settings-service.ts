@@ -17,6 +17,7 @@ import {
   resolveEmbeddingChunkingStrategyFromSettings,
   resolveMaxChunkTokensFromSettings,
   resolveRankingStrategyIdSetting,
+  toRankingStrategySummary,
   validateAiProviderSettings,
   validateMutationApprovalPolicy,
   validateRankingSettings,
@@ -29,6 +30,7 @@ import {
 } from '../adapters/workspace-providers.js';
 import { isSecretsKeyConfigured } from '../auth/secret-crypto.js';
 import { ApiError } from '../errors.js';
+import { assertValidRankingStrategyId } from '../search/validate-ranking-strategy.js';
 
 export type SettingsServiceDeps = {
   workspaces: WorkspaceRepository;
@@ -130,6 +132,11 @@ export class SettingsService {
       if (validationError) {
         throw ApiError.validation(validationError);
       }
+
+      const incomingStrategyId = input.settings.rankingStrategyId;
+      if (typeof incomingStrategyId === 'string') {
+        assertValidRankingStrategyId(this.#rankingRegistry, incomingStrategyId);
+      }
     }
 
     const updated = await this.#workspaces.update(workspaceId, {
@@ -172,10 +179,9 @@ export class SettingsService {
       source:
         resolvedStrategy.source === 'default' && hasStored ? 'database' : resolvedStrategy.source,
       note: 'Hybrid RRF v1 applies keyword, semantic, path, recency, OKF citation, and exact title boosts from workspace, corpus, and request settings.',
-      availableStrategies: this.#rankingRegistry.list().map((strategy) => ({
-        id: strategy.id,
-        version: strategy.version,
-      })),
+      availableStrategies: this.#rankingRegistry
+        .list()
+        .map((strategy) => toRankingStrategySummary(strategy)),
     };
   }
 

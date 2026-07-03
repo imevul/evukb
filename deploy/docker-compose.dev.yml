@@ -57,6 +57,10 @@ services:
       # Optional local embeddings: docker compose --profile local-embed up -d ollama
       # then set EVUKB_EMBEDDING_* to http://ollama:11434/v1 (see deploy/local-embed.env.example)
       EVUKB_WEB_ORIGIN: http://localhost:4200
+      # Example ranking strategies from examples/custom-ranking-strategy/ (dev reference).
+      EVUKB_REGISTER_EXAMPLE_RANKING_STRATEGIES: ${EVUKB_REGISTER_EXAMPLE_RANKING_STRATEGIES:-true}
+      EVUKB_EXAMPLE_RANKING_STRATEGIES_MODULE: /workspace/examples/custom-ranking-strategy/src/register-dev.ts
+      EVUKB_ENABLE_RANKING_PLUGIN_RELOAD: ${EVUKB_ENABLE_RANKING_PLUGIN_RELOAD:-true}
     ports:
       - "4201:4201"
     volumes:

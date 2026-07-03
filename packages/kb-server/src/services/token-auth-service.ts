@@ -1,6 +1,7 @@
 import {
   type ApiKeyRecord,
   type AuthenticatedToken,
+  allKbAuthScopes,
   type CreatedApiKey,
   type CreatedMcpToken,
   defaultKbReadScopes,
@@ -28,7 +29,7 @@ function normalizeScopes(scopes?: KbAuthScope[]): KbAuthScope[] {
   }
 
   for (const scope of scopes) {
-    if (scope !== 'kb:read' && scope !== 'kb:write') {
+    if (!allKbAuthScopes.includes(scope)) {
       throw ApiError.validation(`Invalid scope: ${scope}`);
     }
   }

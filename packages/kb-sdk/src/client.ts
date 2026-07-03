@@ -40,7 +40,13 @@ import type {
   RotateSecretRequest,
   SecretRecord,
 } from './secrets.js';
-import type { AiProvidersView, SettingsResponse, UpdateSettingsRequest } from './settings.js';
+import type {
+  AiProvidersView,
+  RankingStrategiesListResponse,
+  RankingStrategyUsageView,
+  SettingsResponse,
+  UpdateSettingsRequest,
+} from './settings.js';
 import { parseSseEvents } from './sse.js';
 import type { KnowledgeCorpusStats } from './stats.js';
 import type { SyncEnqueueResponse } from './sync.js';
@@ -549,6 +555,82 @@ export class EvuKbClient {
       'PATCH',
       this.#workspacePath(workspaceId, '/settings'),
       body,
+    );
+  }
+
+  async listRankingStrategies(workspaceId: string): Promise<RankingStrategiesListResponse> {
+    return this.#requestJson<RankingStrategiesListResponse>(
+      'GET',
+      this.#workspacePath(workspaceId, '/settings/ranking/strategies'),
+    );
+  }
+
+  async getRankingStrategyUsage(
+    workspaceId: string,
+    strategyId: string,
+  ): Promise<RankingStrategyUsageView> {
+    return this.#requestJson<RankingStrategyUsageView>(
+      'GET',
+      this.#workspacePath(
+        workspaceId,
+        `/settings/ranking/strategies/${encodeURIComponent(strategyId)}/usage`,
+      ),
+    );
+  }
+
+  async registerRankingStrategyPreset(
+    workspaceId: string,
+    body: {
+      preset: {
+        id: string;
+        version: string;
+        label?: string;
+        description?: string;
+        weights?: Record<string, unknown>;
+        postRank?: string;
+      };
+      force?: boolean;
+    },
+  ): Promise<{ strategy: import('./settings.js').RankingStrategySummary }> {
+    return this.#requestJson(
+      'POST',
+      this.#workspacePath(workspaceId, '/settings/ranking/strategies'),
+      body,
+    );
+  }
+
+  async registerRankingStrategyExample(
+    workspaceId: string,
+    exampleId: string,
+    options?: { force?: boolean },
+  ): Promise<{ strategy: import('./settings.js').RankingStrategySummary }> {
+    return this.#requestJson(
+      'POST',
+      this.#workspacePath(workspaceId, '/settings/ranking/strategies'),
+      {
+        exampleId,
+        ...(options?.force ? { force: true } : {}),
+      },
+    );
+  }
+
+  async unregisterRankingStrategy(
+    workspaceId: string,
+    strategyId: string,
+  ): Promise<{
+    strategyId: string;
+    remediatedCorpusCount: number;
+    workspaceRemediated: boolean;
+    corpusFallbackStrategyId: string;
+    workspaceFallbackStrategyId: string;
+  }> {
+    return this.#requestJson(
+      'DELETE',
+      this.#workspacePath(
+        workspaceId,
+        `/settings/ranking/strategies/${encodeURIComponent(strategyId)}`,
+      ),
+      { confirm: true },
     );
   }
 

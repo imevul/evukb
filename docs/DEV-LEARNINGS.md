@@ -1121,3 +1121,47 @@ code into browser bundles. The kb-sdk `tsconfig.json` needed a project `referenc
 entry for kb-core, or `tsc --build` fails with TS6059/TS6307 rootDir errors when the
 path alias resolves to kb-core sources. Type the SDK's code field as
 `ApiErrorCode | (string & {})` so unknown codes from newer servers still parse.
+
+## 2026-07-03: F-1 Memory Banks — Out Of Scope
+
+Area: product boundary, agent writes, host integration
+
+Context: Brainstorm on whether full memory banks belong in EvuKB (ROADMAP F-1).
+Standalone EvuKB does not need cross-session agent memory. Host platforms own run
+lifecycle and memory injection. A separate EvuMemory project remains an option if
+memory infrastructure is needed later.
+
+Decision:
+- Memory banks are **not** in EvuKB; knowledge-only mission unchanged.
+- `agent-notes/` remains the only agent write path today (`assertAgentNotesPath`).
+- Operators can isolate agent writes in a dedicated corpus (e.g. vault synced via mount/git).
+- Standalone and embedded deployment are equally valid; combined vault + agent host is a supported pattern.
+
+Roadmap follow-ups:
+- **AGENT-1:** workspace + corpus settings for including `agent-notes/` in Ask/search (default true).
+- **AGENT-2:** path ACLs so agents can CRUD approved paths outside `agent-notes/`.
+- Per-agent workspace isolation needs operational testing before ACL scoping.
+
+Action: Updated `SPEC.md` §16 and §31, `docs/ROADMAP.md`, `docs/DEVELOPMENT.md`,
+`docs/INTEGRATION-HOST-SHAPES.md`.
+
+## 2026-07-03: F-4 Ranking Strategy Plugin API
+
+Area: ranking registry, kb:admin auth, operator plugin reload
+
+Context: Shipped mutable `RankingStrategyRegistry`, `PostRankHandlerRegistry`, kb:admin-gated
+plugin routes, unregister remediation, and `examples/custom-ranking-strategy/`.
+
+Learning:
+- Keep `kb:write` agent-only; plugin admin uses separate `kb:admin` scope.
+- Corpus `ranking_strategy_id` is NOT NULL — uninstall remediation sets corpora to workspace
+  fallback (or `hybrid_default_v1` when workspace default was the removed strategy).
+- Custom `rank()` cannot be JSON-registered; presets and allowlisted `importPath` only.
+- `examples/custom-ranking-strategy/` splits preset (`boost_agent_notes_v1`) and custom
+  `rank()` (`prefer_docs_prefix_v1`) with golden tests under `examples/**/test/` included
+  in root Vitest.
+- In-memory registry reload is per API process; multi-replica deploys need rolling restart or
+  boot-time registration.
+
+Action: See `packages/kb-core/src/search/ranking-registry.ts`,
+`packages/kb-server/src/services/ranking-strategy-plugin-service.ts`, `docs/EMBED.md`.

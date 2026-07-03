@@ -27,6 +27,8 @@ export type EvuKbServerOptions = {
   logger?: boolean;
   maxUploadBytes?: number;
   scope?: KnowledgeWorkspaceScope;
+  rankingRegistry?: import('@evu/kb-core').RankingStrategyRegistry;
+  postRankHandlers?: import('./search/post-rank-registry.js').PostRankHandlerRegistry;
 };
 
 declare module 'fastify' {
@@ -59,6 +61,8 @@ export async function createEvuKbServer(
     ...(options.bootstrapDevWorkspace !== undefined
       ? { bootstrapDevWorkspace: options.bootstrapDevWorkspace }
       : {}),
+    ...(options.rankingRegistry ? { rankingRegistry: options.rankingRegistry } : {}),
+    ...(options.postRankHandlers ? { postRankHandlers: options.postRankHandlers } : {}),
   });
 
   const logLevel = process.env.EVUKB_LOG_LEVEL?.trim();
