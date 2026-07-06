@@ -9,6 +9,7 @@ import multipart from '@fastify/multipart';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import { assertTokenPepperConfigured, isHttpAuthRequired } from './auth/http-auth.js';
+import { bootstrapOperatorApiKeyIfNeeded } from './auth/operator-auth.js';
 import { ApiError, type ApiErrorBody } from './errors.js';
 import { probeBlobStore } from './health-probes.js';
 import { resolveMaxUploadBytes } from './limits.js';
@@ -72,6 +73,14 @@ export async function createEvuKbServer(
   });
   server.decorate('evuKbBlobStore', blobProbe.store);
   server.decorate('evuKbRuntime', runtime);
+
+  if (isHttpAuthRequired()) {
+    bootstrapOperatorApiKeyIfNeeded(process.env, {
+      info: (_payload, message) => {
+        server.log.info(message);
+      },
+    });
+  }
 
   const webOrigin = process.env.EVUKB_WEB_ORIGIN;
   if (webOrigin) {

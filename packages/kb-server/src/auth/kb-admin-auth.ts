@@ -9,7 +9,7 @@ export function readHttpAuthScopes(request: FastifyRequest): KbAuthScope[] {
   if (!actor) {
     return [];
   }
-  if (actor.kind === 'dev') {
+  if (actor.kind === 'dev' || actor.kind === 'operator') {
     return ['kb:read', 'kb:write', 'kb:admin'];
   }
   if (actor.kind === 'api_key') {

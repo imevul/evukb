@@ -32,9 +32,7 @@ async function resolveWorkspaceParam(
   workspaces: WorkspaceRepository,
   workspaceParam: string,
 ): Promise<Workspace> {
-  const byId = UUID_PATTERN.test(workspaceParam)
-    ? await workspaces.getById(workspaceParam)
-    : null;
+  const byId = UUID_PATTERN.test(workspaceParam) ? await workspaces.getById(workspaceParam) : null;
   const workspace = byId ?? (await workspaces.getBySlug(workspaceParam));
   if (!workspace) {
     throw ApiError.workspaceNotFound(workspaceParam);
@@ -49,7 +47,10 @@ function filterWorkspacesForActor(
   if (actor.kind === 'dev' || isCollectionAdmin(actor)) {
     return all;
   }
-  return all.filter((workspace) => workspace.id === actor.workspaceId);
+  if (actor.kind === 'api_key') {
+    return all.filter((workspace) => workspace.id === actor.workspaceId);
+  }
+  return all;
 }
 
 export const workspaceCollectionRoutesPlugin: FastifyPluginAsync<
@@ -83,10 +84,7 @@ export const workspaceCollectionRoutesPlugin: FastifyPluginAsync<
     async (request) => {
       const actor = await enforceCollectionAuth(options.tokenAuth, request);
       requireCollectionAdmin(actor);
-      const workspace = await resolveWorkspaceParam(
-        options.workspaces,
-        request.params.workspaceId,
-      );
+      const workspace = await resolveWorkspaceParam(options.workspaces, request.params.workspaceId);
       const corpora = await options.corpora.listByWorkspace(workspace.id);
       if (corpora.length > 0) {
         throw ApiError.conflict(

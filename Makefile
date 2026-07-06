@@ -15,6 +15,7 @@ down:
 	pnpm run down
 
 prod:
+	scripts/ensure-operator-api-key.sh
 	pnpm run prod
 
 update:

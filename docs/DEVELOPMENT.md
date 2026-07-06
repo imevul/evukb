@@ -210,20 +210,35 @@ For llama.cpp or other self-hosted servers, see
 
 The production compose stack serves the Web UI through Vite preview with a
 same-origin `/api` proxy by default. Leave `VITE_EVUKB_API_BASE_URL` unset in
-root `.env` and set `EVUKB_API_PROXY_TARGET=http://evukb-api:4201` at runtime in
-[`deploy/docker-compose.yml`](../deploy/docker-compose.yml).
+root `.env` so the browser calls `/api` on the web hostname. The `evukb-web`
+container proxies to `evukb-api:4201` and injects `EVUKB_OPERATOR_API_KEY`
+(or `EVUKB_WEB_API_KEY` when set) server-side — no browser credential step.
 
-For split-host deployments (Web and API on different public hostnames), set in root
-`.env`:
+`make prod` runs [`scripts/ensure-operator-api-key.sh`](../scripts/ensure-operator-api-key.sh)
+to append `EVUKB_OPERATOR_API_KEY` to `.env` when missing. Set `EVUKB_TOKEN_PEPPER`
+before first production start.
+
+**Recommended split-host layout:**
+
+- **Web hostname** — UI and `/api` (reverse proxy to `evukb-web:4200`). Operator auth is injected by the web container.
+- **API hostname** — external MCP/SDK clients on `:4201` with workspace-scoped keys.
+
+Avoid pointing the browser directly at the API hostname (`VITE_EVUKB_API_BASE_URL`)
+for operator UI use; that bypasses server-side injection.
+
+Legacy split-host (browser → API host directly) remains possible but requires
+setting `EVUKB_WEB_API_KEY` to a workspace-scoped key in `.env` on `evukb-web`.
+
+For CORS when the browser does call the API host directly, set in root `.env`:
 
 ```env
 EVUKB_WEB_ORIGIN=https://evukb.example.com
 VITE_EVUKB_API_BASE_URL=https://evukb-api.example.com
 ```
 
-The web container writes these into `/config.js` at startup; restart `evukb-web`
-after changing them (`make prod` or `docker compose ... up -d --force-recreate evukb-web`).
-Point your reverse proxy at web `:4200` and API `:4201` (`/api`, `/health`, `/mcp` on the API host).
+The web container writes runtime config into `/config.js` at startup; restart `evukb-web`
+after changing `VITE_*` values (`make prod` or `docker compose ... up -d --force-recreate evukb-web`).
+Point your reverse proxy at web `:4200` and API `:4201` (`/api`, `/health`, `/mcp` on the API host when used externally).
 
 Workspace isolation golden tests live under `packages/kb-core/test/isolation-golden.test.ts`
 and `packages/kb-server/test/integration/isolation.integration.test.ts`.
@@ -246,6 +261,8 @@ The consolidated, code-verified env-var reference is [`docs/ENV.md`](ENV.md). Th
 | `EVUKB_BLOB_ROOT` | Local corpus blob directory |
 | `EVUKB_ALLOW_OPEN_AUTH` | Explicit dev-only opt-in for unauthenticated HTTP/MCP access; auth is fail-closed without it and it is ignored in production |
 | `EVUKB_TOKEN_PEPPER` | Required (non-empty) whenever auth is enforced; mixed into API key / MCP token hashes |
+| `EVUKB_OPERATOR_API_KEY` | Global operator bearer for production Web proxy + cross-workspace API access |
+| `EVUKB_WEB_API_KEY` | Optional workspace-scoped bearer for web proxy injection instead of operator key |
 | `EVUKB_SECRETS_KEY` | 32-byte hex key for workspace secret encryption |
 | `EVUKB_EMBEDDING_API_KEY` | Default embedding provider API key |
 | `EVUKB_CHAT_API_KEY` | Ask / chat provider API key (required for `/ask`) |

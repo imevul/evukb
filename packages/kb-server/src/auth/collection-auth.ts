@@ -3,10 +3,12 @@ import type { FastifyRequest } from 'fastify';
 import { ApiError } from '../errors.js';
 import type { TokenAuthService } from '../services/token-auth-service.js';
 import { isHttpAuthRequired } from './http-auth.js';
+import { isOperatorBearer } from './operator-auth.js';
 import { isApiKeySecret } from './token-hash.js';
 
 export type CollectionAuthActor =
   | { kind: 'dev' }
+  | { kind: 'operator' }
   | {
       kind: 'api_key';
       tokenId: string;
@@ -21,7 +23,7 @@ function parseBearer(authorization: string | undefined): string | null {
 }
 
 export function isCollectionAdmin(actor: CollectionAuthActor): boolean {
-  if (actor.kind === 'dev') {
+  if (actor.kind === 'dev' || actor.kind === 'operator') {
     return true;
   }
   return actor.scopes.includes('kb:admin');
@@ -39,6 +41,11 @@ export async function enforceCollectionAuth(
   const bearer = parseBearer(request.headers.authorization);
   if (!bearer) {
     throw ApiError.forbidden('API key is required.');
+  }
+
+  if (isOperatorBearer(bearer)) {
+    request.evuKbActor = { kind: 'operator' };
+    return { kind: 'operator' };
   }
 
   const authenticated = await tokenAuth.authenticateApiBearer(bearer);

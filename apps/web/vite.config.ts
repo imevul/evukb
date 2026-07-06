@@ -1,3 +1,4 @@
+import type { ClientRequest } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
@@ -10,12 +11,34 @@ export function resolveEvuKbApiProxyTarget(env: Record<string, string>): string 
   );
 }
 
+export function resolveWebProxyBearerToken(env: NodeJS.ProcessEnv = process.env): string | null {
+  const webApiKey = env.EVUKB_WEB_API_KEY?.trim();
+  if (webApiKey) {
+    return webApiKey;
+  }
+  const operatorKey = env.EVUKB_OPERATOR_API_KEY?.trim();
+  return operatorKey || null;
+}
+
+function injectWebProxyAuthorization(proxyReq: ClientRequest): void {
+  if (proxyReq.getHeader('authorization')) {
+    return;
+  }
+  const bearer = resolveWebProxyBearerToken();
+  if (bearer) {
+    proxyReq.setHeader('authorization', `Bearer ${bearer}`);
+  }
+}
+
 export function createEvuKbApiProxy(proxyTarget: string) {
   return {
     '/api': {
       target: proxyTarget,
       changeOrigin: true,
       configure: (proxy) => {
+        proxy.on('proxyReq', (proxyReq) => {
+          injectWebProxyAuthorization(proxyReq);
+        });
         proxy.on('proxyRes', (proxyRes) => {
           const contentType = proxyRes.headers['content-type'];
           if (typeof contentType === 'string' && contentType.includes('text/event-stream')) {
@@ -28,6 +51,11 @@ export function createEvuKbApiProxy(proxyTarget: string) {
     '/health': {
       target: proxyTarget,
       changeOrigin: true,
+      configure: (proxy) => {
+        proxy.on('proxyReq', (proxyReq) => {
+          injectWebProxyAuthorization(proxyReq);
+        });
+      },
     },
   } as const;
 }

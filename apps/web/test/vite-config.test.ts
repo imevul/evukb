@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { createEvuKbApiProxy, resolveEvuKbApiProxyTarget } from '../vite.config.js';
+import {
+  createEvuKbApiProxy,
+  resolveEvuKbApiProxyTarget,
+  resolveWebProxyBearerToken,
+} from '../vite.config.js';
 
 describe('EvuKB web vite proxy config', () => {
   it('defaults the API proxy target to localhost:4201', () => {
@@ -35,5 +39,17 @@ describe('EvuKB web vite proxy config', () => {
     const proxy = createEvuKbApiProxy('http://evukb-api:4201');
     expect(proxy['/api'].target).toBe('http://evukb-api:4201');
     expect(proxy['/health'].target).toBe('http://evukb-api:4201');
+  });
+
+  it('prefers EVUKB_WEB_API_KEY over EVUKB_OPERATOR_API_KEY for proxy injection', () => {
+    expect(
+      resolveWebProxyBearerToken({
+        EVUKB_WEB_API_KEY: 'evukb_api_web',
+        EVUKB_OPERATOR_API_KEY: 'evukb_ops_operator',
+      }),
+    ).toBe('evukb_api_web');
+    expect(resolveWebProxyBearerToken({ EVUKB_OPERATOR_API_KEY: 'evukb_ops_operator' })).toBe(
+      'evukb_ops_operator',
+    );
   });
 });

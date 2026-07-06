@@ -4,6 +4,8 @@ import type { FastifyInstance } from 'fastify';
 import { resolveChatProvider } from '../adapters/openai-chat.js';
 import { resolveEmbeddingProvider } from '../adapters/openai-embedding.js';
 import { resolveVectorBackend } from '../adapters/resolve-vector-store.js';
+import { isHttpAuthRequired } from '../auth/http-auth.js';
+import { isOperatorApiKeyConfigured } from '../auth/operator-auth.js';
 import { probeBlobStore, probeDatabase, probeProviders } from '../health-probes.js';
 import type { EvuKbRuntime } from '../runtime/types.js';
 import { readApiReferenceHtml } from './api-reference.js';
@@ -12,6 +14,8 @@ export type EvuKbHealth = {
   service: 'evukb-api';
   status: 'ok' | 'degraded';
   scope: string;
+  httpAuthRequired: boolean;
+  operatorAuthConfigured: boolean;
   database: {
     status: 'ok' | 'error' | 'not-configured';
     migrationsApplied?: number;
@@ -42,6 +46,8 @@ export function registerHealthRoutes(server: FastifyInstance, options: HealthRou
       service: 'evukb-api',
       status,
       scope: describeKnowledgeScope(scope),
+      httpAuthRequired: isHttpAuthRequired(),
+      operatorAuthConfigured: isOperatorApiKeyConfigured(),
       database: currentDatabase,
       blobStore: currentBlob.health,
     };

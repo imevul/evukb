@@ -2,12 +2,14 @@ import type { FastifyRequest } from 'fastify';
 
 import { ApiError } from '../errors.js';
 import type { TokenAuthService } from '../services/token-auth-service.js';
+import { isOperatorBearer } from './operator-auth.js';
 import { isApiKeySecret } from './token-hash.js';
 
 const READ_POST_SUFFIXES = ['/search', '/ask', '/tools/kb'] as const;
 
 export type HttpAuthActor =
   | { kind: 'dev' }
+  | { kind: 'operator' }
   | { kind: 'api_key'; tokenId: string; scopes: import('@evu/kb-core').KbAuthScope[] };
 
 /**
@@ -85,6 +87,11 @@ export async function enforceHttpAuth(
   const bearer = parseBearer(request.headers.authorization);
   if (!bearer) {
     throw ApiError.forbidden('API key is required.');
+  }
+
+  if (isOperatorBearer(bearer)) {
+    request.evuKbActor = { kind: 'operator' };
+    return;
   }
 
   const authenticated = await tokenAuth.authenticateApiBearer(bearer);

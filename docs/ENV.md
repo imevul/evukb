@@ -50,6 +50,9 @@ requests require credentials even outside production. See
 | `EVUKB_ALLOW_OPEN_AUTH` | Explicit dev-only opt-in for unauthenticated HTTP/MCP access; ignored in production | unset (auth enforced) |
 | `EVUKB_REQUIRE_API_KEY` | Force API-key auth on workspace routes even when the open-auth opt-in is set | `false` |
 | `EVUKB_TOKEN_PEPPER` | Required (non-empty) whenever auth is enforced; mixed into API-key and MCP-token hashes | — |
+| `EVUKB_OPERATOR_API_KEY` | Global operator bearer (`evukb_ops_…`) for cross-workspace access; validated by API and injected by web proxy | auto-added by `make prod` when unset |
+| `EVUKB_BOOTSTRAP_OPERATOR_API_KEY` | When `false`, API does not auto-generate an operator key on startup | enabled |
+| `EVUKB_WEB_API_KEY` | Optional workspace-scoped bearer injected by `evukb-web` instead of the operator key | unset |
 | `EVUKB_SECRETS_KEY` | 32-byte hex key for workspace secret encryption | — |
 
 ## MCP

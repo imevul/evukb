@@ -20,6 +20,12 @@ describe('kb admin auth', () => {
     expect(() => assertKbAdminScope(mockRequest(['kb:admin']) as never)).not.toThrow();
   });
 
+  it('allows operator actor', () => {
+    expect(() =>
+      assertKbAdminScope({ evuKbActor: { kind: 'operator' } } as never),
+    ).not.toThrow();
+  });
+
   it('rejects kb:write without kb:admin', () => {
     expect(() => assertKbAdminScope(mockRequest(['kb:write']) as never)).toThrow(ApiError);
     try {

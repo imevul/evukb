@@ -13,6 +13,8 @@ const healthResponse = {
   service: 'evukb-api',
   status: 'ok',
   scope: 'local-dev',
+  httpAuthRequired: true,
+  operatorAuthConfigured: true,
   database: { status: 'ok', migrationsApplied: 12 },
   blobStore: { status: 'ok', root: '/data' },
 };

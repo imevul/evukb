@@ -67,6 +67,7 @@ agents, with core operator controls and KB/RAG workflows.
 | P1-11 | HTTP API-key middleware for production/API-key mode, read/write classification, and workspace scope enforcement | [X] |
 | P1-12 | Portable `.evukb` export/import plus generic zip/tar archive import (auto-detect, path validation, operator UI) | [X] |
 | P1-13 | Workspace collection HTTP API (`GET`/`POST`/`DELETE`), `/workspaces` management UI, browser-persisted workspace selection, and invalid-workspace degraded shell | [X] |
+| P1-14 | Global operator API token (`EVUKB_OPERATOR_API_KEY`), internal web→API proxy auth injection, and `make prod` `.env` bootstrap | [X] |
 
 ---
 
@@ -112,7 +113,7 @@ integration, and optional npm/package consumption.
 | P3-4 | Add workspace isolation golden coverage across HTTP, service, DB, vector, blob, MCP, and tool surfaces (note: shipped as kb-core golden fixtures plus an HTTP-level integration golden in kb-server; there are no dedicated vector- or SQL-layer isolation goldens) | [X] |
 | P3-5 | Add security invariant tests for symlink escapes, upload limits, markdown sanitization, zip bomb limits, binary indexing policy, and citation validation timeouts (note: markdown sanitization is only tested in `kb-ui` markdown-safety tests) | [X] |
 | P3-6 | Align documented env/config with implementation, including provider env names, embedding dimensions, ranking defaults, and full settings precedence (note: initial alignment was incomplete; the consolidated code-verified reference now lives in [`docs/ENV.md`](./ENV.md)) | [X] |
-| P3-7 | Implement or explicitly defer standalone human auth: local password login, browser API-key flow, or documented headless/API-key-only mode | [X] |
+| P3-7 | Implement or explicitly defer standalone human auth: local password login, browser API-key flow, or documented headless/API-key-only mode (shipped: global `EVUKB_OPERATOR_API_KEY` + internal web proxy; no browser auth UI) | [X] |
 | P3-8 | Fix production Web/API deployment so static assets can reliably reach the API without relying on runtime-only Vite env values | [X] |
 | P3-9 | Complete SDK coverage for all stable OpenAPI operations, including corpus delete and node rename/move/bulk delete | [X] |
 | P3-10 | Narrow and document public package surfaces for `@evu/kb-core`, `@evu/kb-server`, `@evu/kb-sdk`, and `@evu/kb-ui` | [X] |
