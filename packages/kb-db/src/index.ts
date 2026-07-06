@@ -16,4 +16,4 @@ export {
 export { UsageRecordRepository } from './repositories/usage-record-repository.js';
 export { WorkspaceRepository } from './repositories/workspace-repository.js';
 export * from './schema/index.js';
-export { devWorkspaceSlug, ensureDevWorkspace } from './seed.js';
+export { devWorkspaceSlug, ensureDevWorkspace, ensureWorkspace } from './seed.js';

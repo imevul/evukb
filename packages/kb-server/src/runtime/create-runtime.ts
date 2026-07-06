@@ -13,6 +13,7 @@ import {
   CorpusRepository,
   createDb,
   ensureDevWorkspace,
+  ensureWorkspace,
   LinkRepository,
   McpTokenRepository,
   MutationApprovalRepository,
@@ -85,6 +86,12 @@ export async function createEvuKbRuntime(
 
   if (options.bootstrapDevWorkspace ?? process.env.NODE_ENV !== 'production') {
     await ensureDevWorkspace(db);
+  } else {
+    const bootstrapSlug = process.env.EVUKB_BOOTSTRAP_WORKSPACE_SLUG?.trim();
+    if (bootstrapSlug) {
+      const bootstrapName = process.env.EVUKB_BOOTSTRAP_WORKSPACE_NAME?.trim() || bootstrapSlug;
+      await ensureWorkspace(db, { slug: bootstrapSlug, name: bootstrapName });
+    }
   }
 
   const blobStore = new LocalFilesystemBlobStore({ rootDir: options.blobRoot });
