@@ -209,12 +209,21 @@ For llama.cpp or other self-hosted servers, see
 ### Production Web deployment
 
 The production compose stack serves the Web UI through Vite preview with a
-same-origin `/api` proxy. Build the Web image with an empty `VITE_EVUKB_API_BASE_URL`
-(default) and set `EVUKB_API_PROXY_TARGET=http://evukb-api:4201` at runtime in
+same-origin `/api` proxy by default. Leave `VITE_EVUKB_API_BASE_URL` unset in
+root `.env` and set `EVUKB_API_PROXY_TARGET=http://evukb-api:4201` at runtime in
 [`deploy/docker-compose.yml`](../deploy/docker-compose.yml).
 
-For split-host deployments where the browser must call a separate API origin, pass
-`VITE_EVUKB_API_BASE_URL` as a Docker build `ARG` when building `apps/web/Dockerfile`.
+For split-host deployments (Web and API on different public hostnames), set in root
+`.env`:
+
+```env
+EVUKB_WEB_ORIGIN=https://evukb.example.com
+VITE_EVUKB_API_BASE_URL=https://evukb-api.example.com
+```
+
+The web container writes these into `/config.js` at startup; restart `evukb-web`
+after changing them (`make prod` or `docker compose ... up -d --force-recreate evukb-web`).
+Point your reverse proxy at web `:4200` and API `:4201` (`/api`, `/health`, `/mcp` on the API host).
 
 Workspace isolation golden tests live under `packages/kb-core/test/isolation-golden.test.ts`
 and `packages/kb-server/test/integration/isolation.integration.test.ts`.

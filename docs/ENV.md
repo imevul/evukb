@@ -116,17 +116,22 @@ and [`deploy/local-embed.env.example`](../deploy/local-embed.env.example).
 | `EVUKB_SYNC_SCHEDULE_CRON` | Cron for the scheduled mount/git sync tick | `*/5 * * * *` |
 | `EVUKB_ENABLE_GIT_WRITEBACK` | Reserved gate for git writeback (SYNC-5 design accepted, SYNC-6 not implemented; see [`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md)) | `false` |
 
-## Web app (build/dev time)
+## Web app (browser config)
 
-These are Vite variables for `apps/web`, resolved at build or dev-server time,
-not runtime API configuration.
+These variables configure the Web UI in `apps/web`. In Docker production (`make prod`),
+the web container writes them into `/config.js` at startup from root `.env` — no image
+rebuild is required when they change. During local Vite dev (`make dev`), Vite reads
+them from `.env` at dev-server time.
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
-| `VITE_EVUKB_API_BASE_URL` | Browser API origin; empty uses same-origin `/api` via the proxy. Pass as a Docker build `ARG` for split-host deployments | empty |
+| `VITE_EVUKB_API_BASE_URL` | Browser API origin; empty uses same-origin `/api` via the Vite preview proxy | empty |
 | `VITE_EVUKB_WORKSPACE_ID` | Default workspace slug for the Web app | `local-dev` |
 | `VITE_EVUKB_MCP_BASE_URL` | MCP base URL shown in the in-app MCP setup guide | derived from API origin |
-| `VITE_EVUKB_API_PROXY_TARGET` | Alternative to `EVUKB_API_PROXY_TARGET` for the Vite proxy | `http://localhost:4201` |
+| `VITE_EVUKB_API_PROXY_TARGET` | Alternative to `EVUKB_API_PROXY_TARGET` for the Vite dev/preview proxy | `http://localhost:4201` |
+
+Split-host production also requires `EVUKB_WEB_ORIGIN` on the API process (see API process
+table above) so cross-origin browser requests from the Web UI are allowed.
 
 ## Container timezone (Docker Compose)
 

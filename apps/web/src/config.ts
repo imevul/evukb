@@ -1,12 +1,14 @@
-// VITE_EVUKB_WORKSPACE_ID defaults to the dev bootstrap slug.
-// VITE_EVUKB_API_BASE_URL empty uses same-origin /api (Vite dev/preview proxy).
-// VITE_EVUKB_API_PROXY_TARGET or EVUKB_API_PROXY_TARGET configures the proxy destination
-// (Docker dev: http://evukb-api:4201). For split-host production builds, set
-// VITE_EVUKB_API_BASE_URL at image build time instead of relying on runtime env.
+// VITE_EVUKB_* in .env are read at Vite dev time and at Docker prod container start
+// (via /config.js). Empty apiBaseUrl uses same-origin /api through the Vite proxy.
+// EVUKB_API_PROXY_TARGET configures the proxy destination (Docker: http://evukb-api:4201).
+
+import { resolveEvuKbRuntimeConfig } from './runtime-config.js';
+
+const runtimeConfig = resolveEvuKbRuntimeConfig();
 
 export const appConfig = {
-  apiBaseUrl: import.meta.env.VITE_EVUKB_API_BASE_URL ?? '',
-  workspaceId: import.meta.env.VITE_EVUKB_WORKSPACE_ID ?? 'local-dev',
+  apiBaseUrl: runtimeConfig.apiBaseUrl,
+  workspaceId: runtimeConfig.workspaceId,
 } as const;
 
 export const appRoutes = {

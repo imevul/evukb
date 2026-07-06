@@ -49,6 +49,9 @@ services:
     environment:
       TZ: ${TZ:-UTC}
       EVUKB_API_PROXY_TARGET: http://evukb-api:4201
+      VITE_EVUKB_API_BASE_URL: ${VITE_EVUKB_API_BASE_URL:-}
+      VITE_EVUKB_MCP_BASE_URL: ${VITE_EVUKB_MCP_BASE_URL:-}
+      VITE_EVUKB_WORKSPACE_ID: ${VITE_EVUKB_WORKSPACE_ID:-local-dev}
     ports:
       - "${EVUKB_WEB_PORT:-4200}:4200"
 

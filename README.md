@@ -58,6 +58,10 @@ make prod
 Auth is fail-closed in production. See [`docs/AUTH.md`](./docs/AUTH.md) for API
 keys, MCP tokens, and workspace scoping.
 
+For split-host reverse-proxy setups (separate Web and API public URLs), set
+`EVUKB_WEB_ORIGIN` and `VITE_EVUKB_API_BASE_URL` in `.env` before `make prod`.
+See [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) (Production Web deployment).
+
 ## Commands
 
 | Command | Purpose |

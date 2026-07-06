@@ -1,4 +1,5 @@
 import { appConfig } from './config.js';
+import { resolveEvuKbRuntimeConfig } from './runtime-config.js';
 
 export const MCP_TOKEN_PLACEHOLDER = 'YOUR_MCP_TOKEN';
 
@@ -13,13 +14,13 @@ export type McpHarnessGuide = {
 };
 
 export function resolveMcpServerUrl(): string {
-  const fromEnv = import.meta.env.VITE_EVUKB_MCP_BASE_URL?.trim();
-  if (fromEnv) {
-    return fromEnv.endsWith('/mcp') ? fromEnv : `${fromEnv.replace(/\/$/, '')}/mcp`;
+  const { mcpBaseUrl, apiBaseUrl } = resolveEvuKbRuntimeConfig();
+  if (mcpBaseUrl) {
+    return mcpBaseUrl.endsWith('/mcp') ? mcpBaseUrl : `${mcpBaseUrl.replace(/\/$/, '')}/mcp`;
   }
 
-  if (appConfig.apiBaseUrl) {
-    const origin = appConfig.apiBaseUrl.replace(/\/api\/?$/, '');
+  if (apiBaseUrl) {
+    const origin = apiBaseUrl.replace(/\/api\/?$/, '');
     return `${origin.replace(/\/$/, '')}/mcp`;
   }
 
