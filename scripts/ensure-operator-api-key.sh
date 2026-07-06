@@ -9,8 +9,8 @@ log() {
   echo "$*" >&2
 }
 
-has_non_empty_operator_key() {
-  [[ -f "${ENV_FILE}" ]] && grep -qE '^EVUKB_OPERATOR_API_KEY=.+$' "${ENV_FILE}"
+has_valid_operator_key() {
+  [[ -f "${ENV_FILE}" ]] && grep -qE '^EVUKB_OPERATOR_API_KEY=evukb_ops_[[:alnum:]]{16,}$' "${ENV_FILE}"
 }
 
 write_operator_key() {
@@ -59,7 +59,8 @@ write_operator_key() {
   fi
 }
 
-if has_non_empty_operator_key; then
+if has_valid_operator_key; then
+  log "EVUKB_OPERATOR_API_KEY already configured in ${ENV_LABEL}"
   echo ok
   exit 0
 fi

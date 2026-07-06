@@ -21,7 +21,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "migrate": "pnpm --filter @evu/kb-db db:migrate",
-    "prod": "docker compose --project-directory . -f deploy/docker-compose.yml up --build",
+    "prod": "bash scripts/run-prod.sh",
     "test": "pnpm exec tsx scripts/verify-db-test-env.ts && vitest run",
     "test:ci": "pnpm exec tsx scripts/verify-db-test-env.ts --require && vitest run --coverage",
     "test:coverage": "pnpm exec tsx scripts/verify-db-test-env.ts && vitest run --coverage",

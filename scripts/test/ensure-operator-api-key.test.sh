@@ -25,7 +25,7 @@ if [[ "${status}" != "added" ]]; then
   echo "expected added on first run, got ${status}" >&2
   exit 1
 fi
-if ! grep -qE '^EVUKB_OPERATOR_API_KEY=evukb_ops_.+$' "${TMP_ROOT}/fixture/.env"; then
+if ! grep -qE '^EVUKB_OPERATOR_API_KEY=evukb_ops_[[:alnum:]]{16,}$' "${TMP_ROOT}/fixture/.env"; then
   echo "operator key missing after first run" >&2
   exit 1
 fi
@@ -40,6 +40,13 @@ printf 'EVUKB_TOKEN_PEPPER=test\nEVUKB_OPERATOR_API_KEY=\n' > "${TMP_ROOT}/fixtu
 status="$(run_in_fixture)"
 if [[ "${status}" != "added" ]]; then
   echo "expected added when replacing empty key, got ${status}" >&2
+  exit 1
+fi
+
+printf 'EVUKB_TOKEN_PEPPER=test\nEVUKB_OPERATOR_API_KEY= \n' > "${TMP_ROOT}/fixture/.env"
+status="$(run_in_fixture)"
+if [[ "${status}" != "added" ]]; then
+  echo "expected added when replacing whitespace key, got ${status}" >&2
   exit 1
 fi
 if grep -cE '^EVUKB_OPERATOR_API_KEY=' "${TMP_ROOT}/fixture/.env" | grep -qx 1; then

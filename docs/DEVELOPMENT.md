@@ -214,10 +214,11 @@ root `.env` so the browser calls `/api` on the web hostname. The `evukb-web`
 container proxies to `evukb-api:4201` and injects `EVUKB_OPERATOR_API_KEY`
 (or `EVUKB_WEB_API_KEY` when set) server-side — no browser credential step.
 
-`make prod` runs [`scripts/ensure-operator-api-key.sh`](../scripts/ensure-operator-api-key.sh)
-to append `EVUKB_OPERATOR_API_KEY` to `.env` when missing. Set `EVUKB_TOKEN_PEPPER`
-before first production start. If the key is newly written, `make prod` force-recreates
-`evukb-api` and `evukb-web` so containers pick up the value (an empty
+`make prod` and `pnpm run prod` both run [`scripts/run-prod.sh`](../scripts/run-prod.sh),
+which calls [`scripts/ensure-operator-api-key.sh`](../scripts/ensure-operator-api-key.sh)
+to write `EVUKB_OPERATOR_API_KEY` into `.env` when missing or empty. Set `EVUKB_TOKEN_PEPPER`
+before first production start. If the key is newly written, prod startup force-recreates
+`evukb-api` and `evukb-web` so containers pick up the value (an empty or whitespace
 `EVUKB_OPERATOR_API_KEY=` line is replaced in place, not duplicated).
 
 **Recommended split-host layout:**

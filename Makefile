@@ -15,12 +15,7 @@ down:
 	pnpm run down
 
 prod:
-	@operator_key_status="$$(EVUKB_ROOT="$(CURDIR)" scripts/ensure-operator-api-key.sh)"; \
-	if [ "$$operator_key_status" = "added" ]; then \
-		pnpm run prod -- --force-recreate evukb-api evukb-web; \
-	else \
-		pnpm run prod; \
-	fi
+	pnpm run prod
 
 update:
 	git pull --ff-only && $(MAKE) prod
