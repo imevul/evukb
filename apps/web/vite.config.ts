@@ -81,6 +81,8 @@ export default defineConfig(({ mode }) => {
     preview: {
       host: '0.0.0.0',
       port: 4200,
+      // Docker prod sits behind a reverse proxy; the Host header is the public hostname.
+      allowedHosts: true,
       proxy: apiProxy,
     },
   };
