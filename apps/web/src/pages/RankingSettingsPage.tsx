@@ -137,7 +137,13 @@ const referenceExampleRankingStrategies = [
   },
 ] as const;
 
-function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => Promise<void> }) {
+function RankingPluginsPanel({
+  onRefreshSettings,
+  selectedSlug,
+}: {
+  onRefreshSettings: () => Promise<void>;
+  selectedSlug: string;
+}) {
   const [strategies, setStrategies] = useState<RankingStrategySummary[]>([]);
   const [usagePreview, setUsagePreview] = useState<RankingStrategyUsageView | null>(null);
   const [pendingUninstallId, setPendingUninstallId] = useState<string | null>(null);
@@ -159,7 +165,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedSlug]);
 
   useEffect(() => {
     void loadStrategies();
@@ -689,7 +695,7 @@ export function RankingSettingsPage() {
           </form>
         ) : null}
       </section>
-      <RankingPluginsPanel onRefreshSettings={reloadSettings} />
+      <RankingPluginsPanel onRefreshSettings={reloadSettings} selectedSlug={selectedSlug} />
     </>
   );
 }

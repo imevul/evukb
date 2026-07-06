@@ -211,11 +211,6 @@ export function WorkspacesPage() {
         <p className="evukb-muted">Loading workspaces…</p>
       ) : workspaces.length === 0 ? (
         <EmptyState
-          action={
-            <Button onClick={openCreateModal} type="button">
-              Create workspace
-            </Button>
-          }
           hint="Create a workspace to start indexing knowledge corpora."
           title="No workspaces yet"
         />
