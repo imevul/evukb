@@ -23,7 +23,8 @@
       "!**/artifacts",
       "!**/backups",
       "!packages/kb-sdk/openapi",
-      "!packages/kb-sdk/src/generated"
+      "!packages/kb-sdk/src/generated",
+      "!docs/api"
     ]
   },
   "formatter": {

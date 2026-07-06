@@ -37,7 +37,7 @@ export function WorkspaceOverviewPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   return (
     <section aria-label="Workspace overview" className="evukb-panel">

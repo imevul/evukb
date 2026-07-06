@@ -1210,3 +1210,17 @@ Learning:
 
 Action: See `packages/kb-core/src/agent-retrieval/`, `packages/kb-core/src/agent-write/path-policy.ts`,
   migration `0004_credential_write_path_prefixes.sql`, workspace/corpus/credential UI settings.
+
+---
+
+## 2026-07-06: Biome And Generated API Reference HTML
+
+Area: CI, lint
+
+Context: `pnpm lint` failed with ~900 diagnostics from `docs/api/index.html` (Redocly output).
+
+Learning: Generated API reference HTML is not source code; Biome a11y rules do not apply.
+Exclude `docs/api` in `biome.json` alongside `packages/kb-sdk/openapi` and generated SDK types.
+
+Action: Run `pnpm lint` before every push; regenerate API docs with `pnpm api-docs` when needed,
+  not as part of routine lint fixes.

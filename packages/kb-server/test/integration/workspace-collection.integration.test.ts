@@ -6,12 +6,7 @@ import { expect, it } from 'vitest';
 
 import { createEvuKbServer } from '../../src/index.js';
 
-import {
-  createTestApiKey,
-  databaseUrl,
-  describeIfDb,
-  requireDatabaseUrl,
-} from './helpers.js';
+import { createTestApiKey, describeIfDb, requireDatabaseUrl } from './helpers.js';
 
 describeIfDb('kb-server workspace collection routes', () => {
   it('lists, creates, and deletes empty workspaces with auth rules', async () => {

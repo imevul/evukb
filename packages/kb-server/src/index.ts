@@ -15,11 +15,11 @@ import { probeBlobStore } from './health-probes.js';
 import { resolveMaxUploadBytes } from './limits.js';
 import { isMcpTokenRequired } from './mcp/context.js';
 import { mcpRoutesPlugin } from './mcp/register-mcp.js';
+import { workspaceCollectionRoutesPlugin } from './routes/workspace-collection-routes.js';
 import { createEvuKbRuntime } from './runtime/create-runtime.js';
 import type { EvuKbRuntime } from './runtime/types.js';
 import { registerHealthRoutes } from './server/health-routes.js';
 import { registerWorkspaceRoutes } from './server/workspace-routes.js';
-import { workspaceCollectionRoutesPlugin } from './routes/workspace-collection-routes.js';
 
 export type EvuKbServerOptions = {
   blobRoot?: string;

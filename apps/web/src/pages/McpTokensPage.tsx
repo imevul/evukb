@@ -2,8 +2,8 @@ import type { CreatedMcpToken, McpTokenRecord } from '@evu/kb-sdk';
 import { useMemo } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { McpSetupGuide } from '../components/McpSetupGuide.js';
 import { KB_AUTH_SCOPE_AREAS_MCP } from '../components/KbAuthScopePicker.js';
+import { McpSetupGuide } from '../components/McpSetupGuide.js';
 import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import {
   CredentialTokensPage,

@@ -280,7 +280,8 @@ export function WorkspacesPage() {
 
       <p className="evukb-muted text-sm">
         Need workspace settings? Open{' '}
-        <Link to={appRoutes.settingsWorkspace}>workspace settings</Link> after selecting a workspace.
+        <Link to={appRoutes.settingsWorkspace}>workspace settings</Link> after selecting a
+        workspace.
       </p>
 
       <AppModal

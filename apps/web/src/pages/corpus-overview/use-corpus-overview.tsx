@@ -22,8 +22,8 @@ import {
   useState,
 } from 'react';
 import { kbClient } from '../../api/client.js';
-import { useWorkspace } from '../../workspace/WorkspaceProvider.js';
 import { normalizeArchiveUploadFile } from '../../lib/archive-import-normalize.js';
+import { useWorkspace } from '../../workspace/WorkspaceProvider.js';
 import {
   type AgentNotesRetrievalMode,
   APPROVAL_KEYS,
@@ -180,7 +180,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     } finally {
       setLoading(false);
     }
-  }, [corpusId]);
+  }, [corpusId, selectedSlug]);
 
   useEffect(() => {
     void loadStats();
@@ -237,9 +237,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     if (!corpusId) {
       return;
     }
-    await runReindex('needing', () =>
-      kbClient.reindexNeedingAttention(selectedSlug, corpusId),
-    );
+    await runReindex('needing', () => kbClient.reindexNeedingAttention(selectedSlug, corpusId));
   }
 
   async function runValidateCitations(): Promise<void> {

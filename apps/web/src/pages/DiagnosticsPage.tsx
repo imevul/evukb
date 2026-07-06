@@ -222,7 +222,7 @@ export function DiagnosticsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   async function refreshFailedJobs(): Promise<void> {
     const jobs = await kbClient.listFailedJobs(selectedSlug, { limit: 50 });
@@ -392,7 +392,9 @@ export function DiagnosticsPage() {
                   <div className="evukb-stat-card">
                     <strong>Chat provider</strong>
                     <p>
-                      <StatusPill tone={healthTone(providerHealth?.chat.status ?? 'not-configured')}>
+                      <StatusPill
+                        tone={healthTone(providerHealth?.chat.status ?? 'not-configured')}
+                      >
                         {providerHealth?.chat.status ?? 'unknown'}
                       </StatusPill>
                     </p>

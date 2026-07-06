@@ -1,9 +1,8 @@
 import { Button, cn, tabClassName } from '@evu/kb-ui';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-
-import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import { buildMcpHarnessGuides, MCP_TOKEN_PLACEHOLDER, type McpHarnessId } from '../mcp-setup.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export type McpSetupGuideProps = {
   mcpToken?: string | null;
@@ -74,8 +73,8 @@ export function McpSetupGuide({ mcpToken = null }: McpSetupGuideProps) {
         <div className="flex flex-col gap-4" id="mcp-setup-guide-content">
           <p className="evukb-muted m-0">
             EvuKB exposes Streamable HTTP MCP at <code>/mcp</code>. Create a token below, then
-            configure your agent with workspace <code>{selectedSlug}</code> and the bearer
-            headers in each example.
+            configure your agent with workspace <code>{selectedSlug}</code> and the bearer headers
+            in each example.
           </p>
           <nav
             aria-label="MCP client harness"

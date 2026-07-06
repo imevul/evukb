@@ -21,9 +21,7 @@ describe('kb admin auth', () => {
   });
 
   it('allows operator actor', () => {
-    expect(() =>
-      assertKbAdminScope({ evuKbActor: { kind: 'operator' } } as never),
-    ).not.toThrow();
+    expect(() => assertKbAdminScope({ evuKbActor: { kind: 'operator' } } as never)).not.toThrow();
   });
 
   it('rejects kb:write without kb:admin', () => {

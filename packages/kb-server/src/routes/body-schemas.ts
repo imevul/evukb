@@ -29,7 +29,10 @@ export const workspaceCreateBodySchema = z.object({
     .string()
     .min(2)
     .max(64)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug must be lowercase alphanumeric with optional hyphens'),
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'slug must be lowercase alphanumeric with optional hyphens',
+    ),
   name: z.string().min(1).max(256),
 });
 

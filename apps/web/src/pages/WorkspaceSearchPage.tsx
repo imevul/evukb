@@ -25,10 +25,7 @@ export function WorkspaceSearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rankingStrategyId, setRankingStrategyId] = useState('');
-  const { strategies, embeddingConfigured } = useRankingStrategyOptions(
-    kbClient,
-    selectedSlug,
-  );
+  const { strategies, embeddingConfigured } = useRankingStrategyOptions(kbClient, selectedSlug);
 
   const corpusNameById = useMemo(
     () => new Map(corpora.availableCorpora.map((corpus) => [corpus.id, corpus.name])),

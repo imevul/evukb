@@ -202,10 +202,7 @@ function RankingPluginsPanel({
     setUninstalling(true);
     setUninstallError(null);
     try {
-      const result = await kbClient.unregisterRankingStrategy(
-        selectedSlug,
-        pendingUninstallId,
-      );
+      const result = await kbClient.unregisterRankingStrategy(selectedSlug, pendingUninstallId);
       setMessage(
         `Uninstalled ${result.strategyId}. Updated ${result.remediatedCorpusCount} corpus override(s).`,
       );
@@ -229,10 +226,7 @@ function RankingPluginsPanel({
     setError(null);
     setInstallingExampleId(exampleId);
     try {
-      const result = await kbClient.registerRankingStrategyExample(
-        selectedSlug,
-        exampleId,
-      );
+      const result = await kbClient.registerRankingStrategyExample(selectedSlug, exampleId);
       setMessage(`Installed ${result.strategy.label ?? result.strategy.id}.`);
       await loadStrategies();
       await onRefreshSettings();
@@ -450,10 +444,7 @@ export function RankingSettingsPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    void Promise.all([
-      kbClient.getSettings(selectedSlug),
-      kbClient.getAiProviders(selectedSlug),
-    ])
+    void Promise.all([kbClient.getSettings(selectedSlug), kbClient.getAiProviders(selectedSlug)])
       .then(([loaded, providers]) => {
         if (!cancelled) {
           setSettings(loaded);
@@ -480,7 +471,7 @@ export function RankingSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   async function handleSave(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();

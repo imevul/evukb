@@ -31,7 +31,9 @@ export function resolveIncludeAgentNotesInRetrieval(
   workspaceSettings: Record<string, unknown>,
   corpusSettings?: Record<string, unknown>,
 ): boolean {
-  const corpusValue = parseIncludeAgentNotesInRetrieval(corpusSettings?.includeAgentNotesInRetrieval);
+  const corpusValue = parseIncludeAgentNotesInRetrieval(
+    corpusSettings?.includeAgentNotesInRetrieval,
+  );
   if (corpusValue !== undefined) {
     return corpusValue;
   }

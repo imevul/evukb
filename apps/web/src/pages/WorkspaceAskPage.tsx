@@ -22,10 +22,7 @@ export function WorkspaceAskPage() {
   const [responseMode, setResponseMode] = useState<AskResponseMode>('concise');
   const [filterDraft, setFilterDraft] = useState(emptySearchFilterDraft);
   const [rankingStrategyId, setRankingStrategyId] = useState('');
-  const { strategies, embeddingConfigured } = useRankingStrategyOptions(
-    kbClient,
-    selectedSlug,
-  );
+  const { strategies, embeddingConfigured } = useRankingStrategyOptions(kbClient, selectedSlug);
 
   const askStream = useAskStream<WorkspaceAskRequest>({
     stream: (request) => kbClient.askWorkspaceStream(selectedSlug, request),

@@ -101,7 +101,7 @@ export function SecretsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   async function refreshSecrets(): Promise<void> {
     const items = await kbClient.listSecrets(selectedSlug);

@@ -81,7 +81,7 @@ export function WorkspaceSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   async function handleSave(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -133,62 +133,62 @@ export function WorkspaceSettingsPage() {
             Display name
             <input value={name} onChange={(event) => setName(event.target.value)} required />
           </label>
-            <fieldset>
-              <legend>Agent mutation approval</legend>
-              <p className="evukb-form-hint">
-                When set to always, matching agent writes create a pending approval instead of
-                applying immediately. Corpus-level overrides can be set via the corpus settings API.
-              </p>
-              {APPROVAL_KEYS.map((key) => (
-                <label key={key}>
-                  {key}
-                  <select
-                    onChange={(event) =>
-                      setApprovalPolicy((current) => ({
-                        ...current,
-                        [key]: event.target.value as Required<MutationApprovalPolicy>[ApprovalKey],
-                      }))
-                    }
-                    value={approvalPolicy[key]}
-                  >
-                    <option value="never">never (apply immediately)</option>
-                    <option value="always">always (require approval)</option>
-                  </select>
-                </label>
-              ))}
-            </fieldset>
-            <fieldset>
-              <legend>Agent notes in search and Ask</legend>
-              <p className="evukb-form-hint">
-                When enabled, files under <code>agent-notes/</code> can appear in hybrid search and
-                Ask citations. Disable to keep agent-authored notes out of retrieval for this
-                workspace (corpora can override).
-              </p>
-              <label className="evukb-checkbox">
-                <Switch
-                  aria-label="Include agent-notes in search and Ask"
-                  checked={includeAgentNotesInRetrieval}
-                  onCheckedChange={setIncludeAgentNotesInRetrieval}
-                />
-                <span>Include agent-notes/ in search and Ask</span>
+          <fieldset>
+            <legend>Agent mutation approval</legend>
+            <p className="evukb-form-hint">
+              When set to always, matching agent writes create a pending approval instead of
+              applying immediately. Corpus-level overrides can be set via the corpus settings API.
+            </p>
+            {APPROVAL_KEYS.map((key) => (
+              <label key={key}>
+                {key}
+                <select
+                  onChange={(event) =>
+                    setApprovalPolicy((current) => ({
+                      ...current,
+                      [key]: event.target.value as Required<MutationApprovalPolicy>[ApprovalKey],
+                    }))
+                  }
+                  value={approvalPolicy[key]}
+                >
+                  <option value="never">never (apply immediately)</option>
+                  <option value="always">always (require approval)</option>
+                </select>
               </label>
-            </fieldset>
-            <fieldset>
-              <legend>Agent write path prefixes</legend>
-              <p className="evukb-form-hint">
-                Relative path prefixes where agent write tools may create or update files. One
-                prefix per line; default is <code>agent-notes</code>. Corpus and credential settings
-                can narrow this list further.
-              </p>
-              <label>
-                Allowed prefixes
-                <textarea
-                  onChange={(event) => setAgentWritePathPrefixesInput(event.target.value)}
-                  rows={4}
-                  value={agentWritePathPrefixesInput}
-                />
-              </label>
-            </fieldset>
+            ))}
+          </fieldset>
+          <fieldset>
+            <legend>Agent notes in search and Ask</legend>
+            <p className="evukb-form-hint">
+              When enabled, files under <code>agent-notes/</code> can appear in hybrid search and
+              Ask citations. Disable to keep agent-authored notes out of retrieval for this
+              workspace (corpora can override).
+            </p>
+            <div className="evukb-checkbox">
+              <Switch
+                aria-label="Include agent-notes in search and Ask"
+                checked={includeAgentNotesInRetrieval}
+                onCheckedChange={setIncludeAgentNotesInRetrieval}
+              />
+              <span>Include agent-notes/ in search and Ask</span>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Agent write path prefixes</legend>
+            <p className="evukb-form-hint">
+              Relative path prefixes where agent write tools may create or update files. One prefix
+              per line; default is <code>agent-notes</code>. Corpus and credential settings can
+              narrow this list further.
+            </p>
+            <label>
+              Allowed prefixes
+              <textarea
+                onChange={(event) => setAgentWritePathPrefixesInput(event.target.value)}
+                rows={4}
+                value={agentWritePathPrefixesInput}
+              />
+            </label>
+          </fieldset>
           <Button disabled={submitting} type="submit" variant="primary">
             {submitting ? 'Saving…' : 'Save settings'}
           </Button>

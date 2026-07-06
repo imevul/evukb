@@ -6,12 +6,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { kbClient } from '../src/api/client.js';
-import { WorkspaceProvider, useWorkspace } from '../src/workspace/WorkspaceProvider.js';
 import {
   clearSelectedWorkspaceSlug,
   readSelectedWorkspaceSlug,
   writeSelectedWorkspaceSlug,
 } from '../src/workspace/storage.js';
+import { useWorkspace, WorkspaceProvider } from '../src/workspace/WorkspaceProvider.js';
 
 vi.mock('../src/api/client.js', () => ({
   kbClient: {

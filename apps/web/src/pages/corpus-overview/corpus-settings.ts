@@ -83,7 +83,9 @@ export function readCorpusAgentWritePathPrefixes(settings: Record<string, unknow
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+  return raw.filter(
+    (value): value is string => typeof value === 'string' && value.trim().length > 0,
+  );
 }
 
 export function formatAgentWritePathPrefixesInput(prefixes: string[]): string {
@@ -119,7 +121,8 @@ export function corpusOverridesEnabled(
   );
   const hasAgentRetrievalOverride =
     readCorpusAgentNotesRetrieval(corpus.settings ?? {}) !== 'inherit';
-  const hasAgentWritePathOverride = readCorpusAgentWritePathPrefixes(corpus.settings ?? {}).length > 0;
+  const hasAgentWritePathOverride =
+    readCorpusAgentWritePathPrefixes(corpus.settings ?? {}).length > 0;
   return (
     hasRankingWeights ||
     hasApprovalOverride ||

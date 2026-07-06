@@ -23,10 +23,7 @@ export function CorpusSearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rankingStrategyId, setRankingStrategyId] = useState('');
-  const { strategies, embeddingConfigured } = useRankingStrategyOptions(
-    kbClient,
-    selectedSlug,
-  );
+  const { strategies, embeddingConfigured } = useRankingStrategyOptions(kbClient, selectedSlug);
 
   const filters = useMemo(() => buildKnowledgeFilters(filterDraft), [filterDraft]);
 

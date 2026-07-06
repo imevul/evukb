@@ -52,16 +52,14 @@ export function Alert({
   if (collapsible) {
     return (
       <details
-        className={cn(
-          'group rounded-lg border text-sm',
-          VARIANT_CLASS[variant],
-          className,
-        )}
+        className={cn('group rounded-lg border text-sm', VARIANT_CLASS[variant], className)}
         {...(defaultExpanded ? { open: true } : {})}
       >
         <summary className="flex cursor-pointer list-none items-start gap-3 p-4 [&::-webkit-details-marker]:hidden">
           {icon ? <Icon aria-hidden /> : null}
-          {title ? <span className="min-w-0 flex-1 font-semibold leading-none">{title}</span> : null}
+          {title ? (
+            <span className="min-w-0 flex-1 font-semibold leading-none">{title}</span>
+          ) : null}
         </summary>
         {children ? (
           <div className="space-y-1 px-4 pb-4 pl-11 leading-relaxed text-muted-foreground [&_svg]:h-4 [&_svg]:w-4">

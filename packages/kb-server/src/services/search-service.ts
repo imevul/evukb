@@ -25,13 +25,13 @@ import {
   type RankingStrategyRegistry,
   rerankerLlmStrategyId,
   resolveEffectiveRankingSettings,
+  resolveIncludeAgentNotesInRetrieval,
   resolveNodeTitleFromMetadata,
   resolveRankingStrategyIdSetting,
-  resolveIncludeAgentNotesInRetrieval,
-  shouldIncludePathInRetrieval,
   type SearchRequest,
   type SearchResult,
   semanticOnlyStrategyId,
+  shouldIncludePathInRetrieval,
   type VectorStore,
 } from '@evu/kb-core';
 import type {

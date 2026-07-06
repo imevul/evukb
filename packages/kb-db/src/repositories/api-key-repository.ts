@@ -1,4 +1,4 @@
-import { asWorkspaceId, type ApiKeyRecord, type KbAuthScope } from '@evu/kb-core';
+import { type ApiKeyRecord, asWorkspaceId, type KbAuthScope } from '@evu/kb-core';
 import { and, eq } from 'drizzle-orm';
 
 import type { DbHandle } from '../client.js';

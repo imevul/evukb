@@ -1,4 +1,4 @@
-import { Alert, StatusPill, AppContent, AppShell, ThemeMenu, useColorScheme } from '@evu/kb-ui';
+import { Alert, AppContent, AppShell, StatusPill, ThemeMenu, useColorScheme } from '@evu/kb-ui';
 import { Link, Outlet } from 'react-router-dom';
 
 import { appRoutes } from '../config.js';

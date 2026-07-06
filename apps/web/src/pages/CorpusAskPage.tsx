@@ -20,10 +20,7 @@ export function CorpusAskPage() {
   const [responseMode, setResponseMode] = useState<AskResponseMode>('concise');
   const [filterDraft, setFilterDraft] = useState(emptySearchFilterDraft);
   const [rankingStrategyId, setRankingStrategyId] = useState('');
-  const { strategies, embeddingConfigured } = useRankingStrategyOptions(
-    kbClient,
-    selectedSlug,
-  );
+  const { strategies, embeddingConfigured } = useRankingStrategyOptions(kbClient, selectedSlug);
 
   const askStream = useAskStream<CorpusAskRequest>({
     stream: (request) => kbClient.askStream(selectedSlug, corpusId ?? '', request),

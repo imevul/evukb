@@ -75,7 +75,7 @@ export function AuditPage() {
     return () => {
       cancelled = true;
     };
-  }, [actionFilter]);
+  }, [actionFilter, selectedSlug]);
 
   return (
     <section className="evukb-panel">

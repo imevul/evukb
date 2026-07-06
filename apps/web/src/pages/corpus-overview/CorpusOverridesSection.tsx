@@ -4,8 +4,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Link } from 'react-router-dom';
 import { appRoutes } from '../../config.js';
 import {
-  APPROVAL_KEYS,
   type AgentNotesRetrievalMode,
+  APPROVAL_KEYS,
   type ApprovalInheritMode,
   type ApprovalKey,
   corpusRankingFields,

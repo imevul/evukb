@@ -42,7 +42,7 @@ export function MutationApprovalsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedSlug]);
 
   useEffect(() => {
     void loadApprovals();

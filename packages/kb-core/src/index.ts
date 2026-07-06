@@ -1,7 +1,7 @@
 export const evuKbCorePackageName = '@evu/kb-core';
 
-export * from './agent-tools/index.js';
 export * from './agent-retrieval/index.js';
+export * from './agent-tools/index.js';
 export * from './agent-write/index.js';
 export * from './archive/index.js';
 export * from './ask/index.js';

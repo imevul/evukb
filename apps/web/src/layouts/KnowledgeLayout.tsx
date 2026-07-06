@@ -70,7 +70,7 @@ export function KnowledgeLayout() {
     return () => {
       cancelled = true;
     };
-  }, [corpusId]);
+  }, [corpusId, selectedSlug]);
 
   function openRenameModal(): void {
     if (!corpus) {
@@ -154,11 +154,7 @@ export function KnowledgeLayout() {
         </p>
       ) : null}
       {error ? <p className="evukb-error">{error}</p> : null}
-      <CorpusIndexEventProvider
-        client={kbClient}
-        corpusId={corpusId}
-        workspaceId={selectedSlug}
-      >
+      <CorpusIndexEventProvider client={kbClient} corpusId={corpusId} workspaceId={selectedSlug}>
         <Outlet />
       </CorpusIndexEventProvider>
       <AppModal

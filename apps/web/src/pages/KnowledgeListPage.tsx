@@ -27,12 +27,12 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { kbClient } from '../api/client.js';
 import { appRoutes } from '../config.js';
-import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import {
   ARCHIVE_IMPORT_ACCEPT,
   normalizeArchiveUploadFile,
   stemFromArchiveName,
 } from '../lib/archive-import-normalize.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 type FormatProfileChoice = 'generic' | 'okf';
 type ImportKindChoice = 'managed' | 'mount' | 'git';
@@ -179,7 +179,7 @@ export function KnowledgeListPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -201,7 +201,7 @@ export function KnowledgeListPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedSlug]);
 
   useEffect(() => {
     if (importKind !== 'git') {
@@ -225,7 +225,7 @@ export function KnowledgeListPage() {
     return () => {
       cancelled = true;
     };
-  }, [importKind]);
+  }, [importKind, selectedSlug]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();

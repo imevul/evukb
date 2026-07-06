@@ -35,12 +35,9 @@ export function CorpusGraphPage() {
 
       setLoading(true);
       try {
-        const loaded = await kbClient.getGraphNeighborhood(
-          selectedSlug,
-          corpusId,
-          nodeId,
-          { depth: nextDepth },
-        );
+        const loaded = await kbClient.getGraphNeighborhood(selectedSlug, corpusId, nodeId, {
+          depth: nextDepth,
+        });
         setNeighborhood(loaded);
         setCenterNodeId(nodeId);
         setError(null);
@@ -53,7 +50,7 @@ export function CorpusGraphPage() {
         setLoading(false);
       }
     },
-    [corpusId],
+    [corpusId, selectedSlug],
   );
 
   const activateNode = useCallback(
