@@ -59,6 +59,8 @@ describeIfDb('kb-server workspace collection routes', () => {
 
   it('restricts non-admin API keys to their workspace on list and forbids create', async () => {
     const blobRoot = mkdtempSync(join(tmpdir(), 'evukb-workspaces-auth-'));
+    const previousAllowOpenAuth = process.env.EVUKB_ALLOW_OPEN_AUTH;
+    process.env.EVUKB_ALLOW_OPEN_AUTH = 'false';
     try {
       const server = await createEvuKbServer({
         logger: false,
@@ -85,6 +87,11 @@ describeIfDb('kb-server workspace collection routes', () => {
       });
       expect(createResponse.statusCode).toBe(403);
     } finally {
+      if (previousAllowOpenAuth === undefined) {
+        delete process.env.EVUKB_ALLOW_OPEN_AUTH;
+      } else {
+        process.env.EVUKB_ALLOW_OPEN_AUTH = previousAllowOpenAuth;
+      }
       rmSync(blobRoot, { recursive: true, force: true });
     }
   });
