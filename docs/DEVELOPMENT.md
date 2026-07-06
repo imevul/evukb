@@ -223,9 +223,11 @@ and `packages/kb-server/test/integration/isolation.integration.test.ts`.
 
 Copy `.env.example` to `.env` at the **repository root** for local overrides. EvuKB uses the `EVUKB_*`
 environment prefix. The dev/prod compose scripts pass `--project-directory .` so this root
-`.env` is loaded when you run `make dev`, `make up`, or `make prod`. After changing provider
-keys or base URLs, recreate the API container (`make down && make dev`, or restart
-`evukb-api`). Local corpus data defaults to `.evukb/corpus-store/`, which is ignored by git.
+`.env` is loaded when you run `make dev`, `make up`, or `make prod`. Compose still
+hardcodes in-container `EVUKB_DATABASE_URL` and `EVUKB_BLOB_ROOT` for API services
+(`postgres` hostname, `/data/corpus-store`); the `.env` value is for host-side tools
+such as `pnpm test` and `make migrate`. After changing provider keys or base URLs,
+recreate the API container (`make down && make dev`, or restart `evukb-api`).
 
 The consolidated, code-verified env-var reference is [`docs/ENV.md`](ENV.md). The most common operator vars:
 

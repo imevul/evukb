@@ -25,8 +25,9 @@ services:
       TZ: ${TZ:-UTC}
       EVUKB_API_PORT: ${EVUKB_API_PORT:-4201}
       EVUKB_REGISTER_EXAMPLE_RANKING_STRATEGIES: "false"
-      EVUKB_BLOB_ROOT: ${EVUKB_BLOB_ROOT:-/data/corpus-store}
-      EVUKB_DATABASE_URL: ${EVUKB_DATABASE_URL:-postgres://evukb:evukb@postgres:5432/evukb}
+      # In-container paths and service DNS; do not inherit host .env localhost URLs.
+      EVUKB_BLOB_ROOT: /data/corpus-store
+      EVUKB_DATABASE_URL: postgres://evukb:evukb@postgres:5432/evukb
       EVUKB_HOST: ${EVUKB_HOST:-0.0.0.0}
       EVUKB_LOG_LEVEL: ${EVUKB_LOG_LEVEL:-info}
       EVUKB_QDRANT_URL: ${EVUKB_QDRANT_URL:-http://qdrant:6333}
