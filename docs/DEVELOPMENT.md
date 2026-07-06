@@ -253,8 +253,10 @@ environment prefix. The dev/prod compose scripts pass `--project-directory .` so
 `.env` is loaded when you run `make dev`, `make up`, or `make prod`. Compose still
 hardcodes in-container `EVUKB_DATABASE_URL` and `EVUKB_BLOB_ROOT` for API services
 (`postgres` hostname, `/data/corpus-store`); the `.env` value is for host-side tools
-such as `pnpm test` and `make migrate`. After changing provider keys or base URLs,
-recreate the API container (`make down && make dev`, or restart `evukb-api`).
+such as `pnpm test` and `make migrate`. Production compose passes operator settings
+(secrets, providers, mount flags, upload limits, and similar) into `evukb-api` explicitly.
+After changing those values, recreate the API container (`make down && make dev`, or
+`docker compose ... up -d --force-recreate evukb-api` in production).
 
 The consolidated, code-verified env-var reference is [`docs/ENV.md`](ENV.md). The most common operator vars:
 
