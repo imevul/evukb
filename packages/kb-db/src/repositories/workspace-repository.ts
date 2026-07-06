@@ -84,6 +84,14 @@ export class WorkspaceRepository {
     return row ? mapWorkspaceRow(row) : null;
   }
 
+  async delete(workspaceId: string): Promise<boolean> {
+    const deleted = await this.#db
+      .delete(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .returning({ id: workspaces.id });
+    return deleted.length > 0;
+  }
+
   async addMember(
     workspaceId: string,
     userId: string,

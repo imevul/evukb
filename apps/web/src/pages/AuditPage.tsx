@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 const WRITE_ACTIONS = [
   'create_document',
@@ -40,6 +40,7 @@ function formatTarget(target: AuditLogEntry['target']): string {
 }
 
 export function AuditPage() {
+  const { selectedSlug } = useWorkspace();
   const formatDateTime = useFormatDateTime();
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
   const [actionFilter, setActionFilter] = useState<ActionFilter>('');
@@ -50,7 +51,7 @@ export function AuditPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .listAuditLog(appConfig.workspaceId, {
+      .listAuditLog(selectedSlug, {
         limit: 50,
         ...(actionFilter ? { action: actionFilter } : {}),
       })

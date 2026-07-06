@@ -66,6 +66,7 @@ agents, with core operator controls and KB/RAG workflows.
 | P1-10 | Workspace settings, AI provider display/overrides, secrets CRUD/rotation, health probes, failed-job diagnostics, and settings UI | [X] |
 | P1-11 | HTTP API-key middleware for production/API-key mode, read/write classification, and workspace scope enforcement | [X] |
 | P1-12 | Portable `.evukb` export/import plus generic zip/tar archive import (auto-detect, path validation, operator UI) | [X] |
+| P1-13 | Workspace collection HTTP API (`GET`/`POST`/`DELETE`), `/workspaces` management UI, browser-persisted workspace selection, and invalid-workspace degraded shell | [X] |
 
 ---
 

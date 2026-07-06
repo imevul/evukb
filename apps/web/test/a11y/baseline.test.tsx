@@ -14,13 +14,19 @@ import { ApiKeysPage } from '../../src/pages/ApiKeysPage.js';
 import { CorpusGraphPage } from '../../src/pages/CorpusGraphPage.js';
 import { CorpusSearchPage } from '../../src/pages/CorpusSearchPage.js';
 import { KnowledgeListPage } from '../../src/pages/KnowledgeListPage.js';
+import { WorkspaceProvider } from '../../src/workspace/WorkspaceProvider.js';
 
 const { kbClientMock } = vi.hoisted(() => ({
   kbClientMock: {
     listCorpora: vi.fn().mockResolvedValue([]),
     listSecrets: vi.fn().mockResolvedValue([]),
     listApiKeys: vi.fn().mockResolvedValue([]),
+    listWorkspaces: vi.fn().mockResolvedValue([]),
     getSettings: vi.fn().mockResolvedValue({
+      id: '00000000-0000-4000-8000-000000000001',
+      slug: 'local-dev',
+      name: 'EvuKB',
+      settings: {},
       ranking: {
         availableStrategies: [{ id: 'hybrid_default_v1', label: 'Hybrid default', version: '1' }],
       },
@@ -89,7 +95,9 @@ function renderWithProviders(ui: ReactElement, initialEntry = '/'): ReturnType<t
   return render(
     <ColorSchemeProvider>
       <DisplayPreferencesProvider>
-        <MemoryRouter initialEntries={[initialEntry]}>{ui}</MemoryRouter>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <WorkspaceProvider>{ui}</WorkspaceProvider>
+        </MemoryRouter>
       </DisplayPreferencesProvider>
     </ColorSchemeProvider>,
   );

@@ -13,22 +13,23 @@ import { useMemo, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
 import { renderCitationFileLink } from '../citation-links.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function WorkspaceAskPage() {
-  const corpora = useWorkspaceCorpora(kbClient, appConfig.workspaceId);
+  const { selectedSlug } = useWorkspace();
+  const corpora = useWorkspaceCorpora(kbClient, selectedSlug);
   const [question, setQuestion] = useState('');
   const [responseMode, setResponseMode] = useState<AskResponseMode>('concise');
   const [filterDraft, setFilterDraft] = useState(emptySearchFilterDraft);
   const [rankingStrategyId, setRankingStrategyId] = useState('');
   const { strategies, embeddingConfigured } = useRankingStrategyOptions(
     kbClient,
-    appConfig.workspaceId,
+    selectedSlug,
   );
 
   const askStream = useAskStream<WorkspaceAskRequest>({
-    stream: (request) => kbClient.askWorkspaceStream(appConfig.workspaceId, request),
-    fallback: (request) => kbClient.askWorkspace(appConfig.workspaceId, request),
+    stream: (request) => kbClient.askWorkspaceStream(selectedSlug, request),
+    fallback: (request) => kbClient.askWorkspace(selectedSlug, request),
   });
 
   const filters = useMemo(() => buildKnowledgeFilters(filterDraft), [filterDraft]);

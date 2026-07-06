@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App.js';
+import { WorkspaceProvider } from './workspace/WorkspaceProvider.js';
 import '@evu/kb-ui/theme/tokens.css';
 import './styles.css';
 import '@evu/kb-ui/theme/components.css';
@@ -18,7 +19,9 @@ createRoot(rootElement).render(
     <ColorSchemeProvider>
       <DisplayPreferencesProvider>
         <BrowserRouter>
-          <App />
+          <WorkspaceProvider>
+            <App />
+          </WorkspaceProvider>
         </BrowserRouter>
       </DisplayPreferencesProvider>
     </ColorSchemeProvider>

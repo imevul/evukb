@@ -26,7 +26,8 @@ import { FolderOpen, LayoutDashboard, Trash2 } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { kbClient } from '../api/client.js';
-import { appConfig, appRoutes } from '../config.js';
+import { appRoutes } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import {
   ARCHIVE_IMPORT_ACCEPT,
   normalizeArchiveUploadFile,
@@ -41,6 +42,7 @@ const createCorpusFormId = 'create-corpus-form';
 const importCorpusFormId = 'import-corpus-form';
 
 export function KnowledgeListPage() {
+  const { selectedSlug } = useWorkspace();
   const formatDateTime = useFormatDateTime();
   const [corpora, setCorpora] = useState<KnowledgeCorpus[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
@@ -139,8 +141,8 @@ export function KnowledgeListPage() {
     setDeleting(true);
     setDeleteError(null);
     try {
-      await kbClient.deleteCorpus(appConfig.workspaceId, deleteTarget.id);
-      removeStoredWorkspaceCorpusId(appConfig.workspaceId, deleteTarget.id);
+      await kbClient.deleteCorpus(selectedSlug, deleteTarget.id);
+      removeStoredWorkspaceCorpusId(selectedSlug, deleteTarget.id);
       setCorpora((current) => current.filter((corpus) => corpus.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (deleteFailure: unknown) {
@@ -156,7 +158,7 @@ export function KnowledgeListPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .listCorpora(appConfig.workspaceId)
+      .listCorpora(selectedSlug)
       .then((items) => {
         if (!cancelled) {
           setCorpora(items);
@@ -182,7 +184,7 @@ export function KnowledgeListPage() {
   useEffect(() => {
     let cancelled = false;
     void kbClient
-      .getSettings(appConfig.workspaceId)
+      .getSettings(selectedSlug)
       .then((loaded) => {
         if (!cancelled) {
           setMountAuthoritativeEnabled(loaded.bootHints.mountAuthoritativeEnabled);
@@ -208,7 +210,7 @@ export function KnowledgeListPage() {
 
     let cancelled = false;
     void kbClient
-      .listSecrets(appConfig.workspaceId)
+      .listSecrets(selectedSlug)
       .then((items) => {
         if (!cancelled) {
           setSecrets(items);
@@ -262,12 +264,12 @@ export function KnowledgeListPage() {
         settings.gitCredentialSecretName = gitCredentialSecretName;
       }
 
-      const created = await kbClient.createCorpus(appConfig.workspaceId, {
+      const created = await kbClient.createCorpus(selectedSlug, {
         name: name.trim(),
         ...(description.trim() ? { description: description.trim() } : {}),
         ...(Object.keys(settings).length > 0 ? { settings } : {}),
       });
-      const items = await kbClient.listCorpora(appConfig.workspaceId);
+      const items = await kbClient.listCorpora(selectedSlug);
       setCorpora(items);
       setSuccessMessage(`Corpus “${created.name}” created.`);
       closeCreateModal();
@@ -309,15 +311,15 @@ export function KnowledgeListPage() {
     setImportError(null);
     let createdCorpusId: string | null = null;
     try {
-      const corpus = await kbClient.createCorpus(appConfig.workspaceId, {
+      const corpus = await kbClient.createCorpus(selectedSlug, {
         name: importName.trim(),
         ...(importDescription.trim() ? { description: importDescription.trim() } : {}),
       });
       createdCorpusId = corpus.id;
       const zipFile = await normalizeArchiveUploadFile(importFile);
-      const result = await kbClient.importPortableZip(appConfig.workspaceId, corpus.id, zipFile);
+      const result = await kbClient.importPortableZip(selectedSlug, corpus.id, zipFile);
       createdCorpusId = null;
-      const items = await kbClient.listCorpora(appConfig.workspaceId);
+      const items = await kbClient.listCorpora(selectedSlug);
       setCorpora(items);
       setSuccessMessage(
         `Imported “${corpus.name}” (${result.mode}): ${formatImportResult(result)}.`,
@@ -326,7 +328,7 @@ export function KnowledgeListPage() {
     } catch (importFailure: unknown) {
       if (createdCorpusId) {
         try {
-          await kbClient.deleteCorpus(appConfig.workspaceId, createdCorpusId);
+          await kbClient.deleteCorpus(selectedSlug, createdCorpusId);
         } catch {
           // Keep the primary import error visible if cleanup fails.
         }

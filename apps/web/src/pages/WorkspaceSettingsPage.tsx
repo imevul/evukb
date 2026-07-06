@@ -3,7 +3,7 @@ import { Alert, Button, EmptyState, Switch } from '@evu/kb-ui';
 import { type FormEvent, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import {
   formatAgentWritePathPrefixesInput,
   parseAgentWritePathPrefixesInput,
@@ -37,6 +37,7 @@ function readIncludeAgentNotesInRetrieval(settings: Record<string, unknown>): bo
 }
 
 export function WorkspaceSettingsPage() {
+  const { selectedSlug } = useWorkspace();
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
   const [name, setName] = useState('');
   const [includeAgentNotesInRetrieval, setIncludeAgentNotesInRetrieval] = useState(true);
@@ -53,7 +54,7 @@ export function WorkspaceSettingsPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .getSettings(appConfig.workspaceId)
+      .getSettings(selectedSlug)
       .then((loaded) => {
         if (!cancelled) {
           setSettings(loaded);
@@ -91,7 +92,7 @@ export function WorkspaceSettingsPage() {
     setSubmitting(true);
     setMessage(null);
     try {
-      const updated = await kbClient.updateSettings(appConfig.workspaceId, {
+      const updated = await kbClient.updateSettings(selectedSlug, {
         name: name.trim(),
         settings: {
           mutationApprovalPolicy: approvalPolicy,

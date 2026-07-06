@@ -56,6 +56,11 @@ import type {
   UsageRecord,
   UsageSummaryQuery,
 } from './usage.js';
+import type {
+  CreateWorkspaceRequest,
+  DeleteWorkspaceResult,
+  WorkspaceSummary,
+} from './workspace.js';
 
 export type EvuKbClientOptions = {
   apiKey?: string;
@@ -76,6 +81,21 @@ export class EvuKbClient {
 
   async health(): Promise<EvuKbHealthResponse> {
     return this.#requestJson<EvuKbHealthResponse>('GET', '/health');
+  }
+
+  async listWorkspaces(): Promise<WorkspaceSummary[]> {
+    return this.#requestJson<WorkspaceSummary[]>('GET', '/api/workspaces');
+  }
+
+  async createWorkspace(body: CreateWorkspaceRequest): Promise<WorkspaceSummary> {
+    return this.#requestJson<WorkspaceSummary>('POST', '/api/workspaces', body);
+  }
+
+  async deleteWorkspace(workspaceId: string): Promise<DeleteWorkspaceResult> {
+    return this.#requestJson<DeleteWorkspaceResult>(
+      'DELETE',
+      `/api/workspaces/${encodeURIComponent(workspaceId)}`,
+    );
   }
 
   async listCorpora(workspaceId: string): Promise<KnowledgeCorpus[]> {

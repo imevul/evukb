@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
-import { appConfig, appRoutes } from '../config.js';
+import { appRoutes } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function CorpusGraphPage() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const graphNodeSearchParam = searchParams.get('nodeId');
@@ -14,7 +16,7 @@ export function CorpusGraphPage() {
     graph,
     loading: graphLoading,
     error: graphLoadError,
-  } = useLinkGraph(kbClient, appConfig.workspaceId, corpusId, 250);
+  } = useLinkGraph(kbClient, selectedSlug, corpusId, 250);
   const [neighborhood, setNeighborhood] = useState<GraphNeighborhood | null>(null);
   const [centerNodeId, setCenterNodeId] = useState('');
   const [depth, setDepth] = useState(1);
@@ -34,7 +36,7 @@ export function CorpusGraphPage() {
       setLoading(true);
       try {
         const loaded = await kbClient.getGraphNeighborhood(
-          appConfig.workspaceId,
+          selectedSlug,
           corpusId,
           nodeId,
           { depth: nextDepth },

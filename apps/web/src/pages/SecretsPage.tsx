@@ -21,12 +21,13 @@ import { type FormEvent, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
 import { SecretRevealBanner } from '../components/SecretRevealBanner.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 const createSecretFormId = 'create-secret-form';
 const rotateSecretFormId = 'rotate-secret-form';
 
 export function SecretsPage() {
+  const { selectedSlug } = useWorkspace();
   const formatDateTime = useFormatDateTime();
   const [secrets, setSecrets] = useState<SecretRecord[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
@@ -79,7 +80,7 @@ export function SecretsPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .listSecrets(appConfig.workspaceId)
+      .listSecrets(selectedSlug)
       .then((items) => {
         if (!cancelled) {
           setSecrets(items);
@@ -103,7 +104,7 @@ export function SecretsPage() {
   }, []);
 
   async function refreshSecrets(): Promise<void> {
-    const items = await kbClient.listSecrets(appConfig.workspaceId);
+    const items = await kbClient.listSecrets(selectedSlug);
     setSecrets(items);
   }
 
@@ -116,7 +117,7 @@ export function SecretsPage() {
     setSubmitting(true);
     setCreateError(null);
     try {
-      const created = await kbClient.createSecret(appConfig.workspaceId, {
+      const created = await kbClient.createSecret(selectedSlug, {
         name: name.trim(),
         value,
       });
@@ -144,7 +145,7 @@ export function SecretsPage() {
     setRotating(true);
     setRotateError(null);
     try {
-      const rotated = await kbClient.rotateSecret(appConfig.workspaceId, target.id, {
+      const rotated = await kbClient.rotateSecret(selectedSlug, target.id, {
         value: nextValue,
       });
       setCreatedSecret({ ...rotated, value: nextValue });
@@ -167,7 +168,7 @@ export function SecretsPage() {
       confirmLabel: 'Delete secret',
       confirmingLabel: 'Deleting…',
       action: async () => {
-        await kbClient.deleteSecret(appConfig.workspaceId, secret.id);
+        await kbClient.deleteSecret(selectedSlug, secret.id);
         if (createdSecret?.id === secret.id) {
           setCreatedSecret(null);
         }

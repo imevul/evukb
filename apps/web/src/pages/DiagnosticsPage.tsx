@@ -28,7 +28,7 @@ import { Eye, RotateCw, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 function formatDiagnosticsJson(value: unknown): string {
   if (value === null || value === undefined) {
@@ -156,6 +156,7 @@ const diagnosticsTabs: Array<{ id: DiagnosticsTab; label: string }> = [
 ];
 
 export function DiagnosticsPage() {
+  const { selectedSlug } = useWorkspace();
   const formatDateTime = useFormatDateTime();
   const [dbHealth, setDbHealth] = useState<DatabaseHealth | null>(null);
   const [blobHealth, setBlobHealth] = useState<BlobStoreHealth | null>(null);
@@ -182,14 +183,14 @@ export function DiagnosticsPage() {
     let cancelled = false;
     setLoading(true);
     void Promise.all([
-      kbClient.getHealthDb(appConfig.workspaceId),
-      kbClient.getHealthBlobStore(appConfig.workspaceId),
-      kbClient.getHealthProviders(appConfig.workspaceId),
-      kbClient.getHealthVectorStore(appConfig.workspaceId),
-      kbClient.listFailedJobs(appConfig.workspaceId, { limit: 50 }),
-      kbClient.listCorpora(appConfig.workspaceId),
-      kbClient.listUsageRecords(appConfig.workspaceId, { limit: 25 }),
-      kbClient.getUsageSummary(appConfig.workspaceId, {
+      kbClient.getHealthDb(selectedSlug),
+      kbClient.getHealthBlobStore(selectedSlug),
+      kbClient.getHealthProviders(selectedSlug),
+      kbClient.getHealthVectorStore(selectedSlug),
+      kbClient.listFailedJobs(selectedSlug, { limit: 50 }),
+      kbClient.listCorpora(selectedSlug),
+      kbClient.listUsageRecords(selectedSlug, { limit: 25 }),
+      kbClient.getUsageSummary(selectedSlug, {
         since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
         groupBy: 'operationType',
       }),
@@ -224,14 +225,14 @@ export function DiagnosticsPage() {
   }, []);
 
   async function refreshFailedJobs(): Promise<void> {
-    const jobs = await kbClient.listFailedJobs(appConfig.workspaceId, { limit: 50 });
+    const jobs = await kbClient.listFailedJobs(selectedSlug, { limit: 50 });
     setFailedJobs(jobs);
   }
 
   async function handleRetry(jobId: string): Promise<void> {
     setRetryingJobId(jobId);
     try {
-      await kbClient.retryFailedJob(appConfig.workspaceId, jobId);
+      await kbClient.retryFailedJob(selectedSlug, jobId);
       await refreshFailedJobs();
       setError(null);
     } catch (retryError: unknown) {
@@ -254,7 +255,7 @@ export function DiagnosticsPage() {
       confirmingLabel: 'Deleting…',
       confirmVariant: 'danger',
       action: async () => {
-        await kbClient.deleteFailedJob(appConfig.workspaceId, job.id);
+        await kbClient.deleteFailedJob(selectedSlug, job.id);
         if (detailJob?.id === job.id) {
           setDetailJob(null);
         }
@@ -280,7 +281,7 @@ export function DiagnosticsPage() {
         setBulkAction('delete');
         try {
           for (const job of failedJobs) {
-            await kbClient.deleteFailedJob(appConfig.workspaceId, job.id);
+            await kbClient.deleteFailedJob(selectedSlug, job.id);
           }
           setDetailJob(null);
           await refreshFailedJobs();
@@ -304,7 +305,7 @@ export function DiagnosticsPage() {
     setBulkAction('retry');
     try {
       for (const job of failedJobs) {
-        await kbClient.retryFailedJob(appConfig.workspaceId, job.id);
+        await kbClient.retryFailedJob(selectedSlug, job.id);
       }
       await refreshFailedJobs();
       setError(null);

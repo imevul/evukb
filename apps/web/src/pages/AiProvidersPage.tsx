@@ -3,7 +3,7 @@ import { Alert, Button, EmptyState, StatusBadge, Switch } from '@evu/kb-ui';
 import { type FormEvent, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 type ProviderDraft = {
   overrideEnabled: boolean;
@@ -52,6 +52,7 @@ function formatSettingSource(source: string | undefined): string {
 }
 
 export function AiProvidersPage() {
+  const { selectedSlug } = useWorkspace();
   const [providers, setProviders] = useState<AiProvidersView | null>(null);
   const [embeddingDraft, setEmbeddingDraft] = useState<EmbeddingDraft>({
     overrideEnabled: false,
@@ -74,7 +75,7 @@ export function AiProvidersPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .getAiProviders(appConfig.workspaceId)
+      .getAiProviders(selectedSlug)
       .then((loaded) => {
         if (!cancelled) {
           setProviders(loaded);
@@ -108,7 +109,7 @@ export function AiProvidersPage() {
         embedding: buildEmbeddingPatch(embeddingDraft),
         chat: buildProviderOverride(chatDraft),
       };
-      const updated = await kbClient.updateAiProviders(appConfig.workspaceId, patch);
+      const updated = await kbClient.updateAiProviders(selectedSlug, patch);
       setProviders(updated);
       setEmbeddingDraft(readEmbeddingDraft(updated.embedding));
       setChatDraft(readProviderDraft(updated.chat));

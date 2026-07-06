@@ -16,11 +16,13 @@ import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
-import { appConfig, appRoutes } from '../config.js';
+import { appRoutes } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 const renameCorpusFormId = 'rename-corpus-form';
 
 export function KnowledgeLayout() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
   const [corpus, setCorpus] = useState<KnowledgeCorpus | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export function KnowledgeLayout() {
 
     let cancelled = false;
     void kbClient
-      .getCorpus(appConfig.workspaceId, corpusId)
+      .getCorpus(selectedSlug, corpusId)
       .then((loaded) => {
         if (!cancelled) {
           setCorpus(loaded);
@@ -93,7 +95,7 @@ export function KnowledgeLayout() {
     setRenameSaving(true);
     setRenameError(null);
     try {
-      const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
         name: renameName.trim(),
       });
       setCorpus(updated);
@@ -155,7 +157,7 @@ export function KnowledgeLayout() {
       <CorpusIndexEventProvider
         client={kbClient}
         corpusId={corpusId}
-        workspaceId={appConfig.workspaceId}
+        workspaceId={selectedSlug}
       >
         <Outlet />
       </CorpusIndexEventProvider>

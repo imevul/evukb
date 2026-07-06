@@ -20,6 +20,8 @@ keys. See [`SPEC.md` §8](../SPEC.md) and [`docs/AUTH.md`](./AUTH.md).
 | `EVUKB_WEB_ORIGIN` | Allowed Web origin for CORS | `http://localhost:4200` |
 | `EVUKB_LOG_LEVEL` | Fastify logger level (`fatal`…`trace`) | `info` |
 | `EVUKB_API_PROXY_TARGET` | Target for the Web app's same-origin `/api` proxy (Vite dev/preview) | `http://localhost:4201` |
+| `EVUKB_BOOTSTRAP_WORKSPACE_SLUG` | In production, ensure this workspace slug exists on API startup (idempotent). Unset to disable | unset (prod compose defaults to `local-dev`) |
+| `EVUKB_BOOTSTRAP_WORKSPACE_NAME` | Display name when bootstrapping the production workspace | slug value |
 
 ## Storage and limits
 
@@ -126,7 +128,7 @@ them from `.env` at dev-server time.
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `VITE_EVUKB_API_BASE_URL` | Browser API origin; empty uses same-origin `/api` via the Vite preview proxy | empty |
-| `VITE_EVUKB_WORKSPACE_ID` | Default workspace slug for the Web app | `local-dev` |
+| `VITE_EVUKB_WORKSPACE_ID` | Initial default workspace slug when no browser selection exists (`localStorage` key `evukb_selected_workspace` overrides after first use) | `local-dev` |
 | `VITE_EVUKB_MCP_BASE_URL` | MCP base URL shown in the in-app MCP setup guide | derived from API origin |
 | `VITE_EVUKB_API_PROXY_TARGET` | Alternative to `EVUKB_API_PROXY_TARGET` for the Vite dev/preview proxy | `http://localhost:4201` |
 

@@ -11,9 +11,10 @@ import { useParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
 import { renderCitationFileLink } from '../citation-links.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function CorpusAskPage() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
   const [question, setQuestion] = useState('');
   const [responseMode, setResponseMode] = useState<AskResponseMode>('concise');
@@ -21,12 +22,12 @@ export function CorpusAskPage() {
   const [rankingStrategyId, setRankingStrategyId] = useState('');
   const { strategies, embeddingConfigured } = useRankingStrategyOptions(
     kbClient,
-    appConfig.workspaceId,
+    selectedSlug,
   );
 
   const askStream = useAskStream<CorpusAskRequest>({
-    stream: (request) => kbClient.askStream(appConfig.workspaceId, corpusId ?? '', request),
-    fallback: (request) => kbClient.ask(appConfig.workspaceId, corpusId ?? '', request),
+    stream: (request) => kbClient.askStream(selectedSlug, corpusId ?? '', request),
+    fallback: (request) => kbClient.ask(selectedSlug, corpusId ?? '', request),
   });
 
   const filters = useMemo(() => buildKnowledgeFilters(filterDraft), [filterDraft]);

@@ -3,16 +3,17 @@ import { useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function CorpusFilesPage() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const fileSearchParam = searchParams.get('file');
 
   const manager = useCorpusFileManager({
     client: kbClient,
-    workspaceId: appConfig.workspaceId,
+    workspaceId: selectedSlug,
     corpusId: corpusId ?? '',
   });
 

@@ -13,10 +13,11 @@ import { useMemo, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
 import { renderCorpusFileLink } from '../citation-links.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function WorkspaceSearchPage() {
-  const corpora = useWorkspaceCorpora(kbClient, appConfig.workspaceId);
+  const { selectedSlug } = useWorkspace();
+  const corpora = useWorkspaceCorpora(kbClient, selectedSlug);
   const [query, setQuery] = useState('');
   const [filterDraft, setFilterDraft] = useState(emptySearchFilterDraft);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -26,7 +27,7 @@ export function WorkspaceSearchPage() {
   const [rankingStrategyId, setRankingStrategyId] = useState('');
   const { strategies, embeddingConfigured } = useRankingStrategyOptions(
     kbClient,
-    appConfig.workspaceId,
+    selectedSlug,
   );
 
   const corpusNameById = useMemo(
@@ -44,7 +45,7 @@ export function WorkspaceSearchPage() {
     setLoading(true);
     setError(null);
     try {
-      const hits = await kbClient.searchWorkspace(appConfig.workspaceId, {
+      const hits = await kbClient.searchWorkspace(selectedSlug, {
         query: query.trim(),
         corpusIds: corpora.corpusIds,
         ...(filters ? { filters } : {}),

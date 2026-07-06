@@ -26,7 +26,7 @@ import { Trash2 } from 'lucide-react';
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 const defaultRankingValues = {
   keywordWeight: 1,
@@ -151,7 +151,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
   const loadStrategies = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await kbClient.listRankingStrategies(appConfig.workspaceId);
+      const response = await kbClient.listRankingStrategies(selectedSlug);
       setStrategies(response.strategies);
       setError(null);
     } catch (loadError: unknown) {
@@ -170,7 +170,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
     setError(null);
     setUninstallError(null);
     try {
-      const usage = await kbClient.getRankingStrategyUsage(appConfig.workspaceId, strategyId);
+      const usage = await kbClient.getRankingStrategyUsage(selectedSlug, strategyId);
       setUsagePreview(usage);
       setPendingUninstallId(strategyId);
     } catch (previewError: unknown) {
@@ -197,7 +197,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
     setUninstallError(null);
     try {
       const result = await kbClient.unregisterRankingStrategy(
-        appConfig.workspaceId,
+        selectedSlug,
         pendingUninstallId,
       );
       setMessage(
@@ -224,7 +224,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
     setInstallingExampleId(exampleId);
     try {
       const result = await kbClient.registerRankingStrategyExample(
-        appConfig.workspaceId,
+        selectedSlug,
         exampleId,
       );
       setMessage(`Installed ${result.strategy.label ?? result.strategy.id}.`);
@@ -412,6 +412,7 @@ function RankingPluginsPanel({ onRefreshSettings }: { onRefreshSettings: () => P
 }
 
 export function RankingSettingsPage() {
+  const { selectedSlug } = useWorkspace();
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
   const [aiProviders, setAiProviders] = useState<AiProvidersView | null>(null);
   const [workspaceStrategyId, setWorkspaceStrategyId] = useState('hybrid_default_v1');
@@ -426,8 +427,8 @@ export function RankingSettingsPage() {
 
   async function reloadSettings(): Promise<void> {
     const [loaded, providers] = await Promise.all([
-      kbClient.getSettings(appConfig.workspaceId),
-      kbClient.getAiProviders(appConfig.workspaceId),
+      kbClient.getSettings(selectedSlug),
+      kbClient.getAiProviders(selectedSlug),
     ]);
     setSettings(loaded);
     setAiProviders(providers);
@@ -444,8 +445,8 @@ export function RankingSettingsPage() {
     let cancelled = false;
     setLoading(true);
     void Promise.all([
-      kbClient.getSettings(appConfig.workspaceId),
-      kbClient.getAiProviders(appConfig.workspaceId),
+      kbClient.getSettings(selectedSlug),
+      kbClient.getAiProviders(selectedSlug),
     ])
       .then(([loaded, providers]) => {
         if (!cancelled) {
@@ -485,7 +486,7 @@ export function RankingSettingsPage() {
         ...ranking,
         ...(pathBoosts ? { pathBoosts } : {}),
       };
-      const updated = await kbClient.updateSettings(appConfig.workspaceId, {
+      const updated = await kbClient.updateSettings(selectedSlug, {
         settings: {
           rankingSettings: nextRanking,
           rankingStrategyId: workspaceStrategyId,

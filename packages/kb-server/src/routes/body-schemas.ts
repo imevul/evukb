@@ -24,6 +24,15 @@ export function parseBody<Schema extends z.ZodType>(
 
 const settingsRecordSchema = z.record(z.string(), z.unknown());
 
+export const workspaceCreateBodySchema = z.object({
+  slug: z
+    .string()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug must be lowercase alphanumeric with optional hyphens'),
+  name: z.string().min(1).max(256),
+});
+
 export const corpusCreateBodySchema = z.object({
   name: z.string(),
   description: z.string().optional(),

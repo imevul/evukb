@@ -18,6 +18,7 @@ import { createEvuKbRuntime } from './runtime/create-runtime.js';
 import type { EvuKbRuntime } from './runtime/types.js';
 import { registerHealthRoutes } from './server/health-routes.js';
 import { registerWorkspaceRoutes } from './server/workspace-routes.js';
+import { workspaceCollectionRoutesPlugin } from './routes/workspace-collection-routes.js';
 
 export type EvuKbServerOptions = {
   blobRoot?: string;
@@ -149,6 +150,13 @@ export async function createEvuKbServer(
         fileSize: maxUploadBytes,
         files: 1,
       },
+    });
+
+    await server.register(workspaceCollectionRoutesPlugin, {
+      prefix: '/api',
+      corpora: runtime.corpora,
+      tokenAuth: runtime.tokenAuth,
+      workspaces: runtime.workspaces,
     });
 
     await registerWorkspaceRoutes(server, {

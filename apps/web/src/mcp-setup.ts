@@ -1,4 +1,3 @@
-import { appConfig } from './config.js';
 import { resolveEvuKbRuntimeConfig } from './runtime-config.js';
 
 export const MCP_TOKEN_PLACEHOLDER = 'YOUR_MCP_TOKEN';
@@ -35,10 +34,10 @@ export function resolveMcpServerUrl(): string {
   return 'http://localhost:4201/mcp';
 }
 
-function mcpHeaders(token: string): Record<string, string> {
+function mcpHeaders(token: string, workspaceId: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
-    'x-evukb-workspace-id': appConfig.workspaceId,
+    'x-evukb-workspace-id': workspaceId,
   };
 }
 
@@ -46,9 +45,12 @@ function formatJson(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-export function buildMcpHarnessGuides(token = MCP_TOKEN_PLACEHOLDER): McpHarnessGuide[] {
+export function buildMcpHarnessGuides(
+  token = MCP_TOKEN_PLACEHOLDER,
+  workspaceId = resolveEvuKbRuntimeConfig().workspaceId,
+): McpHarnessGuide[] {
   const mcpUrl = resolveMcpServerUrl();
-  const headers = mcpHeaders(token);
+  const headers = mcpHeaders(token, workspaceId);
 
   return [
     {

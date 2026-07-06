@@ -15,13 +15,14 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 function formatAction(action: string): string {
   return action.replace(/_/g, ' ');
 }
 
 export function MutationApprovalsPage() {
+  const { selectedSlug } = useWorkspace();
   const formatDateTime = useFormatDateTime();
   const [items, setItems] = useState<MutationApprovalRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ export function MutationApprovalsPage() {
   const loadApprovals = useCallback(async () => {
     setLoading(true);
     try {
-      const pending = await kbClient.listMutationApprovals(appConfig.workspaceId);
+      const pending = await kbClient.listMutationApprovals(selectedSlug);
       setItems(pending);
       setError(null);
     } catch (loadError: unknown) {
@@ -64,7 +65,7 @@ export function MutationApprovalsPage() {
         setBusyId(item.id);
         setMessage(null);
         try {
-          await kbClient.approveMutation(appConfig.workspaceId, item.id);
+          await kbClient.approveMutation(selectedSlug, item.id);
           setMessage('Mutation approved and applied.');
           await loadApprovals();
         } finally {
@@ -89,7 +90,7 @@ export function MutationApprovalsPage() {
         setBusyId(item.id);
         setMessage(null);
         try {
-          await kbClient.rejectMutation(appConfig.workspaceId, item.id);
+          await kbClient.rejectMutation(selectedSlug, item.id);
           setMessage('Mutation rejected.');
           await loadApprovals();
         } finally {

@@ -22,6 +22,8 @@ import { WorkspaceOverviewPage } from './pages/WorkspaceOverviewPage.js';
 import { WorkspaceAskPage } from './pages/WorkspaceAskPage.js';
 import { WorkspaceSearchPage } from './pages/WorkspaceSearchPage.js';
 import { WorkspaceSettingsPage } from './pages/WorkspaceSettingsPage.js';
+import { WorkspacesPage } from './pages/WorkspacesPage.js';
+import { WorkspaceGate } from './workspace/WorkspaceGate.js';
 
 // Heavy work surfaces load on demand: the file manager pulls in CodeMirror and
 // the graph page pulls in the SVG neighborhood view. Keeping them out of the
@@ -41,45 +43,48 @@ export function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route element={<KnowledgeLayout />} path="/">
-          <Route element={<Navigate replace to="/knowledge" />} index />
-          <Route element={<KnowledgeListPage />} path="knowledge" />
-          <Route element={<WorkspaceAskPage />} path="ask" />
-          <Route element={<WorkspaceSearchPage />} path="search" />
-          <Route element={<DiagnosticsPage />} path="diagnostics" />
-          <Route element={<CorpusOverviewPage />} path="knowledge/:corpusId/overview" />
-          <Route
-            element={
-              <LazyRoute>
-                <CorpusFilesPage />
-              </LazyRoute>
-            }
-            path="knowledge/:corpusId/files"
-          />
-          <Route element={<CorpusSearchPage />} path="knowledge/:corpusId/search" />
-          <Route element={<CorpusLinksPage />} path="knowledge/:corpusId/links" />
-          <Route
-            element={
-              <LazyRoute>
-                <CorpusGraphPage />
-              </LazyRoute>
-            }
-            path="knowledge/:corpusId/graph"
-          />
-          <Route element={<CorpusAskPage />} path="knowledge/:corpusId/ask" />
-          <Route element={<SettingsLayout />} path="settings">
-            <Route element={<Navigate replace to="preferences" />} index />
-            <Route element={<SettingsPreferencesPage />} path="preferences" />
-            <Route element={<WorkspaceOverviewPage />} path="overview" />
-            <Route element={<WorkspaceSettingsPage />} path="workspace" />
-            <Route element={<AiProvidersPage />} path="ai" />
-            <Route element={<RankingSettingsPage />} path="ranking" />
-            <Route element={<Navigate replace to="/diagnostics" />} path="diagnostics" />
-            <Route element={<SecretsPage />} path="secrets" />
-            <Route element={<McpTokensPage />} path="mcp-tokens" />
-            <Route element={<ApiKeysPage />} path="api-keys" />
-            <Route element={<AuditPage />} path="audit" />
-            <Route element={<MutationApprovalsPage />} path="approvals" />
+        <Route element={<WorkspacesPage />} path="workspaces" />
+        <Route element={<WorkspaceGate />}>
+          <Route element={<KnowledgeLayout />} path="/">
+            <Route element={<Navigate replace to="/knowledge" />} index />
+            <Route element={<KnowledgeListPage />} path="knowledge" />
+            <Route element={<WorkspaceAskPage />} path="ask" />
+            <Route element={<WorkspaceSearchPage />} path="search" />
+            <Route element={<DiagnosticsPage />} path="diagnostics" />
+            <Route element={<CorpusOverviewPage />} path="knowledge/:corpusId/overview" />
+            <Route
+              element={
+                <LazyRoute>
+                  <CorpusFilesPage />
+                </LazyRoute>
+              }
+              path="knowledge/:corpusId/files"
+            />
+            <Route element={<CorpusSearchPage />} path="knowledge/:corpusId/search" />
+            <Route element={<CorpusLinksPage />} path="knowledge/:corpusId/links" />
+            <Route
+              element={
+                <LazyRoute>
+                  <CorpusGraphPage />
+                </LazyRoute>
+              }
+              path="knowledge/:corpusId/graph"
+            />
+            <Route element={<CorpusAskPage />} path="knowledge/:corpusId/ask" />
+            <Route element={<SettingsLayout />} path="settings">
+              <Route element={<Navigate replace to="preferences" />} index />
+              <Route element={<SettingsPreferencesPage />} path="preferences" />
+              <Route element={<WorkspaceOverviewPage />} path="overview" />
+              <Route element={<WorkspaceSettingsPage />} path="workspace" />
+              <Route element={<AiProvidersPage />} path="ai" />
+              <Route element={<RankingSettingsPage />} path="ranking" />
+              <Route element={<Navigate replace to="/diagnostics" />} path="diagnostics" />
+              <Route element={<SecretsPage />} path="secrets" />
+              <Route element={<McpTokensPage />} path="mcp-tokens" />
+              <Route element={<ApiKeysPage />} path="api-keys" />
+              <Route element={<AuditPage />} path="audit" />
+              <Route element={<MutationApprovalsPage />} path="approvals" />
+            </Route>
           </Route>
         </Route>
       </Route>

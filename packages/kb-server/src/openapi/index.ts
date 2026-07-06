@@ -11,6 +11,7 @@ import { secretTokenPaths } from './secret-token-paths.js';
 import { settingsPaths } from './settings-paths.js';
 import { syncPortablePaths } from './sync-portable-paths.js';
 import { usagePaths } from './usage-paths.js';
+import { workspaceCollectionPaths } from './workspace-collection-paths.js';
 
 export { workspaceBootHintsSchema } from './schemas.js';
 
@@ -25,6 +26,7 @@ export function buildOpenApiDocument() {
     servers: [{ url: 'http://localhost:4201' }],
     paths: {
       ...healthPaths,
+      ...workspaceCollectionPaths,
       ...corpusPaths,
       ...filePaths,
       ...searchAskPaths,

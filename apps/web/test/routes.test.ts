@@ -5,6 +5,7 @@ import { appRouteTable, isCorpusDetailPath } from '../src/routes.js';
 describe('web app routes', () => {
   it('includes the primary knowledge routes from the sprint plan', () => {
     expect(appRouteTable.map((route) => route.path)).toEqual([
+      '/workspaces',
       '/knowledge',
       '/knowledge/:corpusId/overview',
       '/knowledge/:corpusId/files',

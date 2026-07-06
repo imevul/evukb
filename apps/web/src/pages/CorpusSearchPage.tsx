@@ -11,9 +11,10 @@ import { useParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
 import { renderCorpusFileLink } from '../citation-links.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function CorpusSearchPage() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
   const [query, setQuery] = useState('');
   const [filterDraft, setFilterDraft] = useState(emptySearchFilterDraft);
@@ -24,7 +25,7 @@ export function CorpusSearchPage() {
   const [rankingStrategyId, setRankingStrategyId] = useState('');
   const { strategies, embeddingConfigured } = useRankingStrategyOptions(
     kbClient,
-    appConfig.workspaceId,
+    selectedSlug,
   );
 
   const filters = useMemo(() => buildKnowledgeFilters(filterDraft), [filterDraft]);
@@ -36,7 +37,7 @@ export function CorpusSearchPage() {
 
     setLoading(true);
     try {
-      const hits = await kbClient.search(appConfig.workspaceId, corpusId, {
+      const hits = await kbClient.search(selectedSlug, corpusId, {
         query: query.trim(),
         ...(filters ? { filters } : {}),
         ...(rankingStrategyId ? { rankingStrategyId } : {}),

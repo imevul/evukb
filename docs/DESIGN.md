@@ -27,19 +27,27 @@ Implementations are clean-room against documented contracts.
 | primary  | Corpus detail: underline tabs when scoped     |
 | nav      |                                               |
 |          |                                               |
-| workspace|                                               |
+| workspace|  (button → `/workspaces`; shows active slug)   |
 | + theme  |                                               |
 +----------+-----------------------------------------------+
 ```
 
 The sidebar (`w-56 bg-card border-r`) holds the brand, primary nav, workspace
-meta, and the theme control. Active nav links use `bg-primary
+control, and the theme control. The workspace control is a button linking to
+`/workspaces`; it shows the active slug (or a degraded state when the workspace
+is missing or inaccessible). Browser selection in `localStorage` overrides the
+build-time default from `VITE_EVUKB_WORKSPACE_ID`. When the active workspace is
+invalid, primary nav is reduced to **Workspaces** only and a warning banner
+points operators to choose or create a workspace.
+
+Active nav links use `bg-primary
 text-primary-foreground`; the rest are muted with a `hover:bg-muted` affordance.
 
 Primary sidebar routes:
 
 | Item | Route |
 | --- | --- |
+| Workspaces | `/workspaces` |
 | Knowledge | `/knowledge` |
 | Search | `/search` |
 | Ask | `/ask` |
@@ -203,6 +211,7 @@ Primary routes from `SPEC.md`:
 | Route | Purpose |
 | --- | --- |
 | `/` | Redirect to knowledge list |
+| `/workspaces` | Workspace list, select, create, rename, delete (empty only) |
 | `/knowledge` | Corpus list |
 | `/knowledge/{corpusId}/overview` | Stats, warnings, and linked adapters |
 | `/knowledge/{corpusId}/files` | File manager and editor |

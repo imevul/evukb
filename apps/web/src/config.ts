@@ -37,6 +37,7 @@ export const appRoutes = {
   settingsAi: '/settings/ai',
   settingsRanking: '/settings/ranking',
   diagnostics: '/diagnostics',
+  workspaces: '/workspaces',
   settingsSecrets: '/settings/secrets',
   settingsRoot: '/settings',
 } as const;

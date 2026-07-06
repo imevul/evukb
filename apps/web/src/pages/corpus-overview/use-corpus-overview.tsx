@@ -22,7 +22,7 @@ import {
   useState,
 } from 'react';
 import { kbClient } from '../../api/client.js';
-import { appConfig } from '../../config.js';
+import { useWorkspace } from '../../workspace/WorkspaceProvider.js';
 import { normalizeArchiveUploadFile } from '../../lib/archive-import-normalize.js';
 import {
   type AgentNotesRetrievalMode,
@@ -96,6 +96,7 @@ export interface CorpusOverviewState {
 }
 
 export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewState {
+  const { selectedSlug } = useWorkspace();
   const [stats, setStats] = useState<KnowledgeCorpusStats | null>(null);
   const [corpus, setCorpus] = useState<KnowledgeCorpus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -140,9 +141,9 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setLoading(true);
     try {
       const [loadedStats, loadedCorpus, loadedSettings] = await Promise.all([
-        kbClient.getCorpusStats(appConfig.workspaceId, corpusId),
-        kbClient.getCorpus(appConfig.workspaceId, corpusId),
-        kbClient.getSettings(appConfig.workspaceId),
+        kbClient.getCorpusStats(selectedSlug, corpusId),
+        kbClient.getCorpus(selectedSlug, corpusId),
+        kbClient.getSettings(selectedSlug),
       ]);
       setStats(loadedStats);
       setCorpus(loadedCorpus);
@@ -229,7 +230,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     if (!corpusId) {
       return;
     }
-    await runReindex('all', () => kbClient.reindexCorpus(appConfig.workspaceId, corpusId));
+    await runReindex('all', () => kbClient.reindexCorpus(selectedSlug, corpusId));
   }
 
   async function runReindexNeedingAttention(): Promise<void> {
@@ -237,7 +238,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       return;
     }
     await runReindex('needing', () =>
-      kbClient.reindexNeedingAttention(appConfig.workspaceId, corpusId),
+      kbClient.reindexNeedingAttention(selectedSlug, corpusId),
     );
   }
 
@@ -250,7 +251,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setActionError(null);
     setActionMessage(null);
     try {
-      const response = await kbClient.validateCitations(appConfig.workspaceId, corpusId);
+      const response = await kbClient.validateCitations(selectedSlug, corpusId);
       setActionMessage(
         response.enqueued === 0
           ? 'No citation validation jobs were enqueued.'
@@ -276,7 +277,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setActionMessage(null);
     setConvertResult(null);
     try {
-      const result = await kbClient.convertToOkf(appConfig.workspaceId, corpusId, {
+      const result = await kbClient.convertToOkf(selectedSlug, corpusId, {
         synthesizeIndex: true,
       });
       setConvertResult(result);
@@ -326,7 +327,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setActionError(null);
     setActionMessage(null);
     try {
-      const zip = await kbClient.exportOkfZip(appConfig.workspaceId, corpusId);
+      const zip = await kbClient.exportOkfZip(selectedSlug, corpusId);
       const blob = new Blob([zip], { type: 'application/zip' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -353,7 +354,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setActionError(null);
     setActionMessage(null);
     try {
-      const zip = await kbClient.exportPortableZip(appConfig.workspaceId, corpusId);
+      const zip = await kbClient.exportPortableZip(selectedSlug, corpusId);
       const blob = new Blob([zip], { type: 'application/zip' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -382,7 +383,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     try {
       const zipFile = await normalizeArchiveUploadFile(file);
       const result: CorpusArchiveImportResult = await kbClient.importPortableZip(
-        appConfig.workspaceId,
+        selectedSlug,
         corpusId,
         zipFile,
       );
@@ -423,8 +424,8 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     try {
       const response =
         action === 'mount'
-          ? await kbClient.syncMount(appConfig.workspaceId, corpusId)
-          : await kbClient.syncGit(appConfig.workspaceId, corpusId);
+          ? await kbClient.syncMount(selectedSlug, corpusId)
+          : await kbClient.syncGit(selectedSlug, corpusId);
       setActionMessage(
         response.enqueued
           ? `${action === 'mount' ? 'Mount' : 'Git'} sync job enqueued.`
@@ -453,7 +454,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       } else {
         nextSettings.syncIntervalMinutes = parsed;
       }
-      const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
         settings: nextSettings,
       });
       setCorpus(updated);
@@ -475,7 +476,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setSettingsSaving(true);
     setActionError(null);
     try {
-      const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
         settings: {
           ...corpus.settings,
           mountMode: mountModeInput,
@@ -509,7 +510,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
         delete nextSettings.agentMutationApprovalPolicy;
         delete nextSettings.includeAgentNotesInRetrieval;
         delete nextSettings.agentWritePathPrefixes;
-        const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+        const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
           settings: nextSettings,
           rankingStrategyId: workspaceRankingStrategyId,
         });
@@ -554,7 +555,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
         delete nextSettings.agentWritePathPrefixes;
       }
 
-      const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
         settings: nextSettings,
         rankingStrategyId,
       });
@@ -594,7 +595,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setSettingsSaving(true);
     setActionError(null);
     try {
-      const updated = await kbClient.updateCorpus(appConfig.workspaceId, corpusId, {
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
         settings: {
           ...corpus.settings,
           okfStrict: enabled,

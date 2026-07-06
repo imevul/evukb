@@ -2,11 +2,13 @@ import { LinkGraphOverview, useLinkGraph } from '@evu/kb-ui';
 import { Link, useParams } from 'react-router-dom';
 
 import { kbClient } from '../api/client.js';
-import { appConfig, appRoutes } from '../config.js';
+import { appRoutes } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 
 export function CorpusLinksPage() {
+  const { selectedSlug } = useWorkspace();
   const { corpusId } = useParams<{ corpusId: string }>();
-  const { graph, loading, error } = useLinkGraph(kbClient, appConfig.workspaceId, corpusId);
+  const { graph, loading, error } = useLinkGraph(kbClient, selectedSlug, corpusId);
 
   if (!corpusId) {
     return null;

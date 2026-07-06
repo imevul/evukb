@@ -156,3 +156,8 @@ export type {
   UsageRecord,
   UsageSummaryQuery,
 } from './usage.js';
+export type {
+  CreateWorkspaceRequest,
+  DeleteWorkspaceResult,
+  WorkspaceSummary,
+} from './workspace.js';

@@ -2,7 +2,7 @@ import { Button, cn, tabClassName } from '@evu/kb-ui';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import { buildMcpHarnessGuides, MCP_TOKEN_PLACEHOLDER, type McpHarnessId } from '../mcp-setup.js';
 
 export type McpSetupGuideProps = {
@@ -10,6 +10,7 @@ export type McpSetupGuideProps = {
 };
 
 export function McpSetupGuide({ mcpToken = null }: McpSetupGuideProps) {
+  const { selectedSlug } = useWorkspace();
   const [open, setOpen] = useState(false);
   const [activeHarness, setActiveHarness] = useState<McpHarnessId>('cursor');
   const [copied, setCopied] = useState(false);
@@ -21,8 +22,8 @@ export function McpSetupGuide({ mcpToken = null }: McpSetupGuideProps) {
   }, [mcpToken]);
 
   const guides = useMemo(
-    () => buildMcpHarnessGuides(mcpToken?.trim() || MCP_TOKEN_PLACEHOLDER),
-    [mcpToken],
+    () => buildMcpHarnessGuides(mcpToken?.trim() || MCP_TOKEN_PLACEHOLDER, selectedSlug),
+    [mcpToken, selectedSlug],
   );
   const guide = guides.find((entry) => entry.id === activeHarness) ?? guides[0];
 
@@ -73,7 +74,7 @@ export function McpSetupGuide({ mcpToken = null }: McpSetupGuideProps) {
         <div className="flex flex-col gap-4" id="mcp-setup-guide-content">
           <p className="evukb-muted m-0">
             EvuKB exposes Streamable HTTP MCP at <code>/mcp</code>. Create a token below, then
-            configure your agent with workspace <code>{appConfig.workspaceId}</code> and the bearer
+            configure your agent with workspace <code>{selectedSlug}</code> and the bearer
             headers in each example.
           </p>
           <nav

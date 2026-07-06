@@ -4,6 +4,7 @@ export type AppRoute = {
 };
 
 export const appRouteTable: AppRoute[] = [
+  { path: '/workspaces', purpose: 'workspace list and selection' },
   { path: '/knowledge', purpose: 'corpus list' },
   { path: '/knowledge/:corpusId/overview', purpose: 'corpus stats and warnings' },
   { path: '/knowledge/:corpusId/files', purpose: 'file manager and editor' },

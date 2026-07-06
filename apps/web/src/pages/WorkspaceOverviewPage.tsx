@@ -3,10 +3,11 @@ import { EmptyState, StatusPill } from '@evu/kb-ui';
 import { useEffect, useState } from 'react';
 
 import { kbClient } from '../api/client.js';
-import { appConfig } from '../config.js';
+import { useWorkspace } from '../workspace/WorkspaceProvider.js';
 import { buildBootHintCards } from './workspace-settings-shared.js';
 
 export function WorkspaceOverviewPage() {
+  const { selectedSlug } = useWorkspace();
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +16,7 @@ export function WorkspaceOverviewPage() {
     let cancelled = false;
     setLoading(true);
     void kbClient
-      .getSettings(appConfig.workspaceId)
+      .getSettings(selectedSlug)
       .then((loaded) => {
         if (!cancelled) {
           setSettings(loaded);

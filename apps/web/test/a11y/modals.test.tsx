@@ -15,6 +15,7 @@ import { KnowledgeListPage } from '../../src/pages/KnowledgeListPage.js';
 import { McpTokensPage } from '../../src/pages/McpTokensPage.js';
 import { MutationApprovalsPage } from '../../src/pages/MutationApprovalsPage.js';
 import { SecretsPage } from '../../src/pages/SecretsPage.js';
+import { WorkspaceProvider } from '../../src/workspace/WorkspaceProvider.js';
 
 // Make dialogs visible to axe: the shared setup stubs showModal/close as
 // no-ops, but modal-open checks need the `open` attribute toggled.
@@ -29,6 +30,10 @@ const { kbClientMock } = vi.hoisted(() => ({
   kbClientMock: {
     listCorpora: vi.fn().mockResolvedValue([]),
     getSettings: vi.fn().mockResolvedValue({
+      id: '00000000-0000-4000-8000-000000000001',
+      slug: 'local-dev',
+      name: 'EvuKB',
+      settings: {},
       ranking: {
         availableStrategies: [{ id: 'hybrid_default_v1', label: 'Hybrid default', version: '1' }],
       },
@@ -98,7 +103,9 @@ function renderWithProviders(ui: ReactElement): ReturnType<typeof render> {
   return render(
     <ColorSchemeProvider>
       <DisplayPreferencesProvider>
-        <MemoryRouter>{ui}</MemoryRouter>
+        <MemoryRouter>
+          <WorkspaceProvider>{ui}</WorkspaceProvider>
+        </MemoryRouter>
       </DisplayPreferencesProvider>
     </ColorSchemeProvider>,
   );
@@ -127,7 +134,8 @@ describe('a11y pages', () => {
 
   it('diagnostics page has no axe violations', async () => {
     const { container } = renderWithProviders(<DiagnosticsPage />);
-    await screen.findByText('evukb-index');
+    await screen.findByRole('heading', { name: 'Diagnostics' });
+    await screen.findByText('Database');
 
     await expectAccessible(container);
   });
