@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,6 +12,7 @@ import { createTestApiKey, describeIfDb, requireDatabaseUrl } from './helpers.js
 describeIfDb('kb-server workspace collection routes', () => {
   it('lists, creates, and deletes empty workspaces with auth rules', async () => {
     const blobRoot = mkdtempSync(join(tmpdir(), 'evukb-workspaces-'));
+    const slug = `ops-ui-${randomUUID().slice(0, 8)}`;
     try {
       const server = await createEvuKbServer({
         logger: false,
@@ -29,27 +31,27 @@ describeIfDb('kb-server workspace collection routes', () => {
       const createResponse = await server.inject({
         method: 'POST',
         url: '/api/workspaces',
-        payload: { slug: 'ops-ui', name: 'Ops UI' },
+        payload: { slug, name: 'Ops UI' },
       });
       expect(createResponse.statusCode).toBe(200);
       expect(createResponse.json()).toMatchObject({
-        slug: 'ops-ui',
+        slug,
         name: 'Ops UI',
       });
 
       const duplicateResponse = await server.inject({
         method: 'POST',
         url: '/api/workspaces',
-        payload: { slug: 'ops-ui', name: 'Duplicate' },
+        payload: { slug, name: 'Duplicate' },
       });
       expect(duplicateResponse.statusCode).toBe(409);
 
       const deleteResponse = await server.inject({
         method: 'DELETE',
-        url: '/api/workspaces/ops-ui',
+        url: `/api/workspaces/${slug}`,
       });
       expect(deleteResponse.statusCode).toBe(200);
-      expect(deleteResponse.json()).toMatchObject({ deleted: true, slug: 'ops-ui' });
+      expect(deleteResponse.json()).toMatchObject({ deleted: true, slug });
     } finally {
       rmSync(blobRoot, { recursive: true, force: true });
     }

@@ -7,6 +7,7 @@ import {
   isCollectionAdmin,
   requireCollectionAdmin,
 } from '../auth/collection-auth.js';
+import { isPostgresUniqueViolation } from '../db/postgres-errors.js';
 import { ApiError } from '../errors.js';
 import type { TokenAuthService } from '../services/token-auth-service.js';
 import { parseBody, workspaceCreateBodySchema } from './body-schemas.js';
@@ -18,15 +19,6 @@ export type WorkspaceCollectionRoutesOptions = {
   tokenAuth: TokenAuthService;
   workspaces: WorkspaceRepository;
 };
-
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    (error as { code?: string }).code === '23505'
-  );
-}
 
 async function resolveWorkspaceParam(
   workspaces: WorkspaceRepository,
@@ -72,7 +64,7 @@ export const workspaceCollectionRoutesPlugin: FastifyPluginAsync<
         name: body.name,
       });
     } catch (error) {
-      if (isUniqueViolation(error)) {
+      if (isPostgresUniqueViolation(error)) {
         throw ApiError.conflict(`Workspace slug already exists: ${body.slug}`);
       }
       throw error;

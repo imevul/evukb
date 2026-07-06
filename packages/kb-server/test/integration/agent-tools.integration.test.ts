@@ -755,8 +755,7 @@ describeIfDb('kb-server agent inventory MCP surfaces', () => {
       const corpus = createCorpus.json();
 
       const serverFolderPath = await createFolderChain(server, workspace.id, corpus.id, [
-        '03 Areas',
-        'Infrastructure',
+        'Areas',
         'Servers',
       ]);
 

@@ -71,8 +71,29 @@ export function requireDatabaseUrl(): string {
   return databaseUrl;
 }
 
+export const mcpAccept = 'application/json, text/event-stream';
+
+const WORKSPACE_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function resolveTestWorkspaceId(
+  workspaceIdOrSlug: string,
+  handle: Awaited<ReturnType<typeof import('@evu/kb-db').createDb>>,
+): Promise<string> {
+  if (WORKSPACE_ID_PATTERN.test(workspaceIdOrSlug)) {
+    return workspaceIdOrSlug;
+  }
+
+  const { WorkspaceRepository } = await import('@evu/kb-db');
+  const workspace = await new WorkspaceRepository(handle).getBySlug(workspaceIdOrSlug);
+  if (!workspace) {
+    throw new Error(`Workspace not found for test fixture: ${workspaceIdOrSlug}`);
+  }
+  return workspace.id;
+}
+
 export async function createTestApiKey(
-  workspaceId: string,
+  workspaceIdOrSlug: string,
   name: string,
   scopes: KbAuthScope[],
 ): Promise<string> {
@@ -81,6 +102,7 @@ export async function createTestApiKey(
   const handle = createDb({ connectionString: requireDatabaseUrl() });
   try {
     await migrateLatest(handle);
+    const workspaceId = await resolveTestWorkspaceId(workspaceIdOrSlug, handle);
     const plain = generateApiKeySecret();
     await new ApiKeyRepository(handle).create({
       workspaceId,
@@ -128,8 +150,6 @@ export async function waitForNodeIndexedViaJobs(
   await waitForBackgroundJobs(server);
   await waitForNodeIndexed(server, workspaceId, corpusId, nodeId);
 }
-
-export const mcpAccept = 'application/json, text/event-stream';
 
 export async function callMcpTool(
   server: TestServer,
