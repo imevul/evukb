@@ -65,6 +65,7 @@ keys, MCP tokens, and workspace scoping.
 | `make dev` | Start the dev Docker Compose stack (foreground) |
 | `make up` / `make down` | Start or stop the dev stack (background) |
 | `make prod` | Start the production Docker Compose stack |
+| `make update` | Pull latest `main` and restart the production stack |
 | `make migrate` | Apply database migrations |
 | `pnpm lint` | Run Biome checks |
 | `pnpm typecheck` | Build packages and run TypeScript checks |

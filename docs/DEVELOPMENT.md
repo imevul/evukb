@@ -125,6 +125,7 @@ Default dev ports:
 | `make up` | Start the dev stack in the background |
 | `make down` | Stop the dev stack |
 | `make prod` | Start the production Docker Compose stack (`deploy/docker-compose.yml`) |
+| `make update` | `git pull --ff-only`, then start the production stack |
 | `make lint` / `make typecheck` / `make build` | Run the corresponding workspace check |
 | `make test` | Run workspace tests, warning when DB-backed suites will skip |
 | `make verify-dev` | Build, test, and validate the dev compose config |
