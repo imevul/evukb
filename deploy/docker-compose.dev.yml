@@ -19,7 +19,8 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    command: sh -c "pnpm install --no-frozen-lockfile && pnpm --filter @evu/kb-api dev"
+      target: dev
+    command: pnpm --filter @evu/kb-api dev
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,7 +74,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    command: sh -c "pnpm install --no-frozen-lockfile && pnpm --filter @evu/kb-web dev"
+      target: dev
+    command: pnpm --filter @evu/kb-web dev
     depends_on:
       - evukb-api
     environment:
@@ -87,7 +89,7 @@ services:
       - /workspace/node_modules
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.18.2
     profiles: ["qdrant"]
     ports:
       - "6333:6333"
@@ -95,7 +97,7 @@ services:
       - qdrant_data:/qdrant/storage
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.9.6
     profiles: ["local-embed"]
     ports:
       - "11434:11434"

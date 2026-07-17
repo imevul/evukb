@@ -253,12 +253,60 @@ Point your reverse proxy at web `:4200` and API `:4201` (`/api`, `/health`, `/mc
 Workspace isolation golden tests live under `packages/kb-core/test/isolation-golden.test.ts`
 and `packages/kb-server/test/integration/isolation.integration.test.ts`.
 
+## Docker images
+
+`apps/api/Dockerfile` and `apps/web/Dockerfile` are multi-stage:
+
+| Target | Used by | Purpose |
+| --- | --- | --- |
+| `runtime` | `deploy/docker-compose.yml` | Production image (frozen lockfile, non-root, healthcheck, debug toolkit) |
+| `dev` | `deploy/docker-compose.dev.yml` | Deps + toolkit; compose bind-mounts source for hot reload |
+
+### When to rebuild
+
+| Change | Rebuild? | Notes |
+| --- | --- | --- |
+| App/package TypeScript/React source | No (dev) | Dev bind-mounts `.:/workspace`; `tsx` / Vite reload |
+| `pnpm-lock.yaml` / workspace `package.json` | Yes | Rebuild `dev` or `runtime` so the image (and anon `node_modules` volume) picks up deps |
+| `apps/*/Dockerfile`, root `.dockerignore` | Yes | Layer recipe / context changed |
+| System packages / base image pin | Yes | Edit `NODE_IMAGE` / apt set in the Dockerfile |
+| `.env` operator secrets / ports | No image rebuild | Recreate containers (`--force-recreate`) so env is refreshed |
+
+```bash
+# Prod images
+docker compose --project-directory . -f deploy/docker-compose.yml build
+
+# Dev images (after lockfile or Dockerfile changes)
+docker compose --project-directory . -f deploy/docker-compose.dev.yml build
+```
+
+If a dev container still sees stale deps after a lockfile bump, remove the anonymous
+`node_modules` volume (e.g. `docker compose ... down -v` for that project) and rebuild.
+
+### Lint and context
+
+- Lint Dockerfiles with `droast apps/api/Dockerfile apps/web/Dockerfile` (see root
+  [`droast.toml`](../droast.toml) for intentional skips).
+- Keep the root [`.dockerignore`](../.dockerignore) honest: host `node_modules`,
+  `.pnpm-store`, tests, and most docs must stay out of the build context.
+
+### Image pins (compose)
+
+| Image | Pin | Profiles |
+| --- | --- | --- |
+| `pgvector/pgvector` | `pg17` | default |
+| `qdrant/qdrant` | `v1.18.2` | `qdrant` |
+| `ollama/ollama` | `0.9.6` | `local-embed` |
+
+Prod compose builds `EVUKB_DATABASE_URL` from `EVUKB_POSTGRES_USER` /
+`EVUKB_POSTGRES_PASSWORD` / `EVUKB_POSTGRES_DB` (defaults `evukb` / `evukb` / `evukb`).
+
 ## Runtime Defaults
 
 Copy `.env.example` to `.env` at the **repository root** for local overrides. EvuKB uses the `EVUKB_*`
 environment prefix. The dev/prod compose scripts pass `--project-directory .` so this root
 `.env` is loaded when you run `make dev`, `make up`, or `make prod`. Compose still
-hardcodes in-container `EVUKB_DATABASE_URL` and `EVUKB_BLOB_ROOT` for API services
+sets in-container `EVUKB_DATABASE_URL` and `EVUKB_BLOB_ROOT` for API services
 (`postgres` hostname, `/data/corpus-store`); the `.env` value is for host-side tools
 such as `pnpm test` and `make migrate`. Production compose passes operator settings
 (secrets, providers, mount flags, upload limits, and similar) into `evukb-api` explicitly.

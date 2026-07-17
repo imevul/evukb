@@ -70,6 +70,9 @@ See [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) (Production Web deployment).
 | `make up` / `make down` | Start or stop the dev stack (background) |
 | `make prod` | Start the production Docker Compose stack |
 | `make update` | Pull latest `main` and restart the production stack |
+
+Rebuild Docker images after Dockerfile, `.dockerignore`, or lockfile changes — not
+on ordinary source edits. See [Docker images](./docs/DEVELOPMENT.md#docker-images).
 | `make migrate` | Apply database migrations |
 | `pnpm lint` | Run Biome checks |
 | `pnpm typecheck` | Build packages and run TypeScript checks |

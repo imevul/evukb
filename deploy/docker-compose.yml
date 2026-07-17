@@ -17,6 +17,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      target: runtime
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,7 +28,7 @@ services:
       EVUKB_REGISTER_EXAMPLE_RANKING_STRATEGIES: "false"
       # In-container paths and service DNS; do not inherit host .env localhost URLs.
       EVUKB_BLOB_ROOT: /data/corpus-store
-      EVUKB_DATABASE_URL: postgres://evukb:evukb@postgres:5432/evukb
+      EVUKB_DATABASE_URL: postgres://${EVUKB_POSTGRES_USER:-evukb}:${EVUKB_POSTGRES_PASSWORD:-evukb}@postgres:5432/${EVUKB_POSTGRES_DB:-evukb}
       EVUKB_HOST: ${EVUKB_HOST:-0.0.0.0}
       EVUKB_LOG_LEVEL: ${EVUKB_LOG_LEVEL:-info}
       EVUKB_QDRANT_URL: ${EVUKB_QDRANT_URL:-http://qdrant:6333}
@@ -62,18 +63,26 @@ services:
       EVUKB_MCP_REQUIRE_TOKEN: ${EVUKB_MCP_REQUIRE_TOKEN:-false}
       EVUKB_MCP_ENABLE_ASK: ${EVUKB_MCP_ENABLE_ASK:-false}
       EVUKB_INDEX_FRONTMATTER_SUMMARY: ${EVUKB_INDEX_FRONTMATTER_SUMMARY:-false}
-      EVUKB_SYNC_SCHEDULE_CRON: ${EVUKB_SYNC_SCHEDULE_CRON:-*/5 * * * *}
+      EVUKB_SYNC_SCHEDULE_CRON: "${EVUKB_SYNC_SCHEDULE_CRON:-*/5 * * * *}"
     ports:
       - "${EVUKB_API_PORT:-4201}:4201"
     volumes:
       - corpus_store:/data/corpus-store
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4201/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   evukb-web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      target: runtime
     depends_on:
-      - evukb-api
+      evukb-api:
+        condition: service_healthy
     environment:
       TZ: ${TZ:-UTC}
       EVUKB_API_PROXY_TARGET: http://evukb-api:4201
@@ -84,15 +93,21 @@ services:
       VITE_EVUKB_WORKSPACE_ID: ${VITE_EVUKB_WORKSPACE_ID:-local-dev}
     ports:
       - "${EVUKB_WEB_PORT:-4200}:4200"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4200/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.18.2
     profiles: ["qdrant"]
     volumes:
       - qdrant_data:/qdrant/storage
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.9.6
     profiles: ["local-embed"]
     volumes:
       - ollama_data:/root/.ollama

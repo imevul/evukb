@@ -1,0 +1,2 @@
+# Image build context is the repository root (compose --project-directory .).
+# See the root .dockerignore for excludes.

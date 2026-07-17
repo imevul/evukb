@@ -1,14 +1,63 @@
+# Build context is the repository root (compose --project-directory .).
+
+# VCS / IDE / local state
 .git
+.github
+.cursor
 .evukb
+.vscode
+.idea
+**/.DS_Store
+
+# Dependencies and build outputs (installed/built inside the image)
 node_modules
 **/node_modules
+.pnpm-store
+**/.pnpm-store
 **/dist
 **/build
 **/*.tsbuildinfo
 **/.vite
+**/*.map
 coverage
+**/coverage
 test-results
 playwright-report
+.turbo
+.cache
+
+# Secrets and local env (never bake into layers)
 .env
 .env.*
-!.env.example
+
+# Docs / agent noise (API HTML reference is kept under docs/api/)
+*.md
+docs/private
+docs/DEV-LEARNINGS.md
+docs/roadmap
+agent-transcripts
+AGENTS.md
+
+# Tests and host-only tooling
+**/*.test.ts
+**/test
+**/tests
+**/__tests__
+**/vitest.config.*
+**/biome.json
+Makefile
+droast.toml
+
+# Host scripts except the web runtime entrypoint
+scripts/**
+!scripts/write-web-runtime-config.sh
+
+# Example package manifests only (source is bind-mounted in dev)
+examples/**
+!examples/custom-ranking-strategy/package.json
+
+# Compose/Dockerfiles live on the host; only app Dockerfiles are needed as files
+Dockerfile*
+!apps/api/Dockerfile
+!apps/web/Dockerfile
+deploy/**

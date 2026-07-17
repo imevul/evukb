@@ -1,0 +1,16 @@
+# Project-level droast defaults (EvuKB Dockerfiles use a repo-root build context).
+# Keep skips intentional and documented; prefer fixing Dockerfiles when practical.
+skip = [
+  # pnpm via corepack with --frozen-lockfile (not npm ci).
+  "DF031",
+  # Multi-stage files declare CMD per stage; only the selected target's CMD applies.
+  "DF038",
+  # WORKDIR is set on the base stage; droast does not always inherit it across FROM stage.
+  "DF063",
+  # node:22-bookworm-slim and stage names are intentional floating pins for this repo.
+  "DF001",
+  # Apt debug-toolkit packages are intentionally unpinned for operable prod images.
+  "DF005",
+  # Root .dockerignore applies to the compose build context; COPY . is intentional after deps.
+  "DF007",
+]

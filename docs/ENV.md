@@ -32,6 +32,22 @@ keys. See [`SPEC.md` §8](../SPEC.md) and [`docs/AUTH.md`](./AUTH.md).
 | `EVUKB_MAX_UPLOAD_BYTES` | Maximum compressed upload size in bytes | 100 MiB |
 | `EVUKB_MAX_ARCHIVE_IMPORT_BYTES` | Maximum total uncompressed bytes inside an imported archive (zip-bomb defense) | 500 MiB |
 
+### Compose Postgres (prod stack only)
+
+These are read by `deploy/docker-compose.yml` for the `postgres` service and to
+build the in-container `EVUKB_DATABASE_URL`. They are not read by the Node
+process directly.
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `EVUKB_POSTGRES_USER` | Postgres user (compose) | `evukb` |
+| `EVUKB_POSTGRES_PASSWORD` | Postgres password (compose) | `evukb` |
+| `EVUKB_POSTGRES_DB` | Postgres database name (compose) | `evukb` |
+
+Host-side tools (`pnpm test`, `make migrate`) still use `EVUKB_DATABASE_URL`
+pointing at `localhost`. See [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md) (Docker
+images).
+
 ## Vector backend
 
 | Variable | Purpose | Default |
@@ -40,7 +56,9 @@ keys. See [`SPEC.md` §8](../SPEC.md) and [`docs/AUTH.md`](./AUTH.md).
 | `EVUKB_QDRANT_URL` | Qdrant HTTP URL when the backend is `qdrant` | `http://localhost:6333` |
 
 Scale, optional HNSW indexes, and the opt-in latency benchmark are documented in
-[`docs/VECTOR-TUNING.md`](./VECTOR-TUNING.md).
+[`docs/VECTOR-TUNING.md`](./VECTOR-TUNING.md). Compose pins Qdrant to
+`qdrant/qdrant:v1.18.2` (profile `qdrant`) and Ollama to `ollama/ollama:0.9.6`
+(profile `local-embed`).
 
 ## Auth and secrets
 
