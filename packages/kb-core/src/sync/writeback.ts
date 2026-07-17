@@ -14,6 +14,11 @@ export function shouldWritebackManagedNode(node: {
   return node.sourceType === 'managed' && node.nodeType === 'file';
 }
 
+/** Git-sourced file nodes eligible for commit/push when corpus writeback is active. */
+export function shouldGitWritebackNode(node: { sourceType: string; nodeType: string }): boolean {
+  return node.sourceType === 'git' && node.nodeType === 'file';
+}
+
 export function mountContentMatchesKb(
   contentHash: string | null | undefined,
   mountSha256: string,

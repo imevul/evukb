@@ -6,6 +6,7 @@ import {
   JOB_QUEUE_CITATION_VALIDATE,
   JOB_QUEUE_CORPUS_REINDEX,
   JOB_QUEUE_GIT_SYNC,
+  JOB_QUEUE_GIT_WRITEBACK,
   JOB_QUEUE_INDEX,
   JOB_QUEUE_MOUNT_SYNC,
   JOB_QUEUE_MOUNT_SYNC_SCHEDULE,
@@ -17,6 +18,7 @@ import type {
   CorpusJobCounts,
   CorpusReindexJob,
   GitSyncJob,
+  GitWritebackJob,
   IndexNodeJob,
   MountSyncJob,
   OkfMaintainJob,
@@ -68,6 +70,7 @@ export type JobQueueHandlers = {
   onCitationValidate: (job: CitationValidateJob) => Promise<void>;
   onMountSync: (job: MountSyncJob) => Promise<void>;
   onGitSync: (job: GitSyncJob) => Promise<void>;
+  onGitWriteback: (job: GitWritebackJob) => Promise<void>;
   onMountSyncSchedule: () => Promise<void>;
   onCorpusReindex: (job: CorpusReindexJob) => Promise<void>;
 };
@@ -138,6 +141,14 @@ export class JobQueueService {
       await this.#boss.work<GitSyncJob>(JOB_QUEUE_GIT_SYNC, async (jobs) => {
         for (const job of jobs) {
           await this.#handlers.onGitSync(job.data);
+        }
+      }),
+    );
+
+    this.#workerIds.push(
+      await this.#boss.work<GitWritebackJob>(JOB_QUEUE_GIT_WRITEBACK, async (jobs) => {
+        for (const job of jobs) {
+          await this.#handlers.onGitWriteback(job.data);
         }
       }),
     );
@@ -227,6 +238,13 @@ export class JobQueueService {
   async enqueueGitSync(job: GitSyncJob): Promise<string | null> {
     return this.#boss.send(JOB_QUEUE_GIT_SYNC, job, {
       singletonKey: `${job.workspaceId}:${job.corpusId}`,
+    });
+  }
+
+  async enqueueGitWriteback(job: GitWritebackJob): Promise<string | null> {
+    const pathKey = job.changes.map((change) => `${change.op}:${change.relativePath}`).join('|');
+    return this.#boss.send(JOB_QUEUE_GIT_WRITEBACK, job, {
+      singletonKey: `${job.workspaceId}:${job.corpusId}:${pathKey}`,
     });
   }
 

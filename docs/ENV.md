@@ -119,7 +119,7 @@ and [`deploy/local-embed.env.example`](../deploy/local-embed.env.example).
 | `EVUKB_ENABLE_MOUNT_AUTHORITATIVE` | Allow the `mount_authoritative` sync mode (deletes managed files missing from mount) | `false` |
 | `EVUKB_GIT_CACHE_ROOT` | Server-side git clone/fetch cache root | falls back to blob root |
 | `EVUKB_SYNC_SCHEDULE_CRON` | Cron for the scheduled mount/git sync tick | `*/5 * * * *` |
-| `EVUKB_ENABLE_GIT_WRITEBACK` | Reserved gate for git writeback (SYNC-5 design accepted, SYNC-6 not implemented; see [`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md)) | `false` |
+| `EVUKB_ENABLE_GIT_WRITEBACK` | Allow git corpus writeback (`gitWritebackEnabled` on corpus settings; see [`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md)) | `false` |
 
 ## Web app (browser config)
 

@@ -4,13 +4,15 @@ export type ImportKind = 'managed' | 'mount' | 'git';
 
 export type MountSyncMode = 'import' | 'mount_authoritative' | 'import_writeback';
 
-export type SyncStatusValue = 'idle' | 'running' | 'success' | 'failed';
+export type SyncStatusValue = 'idle' | 'running' | 'success' | 'failed' | 'writeback_blocked';
 
 export type SyncStatus = {
   lastSyncAt?: string;
   lastSyncStatus?: SyncStatusValue;
   lastSyncError?: string;
   lastCommitSha?: string;
+  lastWritebackAt?: string;
+  lastWritebackError?: string;
 };
 
 export type SyncImportResult = {

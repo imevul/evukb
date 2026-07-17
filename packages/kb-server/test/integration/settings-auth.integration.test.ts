@@ -41,6 +41,8 @@ describeIfDb('kb-server settings, diagnostics, and secrets routes', () => {
           blobStoreConfigured: true,
           secretsKeyConfigured: true,
           mountAuthoritativeEnabled: expect.any(Boolean),
+          importWritebackEnabled: expect.any(Boolean),
+          gitWritebackEnabled: expect.any(Boolean),
         },
       });
 

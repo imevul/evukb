@@ -25,9 +25,9 @@ scope.
 - File manager operations block path traversal.
 - File manager operations block unsafe symlink escapes.
 - Git credentials and provider API keys are stored as secrets.
-- Git writeback (future SYNC-6) requires write-capable credentials; use
-  branch-scoped deploy keys and treat them as high privilege (see
-  [`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md)).
+- Git writeback (`EVUKB_ENABLE_GIT_WRITEBACK` + corpus `gitWritebackEnabled`)
+  requires write-capable credentials; use branch-scoped deploy keys and treat
+  them as high privilege (see [`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md)).
 - Secret values are never logged.
 - Secret values are never returned after creation. The only carve-out: the
   create and rotate responses for API keys, MCP tokens, and workspace secrets

@@ -31,9 +31,23 @@ interface CorpusSummaryCardProps {
   setMountModeInput: (value: MountModeChoice) => void;
   mountAuthoritativeEnabled: boolean;
   importWritebackEnabled: boolean;
+  gitWritebackEnvEnabled: boolean;
+  gitWritebackEnabled: boolean;
+  setGitWritebackEnabled: (value: boolean) => void;
+  gitPushEnabled: boolean;
+  setGitPushEnabled: (value: boolean) => void;
+  gitWritebackAllowDefaultBranch: boolean;
+  setGitWritebackAllowDefaultBranch: (value: boolean) => void;
+  gitWritebackUseFeatureBranch: boolean;
+  setGitWritebackUseFeatureBranch: (value: boolean) => void;
+  gitAuthorName: string;
+  setGitAuthorName: (value: string) => void;
+  gitAuthorEmail: string;
+  setGitAuthorEmail: (value: string) => void;
   runSync: (action: 'mount' | 'git') => Promise<void>;
   saveSyncInterval: () => Promise<void>;
   saveMountMode: () => Promise<void>;
+  saveGitWriteback: () => Promise<void>;
   toggleOkfStrict: (enabled: boolean) => Promise<void>;
 }
 
@@ -56,12 +70,27 @@ export function CorpusSummaryCard({
   setMountModeInput,
   mountAuthoritativeEnabled,
   importWritebackEnabled,
+  gitWritebackEnvEnabled,
+  gitWritebackEnabled,
+  setGitWritebackEnabled,
+  gitPushEnabled,
+  setGitPushEnabled,
+  gitWritebackAllowDefaultBranch,
+  setGitWritebackAllowDefaultBranch,
+  gitWritebackUseFeatureBranch,
+  setGitWritebackUseFeatureBranch,
+  gitAuthorName,
+  setGitAuthorName,
+  gitAuthorEmail,
+  setGitAuthorEmail,
   runSync,
   saveSyncInterval,
   saveMountMode,
+  saveGitWriteback,
   toggleOkfStrict,
 }: CorpusSummaryCardProps) {
   const formatDateTime = useFormatDateTime();
+  const writebackBlocked = stats.syncStatus?.lastSyncStatus === 'writeback_blocked';
 
   return (
     <Card>
@@ -72,13 +101,21 @@ export function CorpusSummaryCard({
           {stats.syncStatus?.lastSyncAt ? (
             <>
               {' '}
-              Last sync: {stats.syncStatus.lastSyncStatus ?? 'unknown'} at{' '}
-              {formatDateTime(stats.syncStatus.lastSyncAt)}
+              Last sync:{' '}
+              <StatusPill tone={writebackBlocked ? 'warning' : 'neutral'}>
+                {stats.syncStatus.lastSyncStatus ?? 'unknown'}
+              </StatusPill>{' '}
+              at {formatDateTime(stats.syncStatus.lastSyncAt)}
             </>
           ) : null}
           {stats.syncStatus?.lastCommitSha ? (
             <> ({stats.syncStatus.lastCommitSha.slice(0, 7)})</>
           ) : null}
+        </p>
+      ) : null}
+      {writebackBlocked && stats.syncStatus?.lastWritebackError ? (
+        <p className="evukb-form-hint">
+          Git writeback blocked: {stats.syncStatus.lastWritebackError}
         </p>
       ) : null}
       {corpus ? (
@@ -192,6 +229,85 @@ export function CorpusSummaryCard({
                 </p>
               ) : null}
             </>
+          ) : null}
+          {importKind === 'git' ? (
+            <div className="flex flex-col gap-3 border-t border-border pt-4">
+              <p className="text-sm font-medium">Git writeback</p>
+              {!gitWritebackEnvEnabled ? (
+                <p className="evukb-form-hint">
+                  Requires <code>EVUKB_ENABLE_GIT_WRITEBACK=true</code> on the API server.
+                </p>
+              ) : null}
+              <p className="evukb-checkbox">
+                <Switch
+                  aria-label="Enable git writeback"
+                  checked={gitWritebackEnabled}
+                  disabled={settingsSaving || syncing || !gitWritebackEnvEnabled}
+                  onCheckedChange={setGitWritebackEnabled}
+                />
+                <span>Enable writeback (edit git files in KB and commit to cache)</span>
+              </p>
+              <p className="evukb-checkbox">
+                <Switch
+                  aria-label="Push after commit"
+                  checked={gitPushEnabled}
+                  disabled={settingsSaving || syncing || !gitWritebackEnabled}
+                  onCheckedChange={setGitPushEnabled}
+                />
+                <span>Push commits to remote</span>
+              </p>
+              <p className="evukb-checkbox">
+                <Switch
+                  aria-label="Use feature branch"
+                  checked={gitWritebackUseFeatureBranch}
+                  disabled={settingsSaving || syncing || !gitWritebackEnabled}
+                  onCheckedChange={setGitWritebackUseFeatureBranch}
+                />
+                <span>Use feature branch (evukb/writeback/…)</span>
+              </p>
+              <p className="evukb-checkbox">
+                <Switch
+                  aria-label="Allow default branch commits"
+                  checked={gitWritebackAllowDefaultBranch}
+                  disabled={
+                    settingsSaving ||
+                    syncing ||
+                    !gitWritebackEnabled ||
+                    gitWritebackUseFeatureBranch
+                  }
+                  onCheckedChange={setGitWritebackAllowDefaultBranch}
+                />
+                <span>Allow commits on the default branch</span>
+              </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field>
+                  <Label htmlFor="corpus-git-author-name">Commit author name</Label>
+                  <Input
+                    disabled={settingsSaving || !gitWritebackEnabled}
+                    id="corpus-git-author-name"
+                    value={gitAuthorName}
+                    onChange={(event) => setGitAuthorName(event.target.value)}
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="corpus-git-author-email">Commit author email</Label>
+                  <Input
+                    disabled={settingsSaving || !gitWritebackEnabled}
+                    id="corpus-git-author-email"
+                    value={gitAuthorEmail}
+                    onChange={(event) => setGitAuthorEmail(event.target.value)}
+                  />
+                </Field>
+              </div>
+              <Button
+                disabled={settingsSaving || syncing || !gitWritebackEnvEnabled}
+                onClick={() => void saveGitWriteback()}
+                type="button"
+                variant="outline"
+              >
+                {settingsSaving ? 'Saving…' : 'Save git writeback'}
+              </Button>
+            </div>
           ) : null}
         </div>
       ) : null}

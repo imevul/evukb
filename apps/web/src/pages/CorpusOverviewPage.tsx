@@ -75,9 +75,23 @@ export function CorpusOverviewPage() {
         setMountModeInput={overview.setMountModeInput}
         mountAuthoritativeEnabled={overview.mountAuthoritativeEnabled}
         importWritebackEnabled={overview.importWritebackEnabled}
+        gitWritebackEnvEnabled={overview.gitWritebackEnvEnabled}
+        gitWritebackEnabled={overview.gitWritebackEnabled}
+        setGitWritebackEnabled={overview.setGitWritebackEnabled}
+        gitPushEnabled={overview.gitPushEnabled}
+        setGitPushEnabled={overview.setGitPushEnabled}
+        gitWritebackAllowDefaultBranch={overview.gitWritebackAllowDefaultBranch}
+        setGitWritebackAllowDefaultBranch={overview.setGitWritebackAllowDefaultBranch}
+        gitWritebackUseFeatureBranch={overview.gitWritebackUseFeatureBranch}
+        setGitWritebackUseFeatureBranch={overview.setGitWritebackUseFeatureBranch}
+        gitAuthorName={overview.gitAuthorName}
+        setGitAuthorName={overview.setGitAuthorName}
+        gitAuthorEmail={overview.gitAuthorEmail}
+        setGitAuthorEmail={overview.setGitAuthorEmail}
         runSync={overview.runSync}
         saveSyncInterval={overview.saveSyncInterval}
         saveMountMode={overview.saveMountMode}
+        saveGitWriteback={overview.saveGitWriteback}
         toggleOkfStrict={overview.toggleOkfStrict}
       />
 

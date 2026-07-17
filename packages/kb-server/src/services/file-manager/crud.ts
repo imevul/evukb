@@ -5,6 +5,7 @@ import {
   buildFilePath,
   classifyOkfFile,
   createBlobRef,
+  isCorpusGitWritebackActive,
   type KnowledgeNode,
   resolveNodeMutability,
 } from '@evu/kb-core';
@@ -12,6 +13,7 @@ import type { AuditLogRepository, CorpusRepository, NodeRepository } from '@evu/
 
 import { ApiError } from '../../errors.js';
 import type { CorpusIndexEventHub } from '../corpus-index-event-hub.js';
+import type { GitWritebackService } from '../git-writeback-service.js';
 import { managedBlobRelPath, sha256Hex } from '../import-shared.js';
 import type { MountWritebackService } from '../mount-writeback-service.js';
 import {
@@ -31,6 +33,8 @@ import type {
 } from './types.js';
 import {
   maybeDeleteWritebackManagedFile,
+  maybeEnqueueGitWritebackDelete,
+  maybeEnqueueGitWritebackUpsert,
   maybeWritebackManagedFile,
   notifyContentChanged,
   recordAudit,
@@ -43,6 +47,7 @@ export class FileManagerService {
   readonly #indexEventHub: CorpusIndexEventHub | undefined;
   readonly #nodes: NodeRepository;
   readonly #mountWriteback: MountWritebackService | undefined;
+  readonly #gitWriteback: GitWritebackService | undefined;
   readonly #onContentChanged?: FileManagerDeps['onContentChanged'];
   readonly #onOkfMutation?: FileManagerDeps['onOkfMutation'];
 
@@ -53,6 +58,7 @@ export class FileManagerService {
     this.#indexEventHub = deps.indexEventHub;
     this.#nodes = deps.nodes;
     this.#mountWriteback = deps.mountWriteback;
+    this.#gitWriteback = deps.gitWriteback;
     this.#onContentChanged = deps.onContentChanged;
     this.#onOkfMutation = deps.onOkfMutation;
   }
@@ -73,6 +79,7 @@ export class FileManagerService {
     content: Buffer,
   ): Promise<void> {
     await maybeWritebackManagedFile(this.#mountWriteback, workspaceId, corpusId, node, content);
+    await maybeEnqueueGitWritebackUpsert(this.#gitWriteback, workspaceId, corpusId, node);
   }
 
   async #maybeDeleteWritebackManagedFile(
@@ -81,6 +88,7 @@ export class FileManagerService {
     node: KnowledgeNode,
   ): Promise<void> {
     await maybeDeleteWritebackManagedFile(this.#mountWriteback, workspaceId, corpusId, node);
+    await maybeEnqueueGitWritebackDelete(this.#gitWriteback, workspaceId, corpusId, node);
   }
 
   async #requireCorpus(workspaceId: string, corpusId: string) {
@@ -286,8 +294,11 @@ export class FileManagerService {
     return this.createFile(workspaceId, corpusId, input, { internal: true });
   }
 
-  async #assertEditable(node: KnowledgeNode): Promise<void> {
-    const mutability = resolveNodeMutability(node);
+  async #assertEditable(workspaceId: string, corpusId: string, node: KnowledgeNode): Promise<void> {
+    const corpus = await this.#requireCorpus(workspaceId, corpusId);
+    const mutability = resolveNodeMutability(node, {
+      gitWritebackEnabled: isCorpusGitWritebackActive(corpus.settings),
+    });
     if (!mutability.editable) {
       throw ApiError.forbidden(mutability.reason ?? 'Node is read-only.');
     }
@@ -360,7 +371,7 @@ export class FileManagerService {
     if (node.nodeType !== 'file') {
       throw ApiError.validation('Node is not a file.');
     }
-    await this.#assertEditable(node);
+    await this.#assertEditable(workspaceId, corpusId, node);
 
     if (!context.internal) {
       assertOkfStrictAllowsSave(corpus.settings, node.name, input.content);
@@ -433,7 +444,7 @@ export class FileManagerService {
     context: FileMutationContext = {},
   ): Promise<KnowledgeNode> {
     const node = await this.#requireNode(workspaceId, corpusId, nodeId);
-    await this.#assertEditable(node);
+    await this.#assertEditable(workspaceId, corpusId, node);
     const trimmed = normalizeNodeName(name);
     const previousFilePath = buildFilePath(node.path, node.name);
 
@@ -485,7 +496,7 @@ export class FileManagerService {
     context: FileMutationContext = {},
   ): Promise<KnowledgeNode> {
     const node = await this.#requireNode(workspaceId, corpusId, nodeId);
-    await this.#assertEditable(node);
+    await this.#assertEditable(workspaceId, corpusId, node);
     const previousFilePath = buildFilePath(node.path, node.name);
     const parentPath = normalizeFolderPath(targetPath);
 
@@ -587,7 +598,7 @@ export class FileManagerService {
         if (!toDelete.has(node.id)) {
           continue;
         }
-        await this.#assertEditable(node);
+        await this.#assertEditable(workspaceId, corpusId, node);
       }
     }
 

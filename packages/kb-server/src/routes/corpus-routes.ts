@@ -1,5 +1,6 @@
 import {
   asWorkspaceId,
+  isGitWritebackEnabled,
   isImportWritebackEnabled,
   isMountAuthoritativeEnabled,
   type RankingStrategyRegistry,
@@ -32,6 +33,7 @@ async function assertValidCorpusSettings(
   const error = validateCorpusSettings(settings, {
     allowMountAuthoritative: isMountAuthoritativeEnabled(process.env),
     allowImportWriteback: isImportWritebackEnabled(process.env),
+    allowGitWriteback: isGitWritebackEnabled(process.env),
     workspaceSettings: workspace?.settings ?? {},
   });
   if (error) {

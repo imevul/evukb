@@ -1,3 +1,5 @@
+import { isCorpusGitWritebackActive } from '@evu/kb-core';
+import type { CorpusRepository } from '@evu/kb-db';
 import type { FastifyPluginAsync } from 'fastify';
 
 import { ApiError } from '../errors.js';
@@ -14,6 +16,7 @@ import {
 import { withNodesMutability } from './node-presentation.js';
 
 export type FileRoutesOptions = {
+  corpora: CorpusRepository;
   fileManager: FileManagerService;
   maxUploadBytes?: number;
 };
@@ -33,7 +36,13 @@ export const fileRoutesPlugin: FastifyPluginAsync<FileRoutesOptions> = async (se
     if (request.query.format === 'tree') {
       return nodes;
     }
-    return withNodesMutability(nodes as import('@evu/kb-core').KnowledgeNode[]);
+    const corpus = await options.corpora.getById(
+      request.evuKbWorkspace.id,
+      request.params.corpusId,
+    );
+    return withNodesMutability(nodes as import('@evu/kb-core').KnowledgeNode[], {
+      gitWritebackEnabled: corpus ? isCorpusGitWritebackActive(corpus.settings) : false,
+    });
   });
 
   server.post<{ Params: { corpusId: string }; Body: { path?: string; name: string } }>(

@@ -2451,6 +2451,7 @@ export interface paths {
                                 secretsKeyConfigured: boolean;
                                 mountAuthoritativeEnabled: boolean;
                                 importWritebackEnabled: boolean;
+                                gitWritebackEnabled: boolean;
                             };
                             ranking: {
                                 strategyId: string;
@@ -2535,6 +2536,7 @@ export interface paths {
                                 secretsKeyConfigured: boolean;
                                 mountAuthoritativeEnabled: boolean;
                                 importWritebackEnabled: boolean;
+                                gitWritebackEnabled: boolean;
                             };
                             ranking: {
                                 strategyId: string;

@@ -46,6 +46,7 @@ export const workspaceBootHintsSchema = {
     secretsKeyConfigured: { type: 'boolean' },
     mountAuthoritativeEnabled: { type: 'boolean' },
     importWritebackEnabled: { type: 'boolean' },
+    gitWritebackEnabled: { type: 'boolean' },
   },
   required: [
     'databaseConfigured',
@@ -54,6 +55,7 @@ export const workspaceBootHintsSchema = {
     'secretsKeyConfigured',
     'mountAuthoritativeEnabled',
     'importWritebackEnabled',
+    'gitWritebackEnabled',
   ],
 };
 

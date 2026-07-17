@@ -129,6 +129,12 @@ export class CorpusStatsService {
         warnings.push('Sync has never run for this corpus.');
       } else if (syncSettings.syncStatus.lastSyncStatus === 'failed') {
         warnings.push(syncSettings.syncStatus.lastSyncError ?? 'Last sync failed.');
+      } else if (syncSettings.syncStatus.lastSyncStatus === 'writeback_blocked') {
+        warnings.push(
+          syncSettings.syncStatus.lastWritebackError ??
+            syncSettings.syncStatus.lastSyncError ??
+            'Git writeback is blocked.',
+        );
       }
     }
 

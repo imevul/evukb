@@ -1,6 +1,7 @@
 import type { KnowledgeNode } from '@evu/kb-core';
 import type { AuditLogRepository } from '@evu/kb-db';
 
+import type { GitWritebackService } from '../git-writeback-service.js';
 import type { MountWritebackService } from '../mount-writeback-service.js';
 import type { FileManagerDeps, FileMutationContext } from './types.js';
 
@@ -45,6 +46,30 @@ export async function maybeDeleteWritebackManagedFile(
     return;
   }
   await mountWriteback.maybeDeleteWritebackManagedFile(workspaceId, corpusId, node);
+}
+
+export async function maybeEnqueueGitWritebackUpsert(
+  gitWriteback: GitWritebackService | undefined,
+  workspaceId: string,
+  corpusId: string,
+  node: KnowledgeNode,
+): Promise<void> {
+  if (!gitWriteback) {
+    return;
+  }
+  await gitWriteback.enqueueNodeUpsert(workspaceId, corpusId, node);
+}
+
+export async function maybeEnqueueGitWritebackDelete(
+  gitWriteback: GitWritebackService | undefined,
+  workspaceId: string,
+  corpusId: string,
+  node: KnowledgeNode,
+): Promise<void> {
+  if (!gitWriteback) {
+    return;
+  }
+  await gitWriteback.enqueueNodeDelete(workspaceId, corpusId, node);
 }
 
 export async function notifyContentChanged(

@@ -74,6 +74,7 @@ export async function registerWorkspaceRoutes(
         rankingRegistry: runtime.rankingRegistry,
       });
       await workspaceRoutes.register(fileRoutesPlugin, {
+        corpora: runtime.corpora,
         fileManager: runtime.fileManager,
         maxUploadBytes,
       });

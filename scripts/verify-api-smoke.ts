@@ -173,6 +173,9 @@ async function main(): Promise<void> {
     if (!bootHintProperties?.importWritebackEnabled) {
       throw new Error('OpenAPI settings response is missing bootHints.importWritebackEnabled.');
     }
+    if (!bootHintProperties?.gitWritebackEnabled) {
+      throw new Error('OpenAPI settings response is missing bootHints.gitWritebackEnabled.');
+    }
 
     await server.close();
     console.info('verify-api-smoke: ok');

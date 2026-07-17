@@ -40,6 +40,7 @@ import { CorpusIndexEventHub } from '../services/corpus-index-event-hub.js';
 import { CorpusStatsService } from '../services/corpus-stats-service.js';
 import { FileManagerService } from '../services/file-manager.js';
 import { GitSyncService } from '../services/git-sync-service.js';
+import { GitWritebackService } from '../services/git-writeback-service.js';
 import { IndexJobService } from '../services/index-job-service.js';
 import { IndexService } from '../services/index-service.js';
 import { KbToolService } from '../services/kb-tool-service.js';
@@ -165,6 +166,9 @@ export async function createEvuKbRuntime(
       onGitSync: async (job) => {
         await runtime().gitSyncService.runSync(job);
       },
+      onGitWriteback: async (job) => {
+        await runtime().gitWritebackService.runWriteback(job);
+      },
       onMountSyncSchedule: async () => {
         await runtime().syncScheduleService.runTick();
       },
@@ -174,6 +178,23 @@ export async function createEvuKbRuntime(
     },
   });
 
+  const syncImport = new SyncImportService({
+    auditLog,
+    blobStore,
+    corpora,
+    jobQueue,
+    nodes,
+  });
+  const gitWritebackService = new GitWritebackService({
+    auditLog,
+    blobRoot: options.blobRoot,
+    blobStore,
+    corpora,
+    jobQueue,
+    nodes,
+    secrets,
+    syncImport,
+  });
   const mountWritebackService = new MountWritebackService({
     corpora,
     mountAllowlist: parseMountAllowlist(process.env.EVUKB_MOUNT_ALLOWLIST),
@@ -186,6 +207,7 @@ export async function createEvuKbRuntime(
     indexEventHub,
     nodes,
     mountWriteback: mountWritebackService,
+    gitWriteback: gitWritebackService,
     onContentChanged: ({ workspaceId, corpusId, nodeId }) => {
       void (async () => {
         const node = await nodes.getById(workspaceId, corpusId, nodeId);
@@ -227,13 +249,6 @@ export async function createEvuKbRuntime(
     nodes,
   });
 
-  const syncImport = new SyncImportService({
-    auditLog,
-    blobStore,
-    corpora,
-    jobQueue,
-    nodes,
-  });
   const mountSyncService = new MountSyncService({
     corpora,
     jobQueue,
@@ -375,6 +390,7 @@ export async function createEvuKbRuntime(
     jobQueue,
     mountSyncService,
     gitSyncService,
+    gitWritebackService,
     agentWriteService,
     kbToolService,
     mutationApprovalService,

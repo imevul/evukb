@@ -156,7 +156,7 @@ host-specific platform concepts.
 | SYNC-3 | Mount `mount_authoritative`: mount is source of truth, sync can remove managed files missing from mount | [X] |
 | SYNC-4 | Git `import`: clone/fetch remote, import repository tree, mark git files read-only, record last commit SHA | [X] |
 | SYNC-5 | Git writeback design: branch/commit/push semantics, conflict policy, author identity, protected branch handling, approval requirements, and tests | [X] |
-| SYNC-6 | Git writeback implementation, only after SYNC-5 is accepted | [ ] |
+| SYNC-6 | Git writeback implementation, only after SYNC-5 is accepted | [X] |
 
 ---
 

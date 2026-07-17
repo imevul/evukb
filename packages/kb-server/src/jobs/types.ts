@@ -32,6 +32,19 @@ export type GitSyncJob = {
   corpusId: string;
 };
 
+export type GitWritebackChange = {
+  relativePath: string;
+  op: 'upsert' | 'delete';
+  nodeId?: string;
+};
+
+export type GitWritebackJob = {
+  workspaceId: string;
+  corpusId: string;
+  changes: GitWritebackChange[];
+  approvalId?: string;
+};
+
 export type CorpusReindexJob = {
   workspaceId: string;
   corpusId: string;

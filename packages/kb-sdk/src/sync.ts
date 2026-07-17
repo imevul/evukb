@@ -5,7 +5,9 @@ export type SyncEnqueueResponse = {
 
 export type SyncStatus = {
   lastSyncAt?: string;
-  lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed';
+  lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed' | 'writeback_blocked';
   lastSyncError?: string;
   lastCommitSha?: string;
+  lastWritebackAt?: string;
+  lastWritebackError?: string;
 };

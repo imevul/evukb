@@ -1092,14 +1092,14 @@ Git sync:
 
 - clone/pull repository into server-side cache
 - import tree into corpus
-- read-only in KB v1 (writeback is opt-in future work)
+- files are read-only unless git writeback is enabled on the corpus
 - credentials stored as secrets
 - references under `references/` get `sourceType=reference`
-- **Git writeback (SYNC-5 design accepted):** optional commit/push of managed KB
-  edits for git-backed corpora only; env-gated (`EVUKB_ENABLE_GIT_WRITEBACK`),
-  fail-closed on conflicts, no force-push, audit and approval aware. See
-  [`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md). Implementation is SYNC-6;
-  distinct from mount `import_writeback`.
+- **Git writeback (SYNC-6):** optional commit/push of git-sourced file edits for
+  git-backed corpora; env-gated (`EVUKB_ENABLE_GIT_WRITEBACK`), corpus
+  `gitWritebackEnabled`, fail-closed on conflicts, no force-push, audit and
+  approval aware. See [`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md). Distinct
+  from mount `import_writeback`.
 
 Mutability resolution:
 
@@ -1569,6 +1569,7 @@ P2: advanced standalone features and integration contracts
 - [x] portable import/export
 - [x] multi-corpus ask
 - [x] mount `import_writeback`
+- [x] git writeback (SYNC-6; env-gated)
 - [x] mount `mount_authoritative`
 - [x] memory-bank decision (out of scope; see §16)
 
@@ -1636,7 +1637,7 @@ Decisions:
 - Qdrant remains officially supported as an optional vector backend alongside pgvector (default).
 - Host-specific adapter code belongs in consuming projects. EvuKB owns generic HTTP, SDK, MCP, tool, and package contracts.
 - Mount `import_writeback` and `mount_authoritative` are supported sync modes.
-- Git sync writeback design is accepted ([`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md)); implementation is SYNC-6.
+- Git sync writeback is supported when env-gated ([`docs/GIT-WRITEBACK.md`](docs/GIT-WRITEBACK.md)).
 - Full memory banks are **out of scope** for EvuKB; host platforms or a separate EvuMemory project if needed (see §16).
 - `@evu/kb-ui` ships as a workspace package with reusable primitives.
 - Standalone v1 auth is API-key/MCP-token only (see [`docs/AUTH.md`](docs/AUTH.md)).
@@ -1650,7 +1651,6 @@ Deferred features:
 - public marketplace
 - generic resource-map platform replacement
 - host run-time context injection bridges
-- git sync writeback implementation (SYNC-6)
 - ranking strategy plugins (shipped F-4)
 
 ---

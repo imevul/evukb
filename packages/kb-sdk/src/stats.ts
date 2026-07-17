@@ -24,9 +24,11 @@ export type KnowledgeCorpusStats = {
   importKind?: 'managed' | 'mount' | 'git';
   syncStatus?: {
     lastSyncAt?: string;
-    lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed';
+    lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed' | 'writeback_blocked';
     lastSyncError?: string;
     lastCommitSha?: string;
+    lastWritebackAt?: string;
+    lastWritebackError?: string;
   };
   warnings: string[];
   updatedAt: string;

@@ -3486,6 +3486,9 @@
                         },
                         "importWritebackEnabled": {
                           "type": "boolean"
+                        },
+                        "gitWritebackEnabled": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -3494,7 +3497,8 @@
                         "mountAllowlistConfigured",
                         "secretsKeyConfigured",
                         "mountAuthoritativeEnabled",
-                        "importWritebackEnabled"
+                        "importWritebackEnabled",
+                        "gitWritebackEnabled"
                       ]
                     },
                     "ranking": {
@@ -3678,6 +3682,9 @@
                         },
                         "importWritebackEnabled": {
                           "type": "boolean"
+                        },
+                        "gitWritebackEnabled": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
@@ -3686,7 +3693,8 @@
                         "mountAllowlistConfigured",
                         "secretsKeyConfigured",
                         "mountAuthoritativeEnabled",
-                        "importWritebackEnabled"
+                        "importWritebackEnabled",
+                        "gitWritebackEnabled"
                       ]
                     },
                     "ranking": {

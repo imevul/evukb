@@ -189,4 +189,5 @@ Option keys on `EvuKbServerOptions` are checked in
 - npm package publishing (P3-1)
 - Custom Fastify auth hooks or host JWT middleware (use API keys)
 - Embedding `apps/web` React bundle
-- Git writeback implementation (see [`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md))
+- Git writeback (see [`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md); enable with
+  `EVUKB_ENABLE_GIT_WRITEBACK` and corpus `gitWritebackEnabled`)

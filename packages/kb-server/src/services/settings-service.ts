@@ -7,6 +7,7 @@ import {
   defaultRankingStrategyId,
   defaultRankingStrategyRegistry,
   type EmbeddingProvider,
+  isGitWritebackEnabled,
   isImportWritebackEnabled,
   isMountAuthoritativeEnabled,
   mergeAiProviderSettings,
@@ -278,6 +279,7 @@ export class SettingsService {
       secretsKeyConfigured: isSecretsKeyConfigured(),
       mountAuthoritativeEnabled: isMountAuthoritativeEnabled(process.env),
       importWritebackEnabled: isImportWritebackEnabled(process.env),
+      gitWritebackEnabled: isGitWritebackEnabled(process.env),
     };
   }
 }

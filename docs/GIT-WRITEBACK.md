@@ -1,8 +1,8 @@
 # Git Sync Writeback Design (v1)
 
-Accepted design for **SYNC-5**. This document defines git-sourced corpus
-writeback semantics before implementation (**SYNC-6**). Git import remains the
-default and is unchanged.
+Accepted design for **SYNC-5**; implemented as **SYNC-6**. This document defines
+git-sourced corpus writeback semantics. Git import remains the default when
+writeback is not enabled.
 
 Related docs:
 
@@ -137,14 +137,14 @@ Git clone caches live under the server blob/git cache root (see BACKUP.md). Rest
 Postgres without the git cache may require a fresh clone on next sync. Restoring
 cache without Postgres may orphan commit metadata.
 
-## Implementation gate (SYNC-6)
+## Implementation status (SYNC-6)
 
-Do not implement until:
+Shipped:
 
-1. This design is merged and ROADMAP SYNC-5 is `[X]`.
-2. Golden design tests pass in CI.
-3. SECURITY.md documents write-capable git credential risk.
-
-SYNC-6 deliverables (future): `GitWritebackService`, job handlers, corpus settings
-schema, integration tests with a local bare repo, operator diagnostics for
-writeback_blocked state.
+- `GitWritebackService` and `evu-kb-git-writeback` pg-boss jobs
+- Corpus settings (`gitWritebackEnabled`, push/branch/author fields) gated by
+  `EVUKB_ENABLE_GIT_WRITEBACK`
+- Mutability for `sourceType=git` when writeback is active
+- Fail-closed divergence / protected-branch handling with `writeback_blocked`
+- Audit actions `git_writeback_commit` / `git_writeback_push`
+- Operator corpus overview controls and diagnostics

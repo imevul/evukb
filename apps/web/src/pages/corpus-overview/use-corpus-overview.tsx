@@ -64,6 +64,19 @@ export interface CorpusOverviewState {
   setMountModeInput: (value: MountModeChoice) => void;
   mountAuthoritativeEnabled: boolean;
   importWritebackEnabled: boolean;
+  gitWritebackEnvEnabled: boolean;
+  gitWritebackEnabled: boolean;
+  setGitWritebackEnabled: (value: boolean) => void;
+  gitPushEnabled: boolean;
+  setGitPushEnabled: (value: boolean) => void;
+  gitWritebackAllowDefaultBranch: boolean;
+  setGitWritebackAllowDefaultBranch: (value: boolean) => void;
+  gitWritebackUseFeatureBranch: boolean;
+  setGitWritebackUseFeatureBranch: (value: boolean) => void;
+  gitAuthorName: string;
+  setGitAuthorName: (value: string) => void;
+  gitAuthorEmail: string;
+  setGitAuthorEmail: (value: string) => void;
   rankingStrategyId: string;
   setRankingStrategyId: (value: string) => void;
   workspaceRankingStrategyId: string;
@@ -91,6 +104,7 @@ export interface CorpusOverviewState {
   runSync: (action: 'mount' | 'git') => Promise<void>;
   saveSyncInterval: () => Promise<void>;
   saveMountMode: () => Promise<void>;
+  saveGitWriteback: () => Promise<void>;
   saveCorpusAdvancedSettings: () => Promise<void>;
   toggleOkfStrict: (enabled: boolean) => Promise<void>;
 }
@@ -113,6 +127,13 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
   const [mountModeInput, setMountModeInput] = useState<MountModeChoice>('import');
   const [mountAuthoritativeEnabled, setMountAuthoritativeEnabled] = useState(false);
   const [importWritebackEnabled, setImportWritebackEnabled] = useState(false);
+  const [gitWritebackEnvEnabled, setGitWritebackEnvEnabled] = useState(false);
+  const [gitWritebackEnabled, setGitWritebackEnabled] = useState(false);
+  const [gitPushEnabled, setGitPushEnabled] = useState(false);
+  const [gitWritebackAllowDefaultBranch, setGitWritebackAllowDefaultBranch] = useState(false);
+  const [gitWritebackUseFeatureBranch, setGitWritebackUseFeatureBranch] = useState(false);
+  const [gitAuthorName, setGitAuthorName] = useState('');
+  const [gitAuthorEmail, setGitAuthorEmail] = useState('');
   const [rankingStrategyId, setRankingStrategyId] = useState('hybrid_default_v1');
   const [workspaceRankingStrategyId, setWorkspaceRankingStrategyId] = useState('hybrid_default_v1');
   const [overridesEnabled, setOverridesEnabled] = useState(false);
@@ -162,6 +183,23 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
       setAvailableStrategies(loadedSettings.ranking.availableStrategies);
       setMountAuthoritativeEnabled(loadedSettings.bootHints.mountAuthoritativeEnabled);
       setImportWritebackEnabled(loadedSettings.bootHints.importWritebackEnabled);
+      setGitWritebackEnvEnabled(loadedSettings.bootHints.gitWritebackEnabled === true);
+      setGitWritebackEnabled(loadedCorpus.settings?.gitWritebackEnabled === true);
+      setGitPushEnabled(loadedCorpus.settings?.gitPushEnabled === true);
+      setGitWritebackAllowDefaultBranch(
+        loadedCorpus.settings?.gitWritebackAllowDefaultBranch === true,
+      );
+      setGitWritebackUseFeatureBranch(loadedCorpus.settings?.gitWritebackUseFeatureBranch === true);
+      setGitAuthorName(
+        typeof loadedCorpus.settings?.gitAuthorName === 'string'
+          ? loadedCorpus.settings.gitAuthorName
+          : '',
+      );
+      setGitAuthorEmail(
+        typeof loadedCorpus.settings?.gitAuthorEmail === 'string'
+          ? loadedCorpus.settings.gitAuthorEmail
+          : '',
+      );
       const interval = loadedCorpus.settings?.syncIntervalMinutes;
       setSyncIntervalInput(typeof interval === 'number' && interval > 0 ? String(interval) : '');
       const mountMode = loadedCorpus.settings?.mountMode;
@@ -493,6 +531,47 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     }
   }
 
+  async function saveGitWriteback(): Promise<void> {
+    if (!corpusId || !corpus) {
+      return;
+    }
+
+    setSettingsSaving(true);
+    setActionError(null);
+    try {
+      const nextSettings: Record<string, unknown> = {
+        ...corpus.settings,
+        gitWritebackEnabled,
+        gitPushEnabled,
+        gitWritebackAllowDefaultBranch,
+        gitWritebackUseFeatureBranch,
+      };
+      if (gitAuthorName.trim()) {
+        nextSettings.gitAuthorName = gitAuthorName.trim();
+      } else {
+        delete nextSettings.gitAuthorName;
+      }
+      if (gitAuthorEmail.trim()) {
+        nextSettings.gitAuthorEmail = gitAuthorEmail.trim();
+      } else {
+        delete nextSettings.gitAuthorEmail;
+      }
+      const updated = await kbClient.updateCorpus(selectedSlug, corpusId, {
+        settings: nextSettings,
+      });
+      setCorpus(updated);
+      setActionMessage('Git writeback settings updated.');
+    } catch (settingsError: unknown) {
+      setActionError(
+        settingsError instanceof Error
+          ? settingsError.message
+          : 'Failed to update git writeback settings.',
+      );
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
+
   async function saveCorpusAdvancedSettings(): Promise<void> {
     if (!corpusId || !corpus) {
       return;
@@ -630,6 +709,19 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     setMountModeInput,
     mountAuthoritativeEnabled,
     importWritebackEnabled,
+    gitWritebackEnvEnabled,
+    gitWritebackEnabled,
+    setGitWritebackEnabled,
+    gitPushEnabled,
+    setGitPushEnabled,
+    gitWritebackAllowDefaultBranch,
+    setGitWritebackAllowDefaultBranch,
+    gitWritebackUseFeatureBranch,
+    setGitWritebackUseFeatureBranch,
+    gitAuthorName,
+    setGitAuthorName,
+    gitAuthorEmail,
+    setGitAuthorEmail,
     rankingStrategyId,
     setRankingStrategyId,
     workspaceRankingStrategyId,
@@ -657,6 +749,7 @@ export function useCorpusOverview(corpusId: string | undefined): CorpusOverviewS
     runSync,
     saveSyncInterval,
     saveMountMode,
+    saveGitWriteback,
     saveCorpusAdvancedSettings,
     toggleOkfStrict,
   };

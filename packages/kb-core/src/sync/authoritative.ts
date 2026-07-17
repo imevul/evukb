@@ -6,6 +6,10 @@ export function isImportWritebackEnabled(env: Record<string, string | undefined>
   return env.EVUKB_ENABLE_IMPORT_WRITEBACK === 'true';
 }
 
+export function isGitWritebackEnabled(env: Record<string, string | undefined>): boolean {
+  return env.EVUKB_ENABLE_GIT_WRITEBACK === 'true';
+}
+
 export function managedRelativePath(path: string, name: string): string {
   return path ? `${path}/${name}` : name;
 }

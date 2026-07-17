@@ -53,6 +53,7 @@ export function validateCorpusSettings(
   options: {
     allowMountAuthoritative?: boolean;
     allowImportWriteback?: boolean;
+    allowGitWriteback?: boolean;
     workspaceSettings?: Record<string, unknown>;
   } = {},
 ): string | null {

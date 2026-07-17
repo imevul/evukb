@@ -56,6 +56,19 @@ describe('sync mutability', () => {
     );
   });
 
+  it('allows git files when writeback is enabled', () => {
+    expect(
+      resolveNodeMutability({ sourceType: 'git', nodeType: 'file' }, { gitWritebackEnabled: true })
+        .editable,
+    ).toBe(true);
+    expect(
+      resolveNodeMutability(
+        { sourceType: 'reference', nodeType: 'file' },
+        { gitWritebackEnabled: true },
+      ).editable,
+    ).toBe(false);
+  });
+
   it('classifies references paths', () => {
     expect(resolveSyncedSourceType('references/paper.pdf')).toBe('reference');
     expect(resolveSyncedSourceType('concepts/alpha.md')).toBe('shared_mount');

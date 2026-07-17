@@ -2,6 +2,7 @@ import type { BlobStore, KnowledgeNode, OkfLogMaintenanceActor } from '@evu/kb-c
 import type { AuditLogRepository, CorpusRepository, NodeRepository } from '@evu/kb-db';
 
 import type { CorpusIndexEventHub } from '../corpus-index-event-hub.js';
+import type { GitWritebackService } from '../git-writeback-service.js';
 import type { MountWritebackService } from '../mount-writeback-service.js';
 import type { OkfMaintenanceEvent } from '../okf-maintenance-types.js';
 
@@ -12,6 +13,7 @@ export type FileManagerDeps = {
   indexEventHub?: CorpusIndexEventHub;
   nodes: NodeRepository;
   mountWriteback?: MountWritebackService;
+  gitWriteback?: GitWritebackService;
   onContentChanged?: (input: {
     workspaceId: string;
     corpusId: string;

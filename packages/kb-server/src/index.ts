@@ -202,6 +202,7 @@ export { AskService } from './services/ask-service.js';
 export { CitationValidateService } from './services/citation-validate-service.js';
 export { CorpusStatsService } from './services/corpus-stats-service.js';
 export { GitSyncService } from './services/git-sync-service.js';
+export { GitWritebackService } from './services/git-writeback-service.js';
 export { IndexJobService } from './services/index-job-service.js';
 export { IndexService } from './services/index-service.js';
 export { KbToolService } from './services/kb-tool-service.js';

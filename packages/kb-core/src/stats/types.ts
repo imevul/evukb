@@ -1,5 +1,6 @@
 import type { CorpusId, WorkspaceId } from '../ids.js';
 import type { IndexStatus } from '../runtime.js';
+import type { SyncStatus } from '../sync/types.js';
 
 export type CorpusLinkCounts = {
   total: number;
@@ -31,12 +32,7 @@ export type KnowledgeCorpusStats = {
   pendingJobCount: number;
   failedJobCount: number;
   importKind?: 'managed' | 'mount' | 'git';
-  syncStatus?: {
-    lastSyncAt?: string;
-    lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed';
-    lastSyncError?: string;
-    lastCommitSha?: string;
-  };
+  syncStatus?: SyncStatus;
   warnings: string[];
   updatedAt: string;
 };

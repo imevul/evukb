@@ -302,18 +302,29 @@ export class SyncImportService {
     workspaceId: string,
     corpusId: string,
     syncStatus: {
-      lastSyncAt: string;
-      lastSyncStatus: 'idle' | 'running' | 'success' | 'failed';
-      lastSyncError?: string;
+      lastSyncAt?: string;
+      lastSyncStatus?: 'idle' | 'running' | 'success' | 'failed' | 'writeback_blocked';
+      lastSyncError?: string | null;
       lastCommitSha?: string;
+      lastWritebackAt?: string;
+      lastWritebackError?: string | null;
     },
   ): Promise<void> {
     const corpus = await this.#corpora.getById(workspaceId, corpusId);
     if (!corpus) {
       return;
     }
+    const existing = (corpus.settings.syncStatus ?? {}) as Record<string, unknown>;
+    const next: Record<string, unknown> = { ...existing };
+    for (const [key, value] of Object.entries(syncStatus)) {
+      if (value === null) {
+        delete next[key];
+      } else if (value !== undefined) {
+        next[key] = value;
+      }
+    }
     await this.#corpora.update(workspaceId, corpusId, {
-      settings: mergeSyncStatus(corpus.settings, syncStatus),
+      settings: mergeSyncStatus(corpus.settings, next as import('@evu/kb-core').SyncStatus),
     });
   }
 }

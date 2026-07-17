@@ -37,7 +37,11 @@ const { kbClientMock } = vi.hoisted(() => ({
       ranking: {
         availableStrategies: [{ id: 'hybrid_default_v1', label: 'Hybrid default', version: '1' }],
       },
-      bootHints: { mountAuthoritativeEnabled: false, importWritebackEnabled: false },
+      bootHints: {
+        mountAuthoritativeEnabled: false,
+        importWritebackEnabled: false,
+        gitWritebackEnabled: false,
+      },
     }),
     listSecrets: vi.fn().mockResolvedValue([
       {

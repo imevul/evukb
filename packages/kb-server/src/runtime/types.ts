@@ -20,6 +20,7 @@ import type { CorpusIndexEventHub } from '../services/corpus-index-event-hub.js'
 import type { CorpusStatsService } from '../services/corpus-stats-service.js';
 import type { FileManagerService } from '../services/file-manager.js';
 import type { GitSyncService } from '../services/git-sync-service.js';
+import type { GitWritebackService } from '../services/git-writeback-service.js';
 import type { IndexJobService } from '../services/index-job-service.js';
 import type { IndexService } from '../services/index-service.js';
 import type { KbToolService } from '../services/kb-tool-service.js';
@@ -65,6 +66,7 @@ export type EvuKbRuntime = {
   jobQueue: JobQueueService;
   mountSyncService: MountSyncService;
   gitSyncService: GitSyncService;
+  gitWritebackService: GitWritebackService;
   agentWriteService: AgentWriteService;
   kbToolService: KbToolService;
   mutationApprovalService: MutationApprovalService;

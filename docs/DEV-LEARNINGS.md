@@ -909,6 +909,32 @@ Pass auth and provider vars explicitly in `deploy/docker-compose.dev.yml` (`EVUK
 the API container even when they exist in root `.env`.
 After changing env vars, recreate `evukb-api` so the container environment is refreshed.
 
+## 2026-07-17: Sprint 29 (of ~32) Git Writeback Implementation
+
+Area: SYNC-6 git corpus writeback (commit/push jobs, mutability, operator UI)
+
+Context: Sprint 29 (of ~32) implemented env-gated git writeback per
+[`docs/GIT-WRITEBACK.md`](./GIT-WRITEBACK.md): `GitWritebackService`,
+`evu-kb-git-writeback` jobs, corpus settings, git-file mutability when active,
+fail-closed `writeback_blocked`, audit, and corpus overview controls.
+
+Learning:
+- Git import still uses shallow clone/`FETCH_HEAD`; writeback should create an
+  explicit branch (`checkout -B`) before committing, especially feature branches
+  `evukb/writeback/{corpusId}`.
+- Default-branch commits must stay opt-in (`gitWritebackAllowDefaultBranch`) so
+  operators are not surprised by pushes to `main`.
+- Mutability for `sourceType=git` needs corpus+env context on both file-manager
+  assert paths and `GET .../nodes` presentation; list routes must load corpus
+  settings before attaching `mutability`.
+- Enqueue writeback only after a successful KB save so agent approval continues
+  to gate content that never lands in git.
+
+Action: Set `EVUKB_ENABLE_GIT_WRITEBACK=true` only when operators need writeback.
+Prefer feature-branch mode or scoped deploy keys. Run
+`packages/kb-server/test/git-writeback-service.test.ts` and the git-writeback
+integration suite when changing commit/push policy.
+
 ## 2026-07-01: Sprint 28 — Release Readiness (MIT, No Publish Yet)
 
 Area: licensing, distribution policy, package surface documentation

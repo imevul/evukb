@@ -7,6 +7,7 @@ export type WorkspaceBootHints = {
   secretsKeyConfigured: boolean;
   mountAuthoritativeEnabled: boolean;
   importWritebackEnabled: boolean;
+  gitWritebackEnabled: boolean;
 };
 
 export type WorkspaceSettingsView = {

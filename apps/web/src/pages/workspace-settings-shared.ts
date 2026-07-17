@@ -45,5 +45,11 @@ export function buildBootHintCards(hints: WorkspaceBootHints): BootHintCard[] {
       tone: hints.importWritebackEnabled ? 'success' : 'neutral',
       hint: 'EVUKB_ENABLE_IMPORT_WRITEBACK=true on the API server.',
     },
+    {
+      label: 'Git writeback mode',
+      status: hints.gitWritebackEnabled ? 'Enabled' : 'Disabled',
+      tone: hints.gitWritebackEnabled ? 'success' : 'neutral',
+      hint: 'EVUKB_ENABLE_GIT_WRITEBACK=true on the API server.',
+    },
   ];
 }

@@ -24,6 +24,9 @@ describeIfDb('JobQueueService', () => {
         onCitationValidate: async () => undefined,
         onMountSync: async () => undefined,
         onGitSync: async () => undefined,
+        onGitWriteback: async () => undefined,
+        onMountSyncSchedule: async () => undefined,
+        onCorpusReindex: async () => undefined,
       },
     });
 
