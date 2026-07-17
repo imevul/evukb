@@ -909,6 +909,36 @@ Pass auth and provider vars explicitly in `deploy/docker-compose.dev.yml` (`EVUK
 the API container even when they exist in root `.env`.
 After changing env vars, recreate `evukb-api` so the container environment is refreshed.
 
+## 2026-07-17: Sprint 30 (of ~32) Vector Tuning And Benchmarks
+
+Area: F-5 pgvector/Qdrant scale guidance and opt-in latency benchmark
+
+Context: Sprint 30 (of ~32) added [`docs/VECTOR-TUNING.md`](./VECTOR-TUNING.md),
+`scripts/benchmark-vector-search.ts` (`pnpm benchmark:vector` /
+`make benchmark-vector`), and explicit Qdrant HNSW defaults (`m=16`,
+`ef_construct=100`) on collection create. Default schema still has no pgvector
+ANN index; operators add HNSW via documented SQL when semantic latency grows.
+
+Learning:
+- `ChunkRepository` list/map paths omit embeddings, so benchmarks that also
+  upsert to Qdrant must pass vectors at seed time rather than re-loading chunks.
+- `CREATE INDEX … HNSW` belongs in operator runbooks (`CONCURRENTLY` on live DBs),
+  not the default migration, so tiny installs stay light.
+- Root scripts cannot import `@evu/*` or `@qdrant/*` by package name; use
+  `packages/*/dist` (and `createQdrantVectorStore` / REST cleanup for Qdrant).
+- `knowledge_chunks.embedding` is `vector(1536)`; `EVUKB_BENCHMARK_QUICK`
+  only shrinks chunk counts. Non-1536 dims require the Qdrant backend path.
+- Quote `EVUKB_SYNC_SCHEDULE_CRON` in `.env` (`'*/5 * * * *'`); unquoted `*/…`
+  expands via the shell when sourcing and can set the cron to a random filename.
+- With `EVUKB_MCP_DEV_TOKEN` set, MCP requires that bearer even when
+  `EVUKB_ALLOW_OPEN_AUTH=true`. Host `pnpm test` against a polluted shell env
+  (real embedding keys, MCP dev token, `EVUKB_QDRANT_URL` without Qdrant)
+  produces false integration failures; prefer a minimal clean env for the suite.
+
+Action: Link VECTOR-TUNING from ENV/DEVELOPMENT when discussing backends. Run
+`pnpm build` then `EVUKB_BENCHMARK_QUICK=true pnpm benchmark:vector` after
+Postgres is up; use `make verify-qdrant` for adapter parity, not the benchmark.
+
 ## 2026-07-17: Sprint 29 (of ~32) Git Writeback Implementation
 
 Area: SYNC-6 git corpus writeback (commit/push jobs, mutability, operator UI)

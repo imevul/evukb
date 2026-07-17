@@ -199,7 +199,7 @@ Notes:
 | F-2 | Decide whether `@evu/kb-ui` ships as a package or remains app-local until proven reusable | [X] |
 | F-3 | Stabilize embeddable `@evu/kb-server` for host applications that bring their own auth/process lifecycle | [X] |
 | F-4 | Add ranking strategy plugin API after core ranking contracts settle (mutable registry, kb:admin plugin API, post-rank handlers, example package) | [X] |
-| F-5 | Larger-scale vector tuning and benchmark guidance for pgvector and Qdrant | [ ] |
+| F-5 | Larger-scale vector tuning and benchmark guidance for pgvector and Qdrant | [X] |
 | F-6 | External HTTP import and Obsidian vault sync, if they stay within the KB boundary | [ ] |
 | F-7 | OKF v0.2 adapter if the upstream OKF spec changes | [ ] |
 

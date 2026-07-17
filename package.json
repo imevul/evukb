@@ -28,7 +28,8 @@
     "typecheck": "pnpm run build && pnpm -r --if-present typecheck",
     "up": "bash scripts/ensure-lockfile-sync.sh && docker compose --project-directory . -f deploy/docker-compose.dev.yml up --build -d",
     "verify-dev": "pnpm run build && pnpm run test && pnpm exec tsx scripts/verify-api-smoke.ts && pnpm exec tsx scripts/verify-openapi-sdk.ts && docker compose --project-directory . -f deploy/docker-compose.dev.yml config >/dev/null",
-    "verify-qdrant": "pnpm exec tsx scripts/verify-qdrant.ts"
+    "verify-qdrant": "pnpm exec tsx scripts/verify-qdrant.ts",
+    "benchmark:vector": "pnpm exec tsx scripts/benchmark-vector-search.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",

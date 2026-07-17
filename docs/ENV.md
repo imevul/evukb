@@ -39,6 +39,9 @@ keys. See [`SPEC.md` §8](../SPEC.md) and [`docs/AUTH.md`](./AUTH.md).
 | `EVUKB_VECTOR_BACKEND` | Vector index backend: `pgvector` or `qdrant` | `pgvector` |
 | `EVUKB_QDRANT_URL` | Qdrant HTTP URL when the backend is `qdrant` | `http://localhost:6333` |
 
+Scale, optional HNSW indexes, and the opt-in latency benchmark are documented in
+[`docs/VECTOR-TUNING.md`](./VECTOR-TUNING.md).
+
 ## Auth and secrets
 
 Auth is fail-closed: without `EVUKB_ALLOW_OPEN_AUTH=true`, HTTP and MCP

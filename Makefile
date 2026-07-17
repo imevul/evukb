@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: dev dev-local-embed up down prod update migrate test verify-dev verify-qdrant generate-openapi api-docs lint typecheck build
+.PHONY: dev dev-local-embed up down prod update migrate test verify-dev verify-qdrant benchmark-vector generate-openapi api-docs lint typecheck build
 
 dev:
 	pnpm run dev
@@ -31,6 +31,9 @@ verify-dev:
 
 verify-qdrant:
 	pnpm run verify-qdrant
+
+benchmark-vector:
+	pnpm run benchmark:vector
 
 generate-openapi:
 	pnpm run generate-openapi

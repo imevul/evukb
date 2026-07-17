@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   buildQdrantCollectionName,
+  QDRANT_DEFAULT_HNSW_EF_CONSTRUCT,
+  QDRANT_DEFAULT_HNSW_M,
   QdrantVectorStore,
 } from '../src/adapters/qdrant-vector-store.js';
 
@@ -11,6 +13,42 @@ describe('QdrantVectorStore', () => {
     expect(buildQdrantCollectionName('text-embedding-3-small', 1536)).toBe(
       'evukb_text_embedding_3_small_1536',
     );
+  });
+
+  it('creates collections with Cosine distance and documented HNSW defaults', async () => {
+    const createCollection = vi.fn().mockResolvedValue(undefined);
+    const client = {
+      getCollections: vi.fn().mockResolvedValue({ collections: [] }),
+      createCollection,
+      search: vi.fn().mockResolvedValue([]),
+      upsert: vi.fn(),
+      delete: vi.fn(),
+    };
+    const chunks = {
+      updateExternalVectorIds: vi.fn(),
+    };
+
+    const store = new QdrantVectorStore({
+      chunks: chunks as never,
+      client: client as never,
+      collectionName: 'evukb_new_1536',
+      dimensions: 1536,
+    });
+
+    await store.search({
+      workspaceId: asWorkspaceId('workspace-1'),
+      corpusIds: [asCorpusId('corpus-1')],
+      queryEmbedding: new Array(1536).fill(0),
+      limit: 5,
+    });
+
+    expect(createCollection).toHaveBeenCalledWith('evukb_new_1536', {
+      vectors: { size: 1536, distance: 'Cosine' },
+      hnsw_config: {
+        m: QDRANT_DEFAULT_HNSW_M,
+        ef_construct: QDRANT_DEFAULT_HNSW_EF_CONSTRUCT,
+      },
+    });
   });
 
   it('scopes search filters to workspace and corpus', async () => {

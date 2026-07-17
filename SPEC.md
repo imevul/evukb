@@ -589,6 +589,9 @@ Recommendation:
 - pgvector remains the default vector backend.
 - Qdrant remains an officially supported optional profile (`EVUKB_VECTOR_BACKEND=qdrant`, docker `qdrant` profile).
 - pgvector and Qdrant adapters must stay comparable through the same ranking contract (see Sprint 19 parity tests).
+- Larger-scale tuning (optional HNSW on pgvector, Qdrant HNSW defaults, and a
+  disposable latency benchmark) is documented in
+  [`docs/VECTOR-TUNING.md`](docs/VECTOR-TUNING.md).
 
 Qdrant adapter rules:
 
@@ -597,6 +600,8 @@ Qdrant adapter rules:
 - mandatory corpus filter
 - pointer-only payloads
 - chunk body remains in Postgres/blob metadata, not in Qdrant
+- new collections use Cosine distance with documented HNSW defaults (`m=16`,
+  `ef_construct=100`)
 
 ---
 
@@ -1588,7 +1593,7 @@ P3: hardening and ecosystem
 - [x] backup/restore guidance (`docs/BACKUP.md`)
 - [x] ranking strategy plugins (see F-4, `examples/custom-ranking-strategy/`)
 - [x] generated API reference (`docs/api/index.html`, served at `GET /api-reference`)
-- [ ] larger-scale vector tuning
+- [x] larger-scale vector tuning (see [`docs/VECTOR-TUNING.md`](docs/VECTOR-TUNING.md))
 
 ---
 
@@ -1608,6 +1613,7 @@ Companion docs (all shipped; see `docs/` for the full set, including
 | `docs/MIGRATION.md` | clean-room migration principles (detailed source maps are local-only) |
 | `README.md` | short intro, disclaimer, and quickstart |
 | `docs/DEVELOPMENT.md` | repository layout, status, env summary, and extended dev workflow |
+| `docs/VECTOR-TUNING.md` | pgvector/Qdrant scale guidance and opt-in search latency benchmark |
 | `docs/api/index.html` | generated Redoc OpenAPI reference (also `GET /api-reference` on the API) |
 
 `AGENTS.md` should include:

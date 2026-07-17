@@ -17,6 +17,10 @@ export type QdrantVectorStoreDeps = {
   dimensions: number;
 };
 
+/** Documented defaults for new collections; see docs/VECTOR-TUNING.md. */
+export const QDRANT_DEFAULT_HNSW_M = 16;
+export const QDRANT_DEFAULT_HNSW_EF_CONSTRUCT = 100;
+
 function slugifyModelName(model: string): string {
   return model.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
@@ -163,6 +167,10 @@ export class QdrantVectorStore implements VectorStore {
         vectors: {
           size: this.#dimensions,
           distance: 'Cosine',
+        },
+        hnsw_config: {
+          m: QDRANT_DEFAULT_HNSW_M,
+          ef_construct: QDRANT_DEFAULT_HNSW_EF_CONSTRUCT,
         },
       });
     }

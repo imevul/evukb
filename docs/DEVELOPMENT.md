@@ -8,6 +8,7 @@ Related docs:
 - [`SPEC.md`](../SPEC.md) — product and engineering source of truth
 - [`docs/ROADMAP.md`](ROADMAP.md) — phase-level shipped/open work
 - [`docs/ENV.md`](ENV.md) — full environment variable reference
+- [`docs/VECTOR-TUNING.md`](VECTOR-TUNING.md) — pgvector/Qdrant scale and benchmark guidance
 - [`AGENTS.md`](../AGENTS.md) — agent read order, boundaries, and quality gates
 
 ## Current Status
@@ -26,10 +27,12 @@ multi-corpus ask, all six ranking strategies (including `reranker_llm`), workspa
 agent mutation approval, graph neighborhood, portable export/import, and mount sync modes
 (`import`, `import_writeback`, `mount_authoritative`).
 
-Remaining P3+ items are optional npm publishing (see [`docs/RELEASE.md`](RELEASE.md)),
-git writeback implementation (SYNC-6), and agent write/retrieval
-backlog (AGENT-1, AGENT-2). Memory banks are out of scope for EvuKB (see SPEC §16).
-Host-specific adapter code belongs in consuming projects, not in EvuKB.
+Vector scale guidance and an opt-in latency benchmark live in
+[`docs/VECTOR-TUNING.md`](VECTOR-TUNING.md). Remaining Future items are external
+HTTP/Obsidian sync (F-6) and OKF v0.2 if upstream changes (F-7). Optional npm
+publishing remains deferred ([`docs/RELEASE.md`](RELEASE.md)). Memory banks are
+out of scope for EvuKB (see SPEC §16). Host-specific adapter code belongs in
+consuming projects, not in EvuKB.
 
 Consumer integration guide: [`docs/INTEGRATION.md`](INTEGRATION.md). Host shapes
 (agent orchestration vs platform operator): [`docs/INTEGRATION-HOST-SHAPES.md`](INTEGRATION-HOST-SHAPES.md). Auth details:
@@ -76,6 +79,7 @@ docs/
   PACKAGES.md
   RELEASE.md
   ROADMAP.md
+  VECTOR-TUNING.md
 ```
 
 ## Extended Development Workflow
@@ -130,6 +134,7 @@ Default dev ports:
 | `make test` | Run workspace tests, warning when DB-backed suites will skip |
 | `make verify-dev` | Build, test, and validate the dev compose config |
 | `make verify-qdrant` | Optional: run Qdrant integration and vector-backend parity tests (requires Postgres + Qdrant) |
+| `make benchmark-vector` | Optional: seed a disposable corpus and print keyword/semantic/hybrid search latency (requires Postgres) |
 | `make migrate` | Apply Drizzle migrations to the configured Postgres database |
 | `make generate-openapi` | Write OpenAPI spec to `packages/kb-sdk/openapi/evukb.openapi.json` |
 | `make api-docs` | Regenerate Redoc HTML at `docs/api/index.html` (served at `GET /api-reference`) |
@@ -156,7 +161,9 @@ make verify-qdrant
 ```
 
 This runs `qdrant-integration.test.ts` and `vector-backend-parity.test.ts` with
-`EVUKB_VECTOR_BACKEND=qdrant`. GitHub Actions exposes this as an optional manual
+`EVUKB_VECTOR_BACKEND=qdrant`. For scale guidance and a disposable latency
+benchmark, see [`docs/VECTOR-TUNING.md`](VECTOR-TUNING.md) (`make benchmark-vector`).
+GitHub Actions exposes Qdrant verification as an optional manual
 workflow path through the `run_qdrant` dispatch input.
 
 ### Optional local embeddings

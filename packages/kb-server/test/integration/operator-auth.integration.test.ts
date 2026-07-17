@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -67,18 +68,19 @@ describeIfDb('kb-server operator API key auth', () => {
         bootstrapDevWorkspace: true,
       });
 
+      const scopedSlug = `ops-scoped-${randomUUID().slice(0, 8)}`;
       const createResponse = await server.inject({
         method: 'POST',
         url: '/api/workspaces',
         headers: { authorization: `Bearer ${operatorKey}` },
-        payload: { slug: 'ops-scoped-test', name: 'Ops scoped test' },
+        payload: { slug: scopedSlug, name: 'Ops scoped test' },
       });
       expect(createResponse.statusCode).toBe(200);
 
       const readKey = await createTestApiKey('local-dev', 'Read key', ['kb:read']);
       const mismatchResponse = await server.inject({
         method: 'GET',
-        url: '/api/workspaces/ops-scoped-test/settings',
+        url: `/api/workspaces/${scopedSlug}/settings`,
         headers: { authorization: `Bearer ${readKey}` },
       });
       expect(mismatchResponse.statusCode).toBe(403);
