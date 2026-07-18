@@ -38,11 +38,11 @@ Contributors running lint, tests, or other commands **on the host** need
 `pnpm install` first and a reachable Postgres (for example after `make up`).
 See [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md).
 
-Default ports:
+Default host ports:
 
 - Web UI: `http://localhost:4200`
 - API: `http://localhost:4201`
-- Postgres: `localhost:5432`
+- Postgres: `localhost:5434` (compose maps host 5434 → container 5432)
 
 With `EVUKB_ALLOW_OPEN_AUTH=true` (dev default), the operator UI uses workspace
 `local-dev`.

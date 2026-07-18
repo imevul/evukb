@@ -1305,6 +1305,22 @@ Action: When restyling sibling Evu apps, follow `evu_theme/APPLY.md` path B and
 
 ---
 
+## 2026-07-18: Dev Host Port Remap (Sibling Collision Avoidance)
+
+Area: local Docker / ports
+
+Context: Running EvuKB beside 02m8, evunexus, host Postgres/Ollama collided on
+default infra ports (5432, 6333, 11434). App ports 4200/4201 were already unique.
+
+Learning: Publish remapped host ports; keep container-internal ports standard
+(`5432`, `6333`, `11434`). Host URLs in `.env` / docs must match the published
+side (`5434`, `6335`, `11435`). Compose DNS between services is unchanged.
+
+Action: Prefer host `5434` / `6335` / `11435` for EvuKB; do not reclaim 5432 for
+dev publish (02m8 already took 5433).
+
+---
+
 ## 2026-07-18: Evu Theme Elevated Outline Buttons
 
 Area: UI theme / buttons

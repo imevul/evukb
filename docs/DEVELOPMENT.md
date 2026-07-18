@@ -106,19 +106,19 @@ pnpm build
 For Postgres-backed integration tests, point at the dev database:
 
 ```bash
-EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb pnpm test:ci
+EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb pnpm test:ci
 ```
 
 Run `make migrate` on the host only when you need to apply migrations outside
 the API container (for example before a host-run API or one-off DB tooling).
 
-Default dev ports:
+Default dev host ports (container-internal ports stay 5432 / 6333 / 11434):
 
 - Web: `http://localhost:4200`
 - API: `http://localhost:4201`
-- Postgres: `localhost:5432`
-- Qdrant, optional profile: `localhost:6333`
-- Ollama, optional profile: `localhost:11434`
+- Postgres: `localhost:5434` (avoids sibling / host Postgres on 5432)
+- Qdrant, optional profile: `localhost:6335` (avoids sibling Qdrant on 6333)
+- Ollama, optional profile: `localhost:11435` (avoids host Ollama on 11434)
 
 ## Commands
 
@@ -155,8 +155,8 @@ backend (local or in a separate CI job), start the Qdrant profile and run `verif
 
 ```bash
 docker compose --project-directory . -f deploy/docker-compose.dev.yml --profile qdrant up -d qdrant
-EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb \
-EVUKB_QDRANT_URL=http://localhost:6333 \
+EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb \
+EVUKB_QDRANT_URL=http://localhost:6335 \
 make verify-qdrant
 ```
 
@@ -198,7 +198,7 @@ is not read by server code today; see [`docs/ENV.md`](ENV.md).
 Verify the sidecar before reindexing:
 
 ```bash
-curl -sS http://localhost:11434/v1/embeddings \
+curl -sS http://localhost:11435/v1/embeddings \
   -H "Authorization: Bearer local" \
   -H "Content-Type: application/json" \
   -d '{"model":"<model>","input":["test"]}' | jq '.data[0].embedding | length'

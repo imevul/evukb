@@ -45,15 +45,15 @@ process directly.
 | `EVUKB_POSTGRES_DB` | Postgres database name (compose) | `evukb` |
 
 Host-side tools (`pnpm test`, `make migrate`) still use `EVUKB_DATABASE_URL`
-pointing at `localhost`. See [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md) (Docker
-images).
+pointing at `localhost:5434` (dev compose publishes host **5434** → container
+5432). See [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md).
 
 ## Vector backend
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `EVUKB_VECTOR_BACKEND` | Vector index backend: `pgvector` or `qdrant` | `pgvector` |
-| `EVUKB_QDRANT_URL` | Qdrant HTTP URL when the backend is `qdrant` | `http://localhost:6333` |
+| `EVUKB_QDRANT_URL` | Qdrant HTTP URL when the backend is `qdrant` (dev compose publishes host **6335**) | `http://localhost:6335` |
 
 Scale, optional HNSW indexes, and the opt-in latency benchmark are documented in
 [`docs/VECTOR-TUNING.md`](./VECTOR-TUNING.md). Compose pins Qdrant to
@@ -110,7 +110,7 @@ corpus settings override them.
 The dev compose file includes an optional Ollama service under the
 `local-embed` profile. It is **not** started by default (`make dev`). When
 opted in, point `EVUKB_EMBEDDING_BASE_URL` at the sidecar (for example
-`http://ollama:11434/v1` from inside compose, or `http://localhost:11434/v1`
+`http://ollama:11434/v1` from inside compose, or `http://localhost:11435/v1`
 from a host-run API). Set `EVUKB_EMBEDDING_API_KEY` to any non-empty dummy
 value for self-hosted servers that ignore auth. Use `EVUKB_EMBEDDING_BATCH_SIZE=1`
 for strict self-hosted batching. See [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md)

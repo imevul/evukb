@@ -23,7 +23,7 @@ permissions:
 env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10.33.0"
-  EVUKB_DATABASE_URL: postgres://evukb:evukb@localhost:5432/evukb
+  EVUKB_DATABASE_URL: postgres://evukb:evukb@localhost:5434/evukb
 
 jobs:
   required:
@@ -39,7 +39,7 @@ jobs:
           POSTGRES_PASSWORD: evukb
           POSTGRES_USER: evukb
         ports:
-          - 5432:5432
+          - 5434:5432
         options: >-
           --health-cmd "pg_isready -U evukb -d evukb"
           --health-interval 5s
@@ -99,7 +99,7 @@ jobs:
           POSTGRES_PASSWORD: evukb
           POSTGRES_USER: evukb
         ports:
-          - 5432:5432
+          - 5434:5432
         options: >-
           --health-cmd "pg_isready -U evukb -d evukb"
           --health-interval 5s
@@ -108,10 +108,10 @@ jobs:
       qdrant:
         image: qdrant/qdrant:latest
         ports:
-          - 6333:6333
+          - 6335:6333
 
     env:
-      EVUKB_QDRANT_URL: http://localhost:6333
+      EVUKB_QDRANT_URL: http://localhost:6335
 
     steps:
       - name: Checkout

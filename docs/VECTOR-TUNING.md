@@ -27,7 +27,7 @@ ANN needs dedicated capacity or you want to keep Postgres lighter. Enable with:
 
 ```bash
 EVUKB_VECTOR_BACKEND=qdrant
-EVUKB_QDRANT_URL=http://localhost:6333
+EVUKB_QDRANT_URL=http://localhost:6335
 ```
 
 Use the Docker `qdrant` profile in [`docs/DEVELOPMENT.md`](./DEVELOPMENT.md).
@@ -131,13 +131,13 @@ Opt-in; not part of `make verify-dev` or CI.
 
 ```bash
 # Postgres required
-EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb \
+EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb \
   pnpm benchmark:vector
 
 # Optional: also exercise Qdrant for semantic hits
-EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb \
+EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb \
 EVUKB_VECTOR_BACKEND=qdrant \
-EVUKB_QDRANT_URL=http://localhost:6333 \
+EVUKB_QDRANT_URL=http://localhost:6335 \
   pnpm benchmark:vector
 ```
 

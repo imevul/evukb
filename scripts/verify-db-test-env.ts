@@ -10,7 +10,7 @@ if (databaseUrl) {
     [
       'EVUKB_DATABASE_URL is required for this test gate.',
       'Without it, Postgres-backed repository and server integration suites are skipped.',
-      'Example: EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb pnpm test:ci',
+      'Example: EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb pnpm test:ci',
     ].join('\n'),
   );
   process.exit(1);
@@ -19,7 +19,7 @@ if (databaseUrl) {
     [
       'Warning: EVUKB_DATABASE_URL is not set.',
       'Postgres-backed repository and server integration suites will be skipped.',
-      'Run with EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5432/evukb to include them.',
+      'Run with EVUKB_DATABASE_URL=postgres://evukb:evukb@localhost:5434/evukb to include them.',
     ].join('\n'),
   );
 }
