@@ -1280,3 +1280,43 @@ Exclude `docs/api` in `biome.json` alongside `packages/kb-sdk/openapi` and gener
 
 Action: Run `pnpm lint` before every push; regenerate API docs with `pnpm api-docs` when needed,
   not as part of routine lint fixes.
+
+---
+
+## 2026-07-18: Evu Theme Adoption In kb-ui
+
+Area: UI theme / tokens
+
+Context: Applied shared Evu Theme (`imevul/evu_theme`) to EvuKB via `@evu/kb-ui`
+`tokens.css` + shell chrome. Surfaces stay neutral; signature indigo primary is
+reserved for active nav, CTAs, switch-on, focus, and tab underlines. Links use
+`--secondary`.
+
+Learning:
+- Prefer a single token source in `packages/kb-ui/src/theme/tokens.css`; apps
+  consume it and map Tailwind colors — do not keep a second conflicting palette
+  in `apps/web`.
+- Dual-read `evu-color-scheme` with legacy `evukb-color-scheme` during migration;
+  FOUC in `index.html` must check both and set `data-evu-palette`.
+- Keep graph-specific channels (`--graph-node*`) as extensions on the Evu base.
+
+Action: When restyling sibling Evu apps, follow `evu_theme/APPLY.md` path B and
+  preserve each app’s shell IA (sidebar vs topnav).
+
+---
+
+## 2026-07-18: Evu Theme Elevated Outline Buttons
+
+Area: UI theme / buttons
+
+Context: Latest `evu_theme` made outline/default buttons elevated `--card` chips
+so they stay distinct from recessed `bg-background` input wells and badges inside
+`muted/55` fieldsets. Transparent-on-panel secondary actions looked like holes.
+
+Learning: Keep `Button` `default`/`outline`/`dangerOutline` on `bg-card` with a
+foreground-tinted border + light shadow; reserve `ghost`/`quiet` for chrome only.
+Nested action groups must use `bg-muted/55` (not `/20`) — otherwise card-fill
+buttons match the group and look flat in dark mode.
+
+Action: Sync `@evu/kb-ui` `buttonVariants` and `.evukb-file-input-label` when
+pulling theme updates; grep for `bg-muted/20` on panels that host outline buttons.

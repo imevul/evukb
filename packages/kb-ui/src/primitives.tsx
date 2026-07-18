@@ -9,21 +9,33 @@ import {
 
 import { cn } from './cn.js';
 
+/**
+ * Evu Theme button surfaces: outline/default stay elevated `--card` chips so they
+ * never read as input wells or badges inside muted/55 groups.
+ */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-foreground shadow-sm hover:opacity-90',
-        default: 'border border-border bg-card text-foreground shadow-sm hover:bg-muted',
-        outline: 'border border-border bg-card text-foreground shadow-sm hover:bg-muted',
-        secondary: 'bg-muted text-foreground hover:bg-muted/80',
-        quiet: 'text-muted-foreground hover:bg-muted hover:text-foreground',
-        ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
-        danger: 'bg-destructive text-destructive-foreground shadow-sm hover:opacity-90',
+        primary:
+          'border-transparent bg-primary text-primary-foreground shadow-sm hover:brightness-105',
+        default:
+          'border-foreground/25 bg-card text-foreground shadow-[0_1px_2px_hsl(220_10%_4%/0.16)] hover:border-foreground/35 hover:bg-muted/65 dark:border-foreground/30 dark:shadow-[0_1px_2px_rgb(0_0_0/0.55)] dark:hover:border-foreground/45 dark:hover:bg-muted/80',
+        outline:
+          'border-foreground/25 bg-card text-foreground shadow-[0_1px_2px_hsl(220_10%_4%/0.16)] hover:border-foreground/35 hover:bg-muted/65 dark:border-foreground/30 dark:shadow-[0_1px_2px_rgb(0_0_0/0.55)] dark:hover:border-foreground/45 dark:hover:bg-muted/80',
+        secondary:
+          'border-secondary/40 bg-secondary/18 text-secondary shadow-sm hover:border-secondary/55 hover:bg-secondary/28',
+        quiet:
+          'border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-muted/55 hover:text-foreground',
+        ghost:
+          'border-transparent bg-transparent text-muted-foreground shadow-none hover:bg-muted/55 hover:text-foreground',
+        danger:
+          'border-transparent bg-destructive text-destructive-foreground shadow-sm hover:brightness-105',
         dangerOutline:
-          'border border-destructive bg-transparent text-destructive shadow-sm hover:bg-destructive/10',
-        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:opacity-90',
+          'border-destructive/45 bg-card text-destructive shadow-[0_1px_2px_hsl(220_10%_4%/0.16)] hover:border-destructive/65 hover:bg-destructive/12 dark:border-destructive/55 dark:shadow-[0_1px_2px_rgb(0_0_0/0.55)] dark:hover:bg-destructive/15',
+        destructive:
+          'border-transparent bg-destructive text-destructive-foreground shadow-sm hover:brightness-105',
       },
       size: {
         default: 'h-9 px-4 py-2',

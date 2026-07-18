@@ -29,16 +29,12 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
       disabled={disabled}
       {...rest}
       className={cn(
-        'group relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors',
+        'group relative inline-flex h-[1.375rem] w-10 shrink-0 cursor-pointer items-center rounded-full border transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        !disabled && checked && 'bg-primary',
-        !disabled && !checked && 'bg-muted',
-        disabled &&
-          checked &&
-          'cursor-not-allowed border-border/60 bg-primary/90 shadow-sm ring-1 ring-border',
-        disabled &&
-          !checked &&
-          'cursor-not-allowed border-border/80 bg-muted-foreground/35 shadow-sm ring-1 ring-border/90',
+        !disabled && checked && 'border-transparent bg-primary',
+        !disabled && !checked && 'border-border bg-muted',
+        disabled && checked && 'cursor-not-allowed border-transparent bg-primary/90 opacity-50',
+        disabled && !checked && 'cursor-not-allowed border-border bg-muted opacity-50',
         className,
       )}
       onClick={(event) => {
@@ -52,10 +48,10 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
       <span
         aria-hidden
         className={cn(
-          'pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow ring-1 ring-border transition-[left] duration-200 ease-out',
-          'group-disabled:ring-2 group-disabled:ring-foreground/30',
-          'group-data-[state=off]:group-disabled:bg-muted-foreground/25',
-          checked ? 'left-[1.375rem]' : 'left-0.5',
+          'pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color,opacity] duration-150 ease-out',
+          checked
+            ? 'left-[1.125rem] bg-primary-foreground opacity-100'
+            : 'left-0.5 bg-foreground opacity-70',
         )}
       />
     </button>

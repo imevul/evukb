@@ -124,6 +124,8 @@ integration, and optional npm/package consumption.
 | P3-13c | CodeMirror markdown editor with theme sync, status bar, search, Mod-s save | [X] |
 | P3-13d | Remaining UI polish: frontmatter panel, search ranking trace, Ask retrieval trace, richer graph, a11y tests (note: the axe a11y baseline covers ~5 screens — app shell/knowledge list, corpus search, corpus graph, file editor modal, API keys settings — not the full UI) | [X] |
 | P3-13e | Tailwind + shadcn design migration: HSL token layer, `.dark` class theme, rebuilt kb-ui primitives, `Switch`-by-default, `Alert` banners, spacing rhythm | [X] |
+| P3-13f | Adopt shared Evu Theme tokens (indigo signature primary on accents, neutral sidebar, segmented theme menu, `evu-color-scheme`, IBM Plex) while preserving sidebar IA | [X] |
+| P3-13g | Evu Theme form surface stack + elevated outline buttons (`muted/55` groups, `bg-background` wells, card-chip secondary actions) | [X] |
 | P3-14 | Add generic backup/restore guidance for Postgres, blobs, config, secret inventory, and optional Qdrant snapshots | [X] |
 | P3-15 | Public docs site or generated API reference, if/when the project is released publicly | [X] |
 

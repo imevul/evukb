@@ -139,7 +139,7 @@ export function FrontmatterPanel({
   }
 
   const panelClassName = showHeading
-    ? 'flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted/20 p-3'
+    ? 'flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted/55 p-3'
     : 'flex min-w-0 flex-col gap-3';
   const PanelTag = showHeading ? 'aside' : 'div';
   const hasRows = rows.length > 0;

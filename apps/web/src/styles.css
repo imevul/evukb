@@ -16,9 +16,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family:
-      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    @apply bg-background font-sans text-foreground antialiased;
     line-height: 1.5;
   }
 
@@ -39,7 +37,7 @@
   }
 
   a {
-    @apply text-primary underline-offset-4 hover:underline;
+    @apply text-secondary underline-offset-4 hover:underline;
   }
 
   code {
@@ -69,7 +67,7 @@
   }
 
   .evukb-success {
-    @apply text-sm font-medium text-green-600 dark:text-green-400;
+    @apply text-sm font-medium text-success;
   }
 
   /* Surface / page panel — mirrors the Card primitive. */
@@ -117,7 +115,8 @@
   .evukb-audit-filter select,
   .evukb-audit-filter input,
   .evukb-inline-form input {
-    @apply flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm shadow-sm;
+    /* Page surface wells — contrast against card / muted fieldsets (Evu Theme). */
+    @apply flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-sm shadow-sm;
     @apply placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
   }
@@ -127,20 +126,35 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 
-  .evukb-form select {
-    @apply cursor-pointer;
+  /*
+   * Custom chevron — native GTK/Linux arrows ignore padding.
+   * Keep background-color as the recessed well; only layer the SVG.
+   */
+  .evukb-select,
+  .evukb-form select,
+  .evukb-form-grid select,
+  .evukb-audit-filter select {
+    @apply cursor-pointer appearance-none bg-background bg-no-repeat pr-8;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.625rem center;
+    background-size: 1rem;
+  }
+
+  .dark .evukb-select,
+  .dark .evukb-form select,
+  .dark .evukb-form-grid select,
+  .dark .evukb-audit-filter select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2399a1af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
   }
 
   .evukb-form-grid label {
     @apply flex flex-col gap-2 text-sm font-medium text-foreground;
   }
 
-  .evukb-form-grid select {
-    @apply cursor-pointer;
-  }
-
   .evukb-form fieldset {
-    @apply m-0 flex flex-col gap-3.5 rounded-lg border border-border bg-muted/30 p-4;
+    /* Stronger inset than card so grouped settings don't flatten into one slab. */
+    @apply m-0 flex flex-col gap-3.5 rounded-lg border border-border bg-muted/55 p-4;
   }
 
   .evukb-form legend {
@@ -209,7 +223,7 @@
   }
 
   .evukb-stat-card {
-    @apply flex flex-col gap-1.5 rounded-lg border border-border bg-muted/30 p-4;
+    @apply flex flex-col gap-1.5 rounded-lg border border-border bg-muted/55 p-4;
   }
 
   .evukb-stat-metrics {
@@ -293,18 +307,18 @@
     @apply w-auto min-w-[min(18rem,100%)];
   }
 
-  /* File upload trigger, styled like an outline button. */
+  /* File upload trigger — elevated outline chip (Evu `--outline`). */
   .evukb-file-input-label {
-    @apply inline-flex h-9 w-fit cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium shadow-sm transition-colors hover:bg-muted;
+    @apply inline-flex h-9 w-fit cursor-pointer items-center justify-center gap-2 rounded-md border border-foreground/25 bg-card px-4 text-sm font-medium shadow-[0_1px_2px_hsl(220_10%_4%/0.16)] transition-colors hover:border-foreground/35 hover:bg-muted/65 dark:border-foreground/30 dark:shadow-[0_1px_2px_rgb(0_0_0/0.55)] dark:hover:border-foreground/45 dark:hover:bg-muted/80;
   }
 
   .evukb-file-input-label input {
     @apply hidden;
   }
 
-  /* Ask response block */
+  /* Ask response block — same muted/55 strength as fieldset groups. */
   .evukb-ask-response {
-    @apply grid gap-3 rounded-lg border border-border bg-muted/30 p-5;
+    @apply grid gap-3 rounded-lg border border-border bg-muted/55 p-5;
   }
 
   .evukb-ask-response h3,

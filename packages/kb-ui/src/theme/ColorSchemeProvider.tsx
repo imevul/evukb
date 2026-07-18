@@ -11,6 +11,7 @@ import {
 
 import {
   applyDocumentColorScheme,
+  applyDocumentEvuPalette,
   type ColorSchemePreference,
   type EffectiveColorScheme,
   readStoredColorSchemePreference,
@@ -44,6 +45,10 @@ export function ColorSchemeProvider({ children }: { children: ReactNode }): Reac
     () => resolveEffectiveColorScheme(preference, prefersDark),
     [preference, prefersDark],
   );
+
+  useEffect(() => {
+    applyDocumentEvuPalette();
+  }, []);
 
   useEffect(() => {
     applyDocumentColorScheme(effective);

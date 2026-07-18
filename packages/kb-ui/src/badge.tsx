@@ -54,10 +54,10 @@ const WARNING = new Set([
 const ACTIVE = new Set(['running', 'in_progress', 'processing', 'active', 'indexing', 'syncing']);
 
 export const STATUS_TONE_CLASS: Record<Exclude<StatusTone, 'neutral'>, string> = {
-  success: 'border-green-600/30 bg-green-500/10 text-green-800 dark:text-green-300',
+  success: 'border-success/30 bg-success/15 text-success',
   danger: 'border-destructive/40 bg-destructive/10 text-destructive',
-  warning: 'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200',
-  active: 'border-orange-500/40 bg-orange-500/10 text-orange-900 dark:text-orange-200',
+  warning: 'border-warning/40 bg-warning/15 text-warning',
+  active: 'border-secondary/40 bg-secondary/15 text-secondary',
 };
 
 function normalizeStatus(status: string): string {

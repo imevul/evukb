@@ -5,8 +5,10 @@ easy to inspect and operate without hiding the portable file model underneath.
 
 Visual structure follows an operator-console wireframe (sidebar + content) with
 corpus detail tabs and file-manager behavior. The UI is built on **Tailwind CSS**
-with **shadcn-style** primitives for a consistent operator-console look.
-Implementations are clean-room against documented contracts.
+with **shadcn-style** primitives aligned to the shared **Evu Theme**
+([`imevul/evu_theme`](https://github.com/imevul/evu_theme)): neutral surfaces,
+signature indigo primary on accents only, IBM Plex Sans/Mono. Implementations
+are clean-room against documented contracts.
 
 ## Product Principles
 
@@ -32,16 +34,17 @@ Implementations are clean-room against documented contracts.
 +----------+-----------------------------------------------+
 ```
 
-The sidebar (`w-56 bg-card border-r`) holds the brand, primary nav, workspace
-control, and the theme control. The workspace control is a button linking to
-`/workspaces`; it shows the active slug (or a degraded state when the workspace
-is missing or inaccessible). Browser selection in `localStorage` overrides the
-build-time default from `VITE_EVUKB_WORKSPACE_ID`. When the active workspace is
-invalid, primary nav is reduced to **Workspaces** only and a warning banner
-points operators to choose or create a workspace.
+The sidebar (`w-56`, neutral `--sidebar` chrome — not primary-tinted) holds the
+brand mark, primary nav, workspace control, and the theme control. The workspace
+control is a button linking to `/workspaces`; it shows the active slug (or a
+degraded state when the workspace is missing or inaccessible). Browser selection
+in `localStorage` overrides the build-time default from `VITE_EVUKB_WORKSPACE_ID`.
+When the active workspace is invalid, primary nav is reduced to **Workspaces**
+only and a warning banner points operators to choose or create a workspace.
 
-Active nav links use `bg-primary
-text-primary-foreground`; the rest are muted with a `hover:bg-muted` affordance.
+Active nav links use `bg-primary text-primary-foreground` (signature accent
+pill); the rest are muted with a `hover:bg-muted` affordance. Do not paint the
+sidebar or page background with primary.
 
 Primary sidebar routes:
 
@@ -59,8 +62,11 @@ Graph, Ask.
 
 Implementation: `@evu/kb-ui` exports `AppShell`, `AppContent`, `DetailTabs`,
 `ThemeMenu`. Theme preference (`light` / `dark` / `system`) lives in `@evu/kb-ui`
-(`ColorSchemeProvider`, `ThemeMenu`) and toggles a `.dark` **class** on `<html>`
-(Tailwind `darkMode: ['class']`), set early by the FOUC script in `index.html`.
+(`ColorSchemeProvider`, segmented `ThemeMenu`) and toggles a `.dark` **class** on
+`<html>` (Tailwind `darkMode: ['class']`), set early by the FOUC script in
+`index.html`. Preference is stored as `evu-color-scheme` (legacy
+`evukb-color-scheme` is dual-read). Accent palette is `data-evu-palette` on
+`<html>` (`indigo` default; optional `blue`).
 
 Display preferences (date format, time format, timezone, locale) are per-browser
 `localStorage` (`evukb_display_preferences`). Each field defaults to **System
@@ -70,24 +76,26 @@ Docker Compose affects server logs and process time only, not UI formatting.
 
 ## Theme Tokens
 
-shadcn-style HSL channel tokens live in `@evu/kb-ui/theme/tokens.css` (`:root`
-for light, `.dark` for dark) and are consumed through Tailwind as
-`hsl(var(--token))`. The palette follows EvuKB operator-console design tokens.
+Evu Theme HSL channel tokens live in `@evu/kb-ui/theme/tokens.css` (`:root` for
+light, `.dark` for dark; palette blocks for indigo/blue) and are consumed through
+Tailwind as `hsl(var(--token))`.
 
 | Token | Tailwind utility | Purpose |
 | --- | --- | --- |
 | `--background` / `--foreground` | `bg-background` / `text-foreground` | Page surface + text |
-| `--card` / `--card-foreground` | `bg-card` | Cards, sidebar, panels |
-| `--primary` / `--primary-foreground` | `bg-primary` | Primary actions, active nav, links |
+| `--card` / `--card-foreground` | `bg-card` | Cards, panels |
+| `--sidebar*` | `bg-sidebar` / `border-sidebar-border` | Neutral sidebar chrome |
+| `--primary` / `--primary-foreground` | `bg-primary` | Signature accent (nav, CTA, switch-on, focus, tab underline) |
+| `--secondary` / `--secondary-foreground` | `text-secondary` | Links and cool secondary emphasis |
 | `--muted` / `--muted-foreground` | `bg-muted` / `text-muted-foreground` | Secondary surfaces + text |
-| `--border` | `border-border` | Borders and dividers |
-| `--destructive` / `--destructive-foreground` | `bg-destructive` | Danger actions and errors |
+| `--border` / `--input` | `border-border` | Borders and control borders |
+| `--destructive` / `--success` / `--warning` | `bg-destructive` / `text-success` / … | Semantic status |
 | `--ring` | `ring-ring` | Focus rings |
 | `--radius` | `rounded-lg/md/sm` | Corner radius scale |
 | `--graph-node` / `--graph-node-center` | (SVG `hsl(var(--…))`) | Link-graph nodes |
 
-Never hard-code hex. Non-token status accents (success green, warning amber) use
-Tailwind color utilities with dark-mode variants (see `StatusBadge`/`Alert`).
+Never hard-code surface hex. Keep large surfaces neutral; reserve primary for the
+accent map above. Status badges/alerts use token semantic colors.
 
 ## Component Catalog (`@evu/kb-ui`)
 
@@ -95,7 +103,7 @@ Tailwind color utilities with dark-mode variants (see `StatusBadge`/`Alert`).
 | --- | --- |
 | `AppShell`, `AppContent` | Global sidebar layout + centered content column |
 | `Card`, `CardHeader`, `CardTitle`, `CardContent` | Elevated content blocks |
-| `Button` | Actions. Variants: `primary`, `default`/`outline`, `quiet`/`ghost`, `danger`/`destructive`; sizes `default`/`sm`/`lg`/`icon` (`h-9` default) |
+| `Button` | Actions. Variants: `primary`, `default`/`outline` (elevated card chip), `secondary`, `quiet`/`ghost` (chrome only), `danger`/`dangerOutline`/`destructive`; sizes `default`/`sm`/`lg`/`icon` (`h-9` default) |
 | `Switch` | **Default boolean control** (iOS toggle) |
 | `Input`, `Textarea`, `Label` | Form controls; `FORM_CONTROL_CLASS` / `FORM_SELECT_CLASS` for raw elements |
 | `Badge`, `StatusBadge`, `statusTone` | Neutral/semantic badges; status-derived tone |
@@ -112,7 +120,7 @@ Tailwind color utilities with dark-mode variants (see `StatusBadge`/`Alert`).
 | `LinkGraphOverview` | Links tab tables (nodes + edges) |
 | `GraphNeighborhoodView` | Radial graph neighborhood canvas |
 | `EmptyState`, `CitationList`, `SearchResultList` | Content blocks |
-| `ThemeMenu` | Appearance preference |
+| `ThemeMenu` | Segmented Light / Dark / System control |
 | `cn` | `clsx` + `tailwind-merge` class combiner |
 
 `StatusPill` remains a thin backward-compatible alias over `Badge`; new code
@@ -151,8 +159,12 @@ for prior ad-hoc spacing:
 - **Page sections**: `AppContent` stacks blocks with `gap-6` (`space-y-6`).
 - **Cards / panels**: padding `p-5`; internal blocks `gap-4`.
 - **Forms**: `.evukb-form` is a `flex flex-col gap-4`; each label is a
-  `gap-1.5` column; fieldsets `gap-3.5`.
-- **Controls**: inputs, selects, and buttons are `h-9`.
+  `gap-1.5` column; fieldsets `gap-3.5` with a muted inset (`bg-muted/55`) so
+  groups read against the card.
+- **Controls**: inputs, selects, and buttons are `h-9`. Control surfaces use
+  `bg-background` (recessed wells), not transparent-on-card.
+- **Surface stack (dark)**: page `--background` → card → muted fieldset →
+  background wells for fields. Keep enough step between each layer.
 - **Booleans use `Switch` by default.** Only fall back to a native checkbox when a
   toggle is genuinely wrong (e.g. inside a native multi-select form the platform
   must own). Multi-select facet rows (corpus pickers, source-type / index-status
@@ -166,6 +178,10 @@ for prior ad-hoc spacing:
 - Prefer `Button` variants for actions. Raw `<button>` is only acceptable for
   structural controls inside reusable widgets (file-tree rows, breadcrumbs,
   context menus).
+- **Buttons vs wells:** `default`/`outline` use elevated `--card` fill + border +
+  light shadow — never transparent and never `--background` (those read as input
+  holes inside muted groups). Use `ghost`/`quiet` only for chrome (dismiss, icon
+  menus), not form secondary actions on nested panels.
 - The structural design-system classes (`.evukb-panel`, `.evukb-form`,
   `.evukb-table`, `.evukb-stat-card`, credential/checkbox lists, etc.) are
   reimplemented on the HSL tokens in `apps/web/src/styles.css` under

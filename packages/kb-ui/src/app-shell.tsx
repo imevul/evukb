@@ -18,6 +18,10 @@ export type AppShellProps = {
   tagline?: string;
 };
 
+/**
+ * Sidebar operator shell (Evu `evu-shell--sidebar`). Neutral chrome; signature
+ * primary only on the active nav pill.
+ */
 export function AppShell({
   brand,
   tagline,
@@ -27,16 +31,24 @@ export function AppShell({
   children,
 }: AppShellProps) {
   return (
-    <div className="flex h-dvh w-full overflow-hidden">
+    <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
       <aside
-        className="flex w-56 shrink-0 flex-col border-r border-border bg-card"
+        className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
         aria-label="Primary"
       >
-        <div className="border-b border-border px-4 py-4">
-          <p className="text-base font-semibold tracking-tight">{brand}</p>
-          {tagline ? <p className="mt-0.5 text-xs text-muted-foreground">{tagline}</p> : null}
+        <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
+          <span
+            aria-hidden
+            className="h-7 w-7 shrink-0 rounded-[0.4rem] bg-gradient-to-br from-primary to-secondary"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-[1.05rem] font-semibold tracking-tight">{brand}</p>
+            {tagline ? (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{tagline}</p>
+            ) : null}
+          </div>
         </div>
-        <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 py-2">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -44,10 +56,10 @@ export function AppShell({
               {...(item.end !== undefined ? { end: item.end } : {})}
               className={({ isActive }) =>
                 cn(
-                  'block rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'block rounded-md px-2.5 py-[0.45rem] text-sm font-medium no-underline transition-colors',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    ? 'bg-primary text-primary-foreground hover:bg-primary hover:brightness-105 hover:no-underline'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground hover:no-underline',
                 )
               }
             >
@@ -56,13 +68,15 @@ export function AppShell({
           ))}
         </nav>
         {headerMeta ? (
-          <div className="space-y-2 border-t border-border p-3">{headerMeta}</div>
+          <div className="space-y-2 border-t border-sidebar-border p-3">{headerMeta}</div>
         ) : null}
         {footer ? (
-          <div className="border-t border-border p-3 text-xs text-muted-foreground">{footer}</div>
+          <div className="border-t border-sidebar-border p-3 text-xs text-muted-foreground">
+            {footer}
+          </div>
         ) : null}
       </aside>
-      <main className="min-w-0 flex-1 overflow-auto p-4 md:p-6 [scrollbar-gutter:stable]">
+      <main className="min-w-0 flex-1 overflow-auto p-4 md:p-5 [scrollbar-gutter:stable]">
         {children}
       </main>
     </div>

@@ -33,7 +33,7 @@ export function AppLayout() {
       footer={<ThemeMenu value={preference} onChange={setPreference} />}
       headerMeta={
         <Link
-          className="inline-flex w-full items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium shadow-sm hover:bg-muted"
+          className="inline-flex w-full items-center justify-between gap-2 rounded-md border border-sidebar-border bg-background px-3 py-2 text-sm font-medium text-foreground no-underline shadow-sm hover:bg-muted hover:no-underline"
           to={appRoutes.workspaces}
         >
           <span>workspace: {workspaceLabel}</span>

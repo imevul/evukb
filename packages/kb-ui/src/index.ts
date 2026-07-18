@@ -235,13 +235,17 @@ export {
 export type {
   ColorSchemePreference,
   EffectiveColorScheme,
+  EvuPalette,
 } from './theme/color-scheme.js';
 export {
   applyDocumentColorScheme,
+  applyDocumentEvuPalette,
   readStoredColorSchemePreference,
+  readStoredEvuPalette,
   readSystemPrefersDark,
   resolveEffectiveColorScheme,
   writeStoredColorSchemePreference,
+  writeStoredEvuPalette,
 } from './theme/color-scheme.js';
 export type { ThemeMenuProps, ThemePreference } from './theme-menu.js';
 export { ThemeMenu } from './theme-menu.js';

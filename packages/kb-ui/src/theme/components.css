@@ -180,7 +180,7 @@
 }
 
 .evukb-md-preview a {
-  color: hsl(var(--primary));
+  color: hsl(var(--secondary));
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -212,7 +212,7 @@
 }
 
 .evukb-wikilink {
-  color: hsl(var(--primary));
+  color: hsl(var(--secondary));
   font-weight: 500;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -220,7 +220,7 @@
 }
 
 .evukb-tag {
-  color: hsl(var(--primary));
+  color: hsl(var(--secondary));
   font-weight: 500;
 }
 
@@ -249,7 +249,7 @@
 
 .evukb-callout {
   margin: 0.75rem 0;
-  border-left: 4px solid hsl(var(--primary));
+  border-left: 4px solid hsl(var(--secondary));
   border-radius: calc(var(--radius) - 2px);
   background-color: hsl(var(--muted) / 0.45);
   padding: 0.65rem 0.85rem;
@@ -272,17 +272,17 @@
 
 .evukb-callout--note,
 .evukb-callout--info {
-  border-left-color: hsl(var(--primary));
+  border-left-color: hsl(var(--secondary));
 }
 
 .evukb-callout--tip,
 .evukb-callout--success {
-  border-left-color: hsl(142 71% 45%);
+  border-left-color: hsl(var(--success));
 }
 
 .evukb-callout--warning,
 .evukb-callout--caution {
-  border-left-color: hsl(var(--graph-warning, 38 92% 50%));
+  border-left-color: hsl(var(--warning));
 }
 
 .evukb-callout--danger,

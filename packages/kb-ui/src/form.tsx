@@ -11,13 +11,18 @@ import { cn } from './cn.js';
  * Shared control classes so raw `<input>`/`<select>` elements in app forms match
  * the Input/Textarea primitives without wrapping every element.
  */
+/** Controls use page `--background` so they read as recessed wells on cards. */
 export const FORM_CONTROL_CLASS =
-  'flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
+  'flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
 
-export const FORM_SELECT_CLASS = cn(FORM_CONTROL_CLASS, 'cursor-pointer');
+/**
+ * Custom chevron via `.evukb-select` in apps/web styles — native arrows ignore
+ * padding on many Linux/GTK browsers.
+ */
+export const FORM_SELECT_CLASS = cn(FORM_CONTROL_CLASS, 'evukb-select cursor-pointer');
 
 export const FORM_TEXTAREA_CLASS =
-  'w-full min-h-20 resize-y rounded-md border border-border bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
+  'w-full min-h-20 resize-y rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean };
 

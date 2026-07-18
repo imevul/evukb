@@ -137,7 +137,7 @@ export function CorpusSummaryCard({
         </p>
       ) : null}
       {importKind === 'mount' || importKind === 'git' ? (
-        <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/20 p-4">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/55 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <Button
               disabled={syncing || reindexing || okfBusy}

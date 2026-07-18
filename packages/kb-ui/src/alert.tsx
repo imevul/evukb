@@ -6,10 +6,10 @@ import { cn } from './cn.js';
 export type AlertVariant = 'info' | 'warning' | 'danger' | 'success';
 
 const VARIANT_CLASS: Record<AlertVariant, string> = {
-  info: 'border-primary/30 bg-primary/10 text-foreground [&_svg]:text-primary',
-  warning: 'border-amber-500/40 bg-amber-500/10 text-foreground [&_svg]:text-amber-500',
+  info: 'border-secondary/40 bg-secondary/10 text-foreground [&_svg]:text-secondary',
+  warning: 'border-warning/40 bg-warning/10 text-foreground [&_svg]:text-warning',
   danger: 'border-destructive/40 bg-destructive/10 text-foreground [&_svg]:text-destructive',
-  success: 'border-green-600/30 bg-green-500/10 text-foreground [&_svg]:text-green-500',
+  success: 'border-success/40 bg-success/10 text-foreground [&_svg]:text-success',
 };
 
 const VARIANT_ICON: Record<AlertVariant, LucideIcon> = {
