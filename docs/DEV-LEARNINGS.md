@@ -1283,6 +1283,19 @@ Action: Run `pnpm lint` before every push; regenerate API docs with `pnpm api-do
 
 ---
 
+## 2026-10-26: OpenAPI Changes Must Refresh Both Generated Artifacts
+
+Area: CI, API documentation
+
+Context: The OpenAPI JSON and generated SDK types included the git-writeback schema fields,
+but `docs/api/index.html` was left stale, so the API reference drift gate failed.
+
+Learning: Treat the OpenAPI JSON, generated SDK types, and API reference HTML as one change.
+After editing OpenAPI schemas, run both `pnpm generate-types` and `pnpm generate-api-docs`,
+then run the drift verifiers before committing.
+
+---
+
 ## 2026-07-18: Evu Theme Adoption In kb-ui
 
 Area: UI theme / tokens
