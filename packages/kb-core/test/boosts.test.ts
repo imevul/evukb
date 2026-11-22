@@ -57,17 +57,18 @@ describe('ranking boost helpers', () => {
 
 describe('rankHybridDefaultV1 advanced boosts', () => {
   it('ranks newer chunks higher with recency boost', () => {
+    const now = Date.now();
     const ranked = rankHybridDefaultV1(
       [
         {
           chunkId: 'old',
           keywordRank: 1,
-          indexedAt: '2026-01-01T00:00:00.000Z',
+          indexedAt: new Date(now - 365 * 24 * 60 * 60 * 1000).toISOString(),
         },
         {
           chunkId: 'new',
           keywordRank: 2,
-          indexedAt: '2026-06-29T00:00:00.000Z',
+          indexedAt: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
         },
       ],
       { recencyBoost: 2 },
