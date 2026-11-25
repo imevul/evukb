@@ -1336,3 +1336,19 @@ buttons match the group and look flat in dark mode.
 
 Action: Sync `@evu/kb-ui` `buttonVariants` and `.evukb-file-input-label` when
 pulling theme updates; grep for `bg-muted/20` on panels that host outline buttons.
+
+---
+
+## 2026-11-25: Keep Recency Ranking Tests Relative To Runtime
+
+Area: CI, ranking tests
+
+Context: The advanced recency-ranking test used fixed 2026 timestamps while the
+production ranker compares candidates with `Date.now()`. Once both fixtures aged
+past the boost half-life, their small RRF rank difference dominated and CI failed.
+
+Learning: Tests that exercise time decay must derive fixture timestamps from a
+captured current time (or freeze the clock). Fixed calendar dates make the test
+expire even when the ranking behavior is unchanged.
+
+Action: Use relative ages with a wide separation when asserting recency ordering.
